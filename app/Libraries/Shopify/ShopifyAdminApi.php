@@ -237,9 +237,9 @@ class ShopifyAdminApi
 
     public static function applyRecurringCharge($user, $plan_price)
     {
-        $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-10/recurring_application_charges.json', json_encode(array(
 
 
+        $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2021-04/recurring_application_charges.json', json_encode(array(
             "recurring_application_charge" => array(
                 "name" => "Basic Plan",
                 "test" => false, //change after sending shopify
