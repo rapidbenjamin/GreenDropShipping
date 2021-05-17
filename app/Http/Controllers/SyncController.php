@@ -363,12 +363,21 @@ class SyncController extends Controller
                         $product->id = $item->id;
                         $product->sku = $item->sku;
                     }
+
+                    $attribute_upc_index = array_search('upc', array_column($item->custom_attributes, 'attribute_code'));
+
+                    $attribute_upc = NULL;
+
+                    if ($attribute_upc_index !== false) {
+                        $attribute_upc = (string) $item->custom_attributes[$attribute_upc_index]->value;
+                    }
+
                     $product->id = $item->id;
                     $product->name = $item->name;
                     $product->price = $item->price;
                     $product->stock = 0;
                     $product->brand = '';
-                    $product->upc = '';
+                    $product->upc = $attribute_upc;
                     $product->image_url = '';
                     $product->weight = isset($item->weight) ? $item->weight : 0;
                     $product->type_id = $item->type_id;
