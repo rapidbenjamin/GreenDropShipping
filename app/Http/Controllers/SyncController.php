@@ -40,38 +40,38 @@ class SyncController extends Controller
         $users_list = User::select('id')->where('api_status','pending')->get();
 
         foreach ($users_list as $ul) {
-                
+
             $user = User::find($ul["id"]);
-            
+
             $res = ShopifyAdminApi::getStatusRecurringCharge($user);
-                
-            //Validate plan's status    
+
+            //Validate plan's status
             if($res == 'accepted' || $res == 'active' ){
                 $user->api_status = 'accepted';
                 $user->plan = 'basic';
                 $user->save();
-            }    
-            
+            }
+
             echo '<p>id user: '.$ul["id"].'</p>';
-            echo '<p>request: '.ShopifyAdminApi::getStatusRecurringCharge($user).'</p>';    
+            echo '<p>request: '.ShopifyAdminApi::getStatusRecurringCharge($user).'</p>';
         }
-        
+
         //get users with api_status = pending
         $users_list = User::select('id')->where('api_status','accepted')->get();
 
         foreach ($users_list as $ul) {
-                
+
             $user = User::find($ul["id"]);
-            
+
             $res2 = ShopifyAdminApi::getStatusRecurringCharge($user);
-                
-            //Validate plan's status    
+
+            //Validate plan's status
             if($res2 == 'declined' || $res2 == 'expired' || $res2 == 'frozen' || $res2 == 'cancelled'){
                 $user->api_status = 'pending';
                 $user->plan = 'free';
                 $user->save();
-            }    
-            
+            }
+
         }
 
         return 'success';
@@ -91,7 +91,7 @@ class SyncController extends Controller
             if ($product != null && $product->stock != ($item->quantity+5)) {
                 //Writing log
                // self::GDSLOG('Cron Stock', $product->name.' Last Stock: '.$product->stock.' New Stock: '.($item->quantity+5));
-                
+
                 //Update Product Stock
                 $product->stock = $item->quantity;
                 $product->save();
@@ -104,7 +104,7 @@ class SyncController extends Controller
         echo ('End: ' . date("h:i:s", $t));
         return 'success';
     }
-    
+
     public function syncStockUpdateInShopifyStores(){
 
         //This cron is created to improve performance
@@ -215,14 +215,14 @@ class SyncController extends Controller
                 echo $ex->getMessage();
             }
         }
-        
+
         // Log::info("{$trackId} Success");
         echo 'End: ' . date("h:i:s") . "<br>\n";
         return 'success';
         // die('success');
     }
-    
-    
+
+
 
     public function arregloSku()
     {
@@ -230,7 +230,7 @@ class SyncController extends Controller
     }
 
 
-    
+
     public function productsToSend(){
 
         echo '<p>Starting process... </p>';
@@ -250,7 +250,7 @@ class SyncController extends Controller
                 sleep(10);
             } catch (Exception $ex) {
                 echo $ex->getMessage();
-            }            
+            }
 
             $user = User::where('id', $pts["id_merchant"])->first();
 
@@ -267,17 +267,17 @@ class SyncController extends Controller
         echo "<p>inicio del tracking number</p>";
         $orders = Order::whereNotNull('magento_entity_id')->whereNull('tracking_code')->get();
         foreach ($orders as $order) {
-            $querymg = DB::connection('mysql_magento')->select('SELECT * 
+            $querymg = DB::connection('mysql_magento')->select('SELECT *
             FROM `mg_sales_shipment_track` WHERE order_id = ' . $order->magento_entity_id);
             if (count($querymg)) {
                 //Update tracking number in middleware DB
                 $order->tracking_code = $querymg[0]->track_number;
                 $order->fulfillment_status = 6;
                 $order->save();
-                
+
                 //Update fulfillment in shopify store
 
-                $user = User::where('id', $order->id_customer)->first(); 
+                $user = User::where('id', $order->id_customer)->first();
 
                 //Step 1.  Get shopify order to know item lines
                 $shopify_order = ShopifyAdminApi::getOrderInformation($user,$order->id_shopify);
@@ -288,7 +288,7 @@ class SyncController extends Controller
                     if($li['fulfillment_service'] == 'greendropship'){
                         //Step 2.  Get shopify inventory item id
                         $iii = ShopifyAdminApi::getInventoryItemId($user,$li['variant_id']);
-                        
+
                         //Step 3. Get shopify item location id
                         $location = ShopifyAdminApi::getItemLocationId($user,$iii['body']['variant']['inventory_item_id']);
 
@@ -408,12 +408,12 @@ class SyncController extends Controller
     public function syncWP(){
         echo '<p>Iniciando sincronizacion de Wordpress</p>';
 
- 
+
         //UPDATE TOKENS FROM WORDPRESS DB
 
         //1. Get collection of records from Wordpress
         $tokens = DB::connection('mysql_wp')
-            ->select('SELECT 
+            ->select('SELECT
                 wp_rftpn0v78k_pmpro_membership_orders.id AS id_order,
                 wp_rftpn0v78k_pmpro_membership_orders.code AS token,
                 wp_rftpn0v78k_pmpro_membership_orders.user_id,
@@ -441,7 +441,7 @@ class SyncController extends Controller
                 $token->enddate = $tk->enddate;
                 $token->display_name = $tk->display_name;
                 $token->user_email = $tk->user_email;
-                $token->save();                   
+                $token->save();
                 }
 
                 echo '<p>Enddate: '.$tk->enddate.'</p>';
@@ -480,12 +480,12 @@ class SyncController extends Controller
 
     public function updateStatusWhenCancelingMagento()
     {
-        
-        
+
+
         ECHO "<p>Starting sync process .... </p>";
 
         //Process canceled orders
-        
+
         $orders = Order::where('fulfillment_status', 11)->whereNotNull('magento_order_id')->whereNotNull('magento_entity_id')->get();
         ECHO "<p>Orders Canceled Process... (".count($orders).")</p>";
         foreach ($orders as $order) {
@@ -501,7 +501,7 @@ class SyncController extends Controller
         }
 
         //Update state Pending to Processing
- /*       
+ /*
         $orders = Order::where('fulfillment_status', 5)->whereNotNull('magento_order_id')->whereNotNull('magento_entity_id')->get();
         ECHO "<p>Updating pending orders... (".count($orders).")</p>";
         foreach ($orders as $order) {
@@ -554,7 +554,7 @@ class SyncController extends Controller
         return 'success';
     }
 
-  
+
 
     public static function GDSLOG($action, $message)
     {
@@ -572,7 +572,7 @@ class SyncController extends Controller
 
 
         foreach($products as $pr){
-            $user = User::where('id', $pr['id_merchant'])->first(); 
+            $user = User::where('id', $pr['id_merchant'])->first();
 
             $settings = Settings::where('id_merchant', $user['id'])->first();
 
