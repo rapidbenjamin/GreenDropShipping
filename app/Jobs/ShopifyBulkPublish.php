@@ -114,7 +114,7 @@ class ShopifyBulkPublish implements ShouldQueue
                 }
                 break;
             } else if ((int)$response_product['result'] == 2) {
-                Log::info($this->product['title'] . ' - retry-after: ' . (int)$response_product['retry-after']);
+                Log::info($this->product['name'] . ' - retry-after: ' . (int)$response_product['retry-after']);
                 sleep((int)$response_product['retry-after']);
             }
             $i++;
