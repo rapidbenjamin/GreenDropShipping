@@ -33,107 +33,200 @@ class SyncController extends Controller
         return view('settings');
     }
 
+    public function shopifyupgraded()
+    {
+
+        //get users with api_status = pending
+        $users_list = User::select('id')->where('api_status','pending')->get();
+
+        foreach ($users_list as $ul) {
+                
+            $user = User::find($ul["id"]);
+            
+            $res = ShopifyAdminApi::getStatusRecurringCharge($user);
+                
+            //Validate plan's status    
+            if($res == 'accepted' || $res == 'active' ){
+                $user->api_status = 'accepted';
+                $user->plan = 'basic';
+                $user->save();
+            }    
+            
+            echo '<p>id user: '.$ul["id"].'</p>';
+            echo '<p>request: '.ShopifyAdminApi::getStatusRecurringCharge($user).'</p>';    
+        }
+        
+        //get users with api_status = pending
+        $users_list = User::select('id')->where('api_status','accepted')->get();
+
+        foreach ($users_list as $ul) {
+                
+            $user = User::find($ul["id"]);
+            
+            $res2 = ShopifyAdminApi::getStatusRecurringCharge($user);
+                
+            //Validate plan's status    
+            if($res2 == 'declined' || $res2 == 'expired' || $res2 == 'frozen' || $res2 == 'cancelled'){
+                $user->api_status = 'pending';
+                $user->plan = 'free';
+                $user->save();
+            }    
+            
+        }
+
+        return 'success';
+    }
+
     public function syncStock()
     {
         $t = time();
         echo ('Start: ' . date("h:i:s", $t));
 
 
-        //UPDATE STOCK FROM MAGENTO TO MIDDLEWARE
+        //UPDATE STOCK FROM MAGENTO TO MIDDLEWARE (this is a View with quantity and saleable setting for each sku)
         $inventory = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
+
         foreach ($inventory as $item) {
             $product = Products::find($item->product_id);
             if ($product != null && $product->stock != ($item->quantity+5)) {
                 //Writing log
-                self::GDSLOG('Cron Stock', $product->name.' Last Stock: '.$product->stock.' New Stock: '.($item->quantity+5));
+               // self::GDSLOG('Cron Stock', $product->name.' Last Stock: '.$product->stock.' New Stock: '.($item->quantity+5));
                 
                 //Update Product Stock
                 $product->stock = $item->quantity;
                 $product->save();
             }
-        }die('xxx');
+        };
 
-        //Retrieving location_id and inventory_item_id to store inventory
-        $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify')->get();
-        foreach ($myProducts as $mp) {
-            try {
-                $merchant = User::find($mp->id_customer);
-                $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
-                $mp->location_id_shopify = $res['location_id'];
-                $mp->save();
-                echo $res['result'] . '<br>';
-                sleep(10);
-            } catch (Exception $ex) {
-                echo $ex->getMessage();
-            }
-        }
-
-        //UPDATE STOCK IN SHOPIFY STORES
-        foreach ($myProducts as $mp) {
-            // Oscar desarrolla para cada producto actualizar el stock en cada tienda shopify  
-            //Este es el punto 18 del test
-            try {
-                $merchant = User::find($mp->id_customer);
-                $res = ShopifyAdminApi::updateProductIventory($merchant, $mp->id_product, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
-                echo $res['result'] . '<br>';
-                sleep(10);
-            } catch (Exception $ex) {
-                echo $ex->getMessage();
-            }
-        }
 
         $t = time();
+
         echo ('End: ' . date("h:i:s", $t));
         return 'success';
     }
+    
+    public function syncStockUpdateInShopifyStores(){
+
+        //This cron is created to improve performance
+
+        echo "Start: " . date('h:i:s') . "<br>\n";
+        $limit = 20;
+        $trackId = $_SERVER['UNIQUE_ID']; // rand(10000, 99999);
+        // Log::info("{$trackId} Tracking syncStockUpdateInShopifyStores: {$limit}");
+        // Log::info("{$trackId} Request: {$_SERVER['REMOTE_ADDR']} - {$_SERVER['HTTP_USER_AGENT']}");
+        // DB::update('UPDATE my_products set cron = 0');
+        // die();
+
+        //Retrieving location_id and inventory_item_id to store inventory
+        $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify')->where('cron', 0)->limit($limit)->get();
+        // Log::info("{$trackId} First MyProducts: " . count($myProducts));
+        if(count($myProducts) === 0){
+            DB::update('UPDATE my_products set cron = 0');
+            $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify')->where('cron', 0)->limit($limit)->get();
+        }
+        // Log::info("{$trackId} Last MyProducts: " . count($myProducts));
+        $data = [];
+        $productByItem = [];
+        $customerNotFound = [];
+
+        foreach ($myProducts as $mp) {
+            try {
+                $mp->cron = 1;
+                $mp->save();
+                $product = Products::find($mp->id_product);
+                if($product !== null && $mp->stock !== $product->stock){
+                    if(isset($data["customer-{$mp->id_customer}"])) {
+                        $batchInventory = count($data["customer-{$mp->id_customer}"]['inventory']);
+                        if($data["customer-{$mp->id_customer}"]['customer']) {
+                            if(count($data["customer-{$mp->id_customer}"]['inventory'][$batchInventory - 1]) < 50){
+                                $data["customer-{$mp->id_customer}"]['inventory'][$batchInventory - 1][] = $mp->inventory_item_id_shopify;
+                            } else {
+                                $data["customer-{$mp->id_customer}"]['inventory'][] = [$mp->inventory_item_id_shopify];
+                            }
+                        }
+                    } else if(!in_array($mp->id_customer, $customerNotFound)) {
+                        $user = User::find($mp->id_customer);
+                        // Log::info("{$trackId} User: " . json_encode($user));
+                        if($user){
+                            $data["customer-{$mp->id_customer}"] = [
+                                'customer' => $user,
+                                'inventory' => [[$mp->inventory_item_id_shopify]]
+                            ];
+                        } else {
+                            $customerNotFound[] = $mp->id_customer;
+                        }
+                    }
+                    $productByItem["item-{$mp->inventory_item_id_shopify}"] = [
+                        'MyProduct' => $mp,
+                        'ProductModel' => $product
+                    ];
+                }
+            } catch (Exception $ex) {
+                echo $ex->getMessage();
+            }
+        }
+
+        unset($myProducts);
+        // Log::info("{$trackId} Customers not found: " . json_encode($customerNotFound));
+        // DB::delete('DELETE FROM my_products WHERE id_customer IN (' . implode(',', $customerNotFound) . ')');
+
+        foreach ($data as $item) {
+            $access = true;
+            foreach ($item['inventory'] as $inventory) {
+                if ($access) {
+                    $res = ShopifyAdminApi::getLocationIdForIvewntory($item['customer'], implode(',', $inventory));
+                    if(count($res) > 0){
+                        foreach ($res['inventory_levels'] as $resItem) {
+                            $key = "item-{$resItem['inventory_item_id']}";
+                            $productByItem[$key]['MyProduct']->location_id_shopify = $resItem['location_id'];
+                            $productByItem[$key]['MyProduct']->save();
+                        }
+                        sleep(10);
+                    } else {
+                        // Log::info("{$trackId} Customer not found: " . json_encode($data));
+                        $item['customer'] = null;
+                        $access = false;
+                    }
+                }
+            }
+        }
+        // Log::info("{$trackId} Data: " . json_encode($data));
+        // Log::info("{$trackId} ProductByItem: " . json_encode($productByItem));
+        // dump($data, $productByItem);
+        // die();
+
+        //UPDATE STOCK IN SHOPIFY STORES
+        $cont = 0;
+        foreach ($productByItem as $mp) {
+            // Oscar desarrolla para cada producto actualizar el stock en cada tienda shopify  
+            //Este es el punto 18 del test
+            try {
+                if (isset($data["customer-{$mp['MyProduct']->id_customer}"])) {
+                    $cont++;
+                    $res = ShopifyAdminApi::updateProductIventory($data["customer-{$mp['MyProduct']->id_customer}"]['customer'], $mp['ProductModel'], $mp['MyProduct']->location_id_shopify, $mp['MyProduct']->inventory_item_id_shopify);
+                    if($res['result'] === 1){
+                        $mp['MyProduct']->stock = $mp['ProductModel']->stock;
+                        $mp['MyProduct']->save();
+                    }
+                    // Log::info("{$trackId} {$cont} Res updateProductIventory: " . json_encode($res));
+                    sleep(10);
+                }
+            } catch (Exception $ex) {
+                echo $ex->getMessage();
+            }
+        }
+        
+        // Log::info("{$trackId} Success");
+        echo 'End: ' . date("h:i:s") . "<br>\n";
+        return 'success';
+        // die('success');
+    }
+    
+    
 
     public function arregloSku()
     {
-
-
-        ECHO "<P>Lista los webhooks.</P>";
-
-        $user = User::where('id', 121)->first(); 
-
-        $result = ShopifyAdminApi::getWebhooksList($user);
-
-        $existInShopify = 0;
-
-        $existInApp = 0;
-
-        foreach($result['body']['webhooks'] as $wh){
-
-            //exist in shopify?
-            if($wh['address'] == 'https://app.greendropship.com/create-order-webkook'){
-                $existInShopify = 1;
-                $id_webhook = $wh['id'];
-                //exist in App?
-                $id_shWebhook = ShopifyWebhook::where('id_hook',$id_webhook)->where('id_customer',$user->id)->first();
-                if($id_shWebhook){
-                    echo "<p>id_webhook: ".$wh['id']." - id user: ".$user->id." --- id DB: ".$id_shWebhook->id."</p>";
-                }else{
-                    //Create row
-                    $hook = new ShopifyWebhook();
-                    $hook->id_customer = $user->id;
-                    $hook->id_hook = $wh['id'];
-                    $hook->topic = 'orders/create';
-                    $hook->data = json_encode($wh);
-                    $hook->save();
-                    echo "No existe en la base de datos.";
-                }
-                
-            }
-
-
-             
-        }
-
-        //echo "<pre>".print_r($result)."</pre>";
-
-
-
-
-
+            //This function is used by testing
     }
 
 
@@ -149,14 +242,11 @@ class SyncController extends Controller
             try {
                 $user = User::find($pts["id_merchant"]);
                 $published = true;
-                //ShopifyBulkPublish::dispatchNow($user, $pts, $published);
-                
-                //$myproduct = MyProducts::select('id_shopify')->where('id_customer', $pts["id_merchant"])->where('id_imp_product', $pts["id_product"]); 
+
 
                 echo '<p>merchant id '.$pts["id_merchant"].'  --- id product '.$pts["id_product"].'</p>';
                 echo print_r($user);
 
-                //echo $res['result'] . '<br>';
                 sleep(10);
             } catch (Exception $ex) {
                 echo $ex->getMessage();
@@ -182,6 +272,7 @@ class SyncController extends Controller
             if (count($querymg)) {
                 //Update tracking number in middleware DB
                 $order->tracking_code = $querymg[0]->track_number;
+                $order->fulfillment_status = 6;
                 $order->save();
                 
                 //Update fulfillment in shopify store
@@ -211,23 +302,14 @@ class SyncController extends Controller
                         $lines[$i]['variant_id'] = $li['variant_id'];
                         $lines[$i]['inventory_item_id'] = $iii['body']['variant']['inventory_item_id'];
                         $lines[$i]['location_id'] = $location['body']['inventory_levels'][0]['location_id'];
-                        //$lines[$i]['fulfill_status'] = $fulfill;       
 
-                        Log::info('PAULO-SHOPIFYFULFILL-RESPONSE');
-                        Log::info($fulfill);
-
-                        Log::info('PAULO-SHOPIFYFULFILLED-RESPONSE');
-                        Log::info($fulfilled);
 
                     }
 
                     $i++;
                 }
 
-                
-
                 //Outputs
-                echo 'Tracking updated for order_id' . $order->id;
                 Log::info('Tracking updated for order_id' . $order->id);
             }
         }
@@ -284,7 +366,7 @@ class SyncController extends Controller
                     $product->id = $item->id;
                     $product->name = $item->name;
                     $product->price = $item->price;
-                    //$product->stock = 0;
+                    $product->stock = 0;
                     $product->brand = '';
                     $product->upc = '';
                     $product->image_url = '';
@@ -356,15 +438,12 @@ class SyncController extends Controller
                 echo '<p>Enddate: '.$tk->enddate.'</p>';
             }
 
-
-
-
         return 'Success';
     }
 
     public function getRecursiveCategories($children_data, &$categoriesIds)
     {
-        //dd($children_data);
+
         foreach ($children_data as $Mcategory) {
             try {
                 $categoriesIds[] = $Mcategory->id;
@@ -372,10 +451,11 @@ class SyncController extends Controller
                 if ($category == null) {
                     $category = new Category();
                     $category->id = $Mcategory->id;
+                    $category->is_active = $Mcategory->is_active;
                 }
                 $category->parent_id = $Mcategory->parent_id;
                 $category->name = $Mcategory->name;
-                $category->is_active = $Mcategory->is_active;
+                //$category->is_active = $Mcategory->is_active;
                 $category->level = $Mcategory->level;
                 $category->position = $Mcategory->position;
                 $category->save();
@@ -412,7 +492,7 @@ class SyncController extends Controller
         }
 
         //Update state Pending to Processing
-        
+ /*       
         $orders = Order::where('fulfillment_status', 5)->whereNotNull('magento_order_id')->whereNotNull('magento_entity_id')->get();
         ECHO "<p>Updating pending orders... (".count($orders).")</p>";
         foreach ($orders as $order) {
@@ -443,9 +523,11 @@ class SyncController extends Controller
                 }
             }
         }
+*/
+
 
         //Process closed orders
-        
+
         $orders = Order::where('fulfillment_status', 5)->whereNotNull('magento_order_id')->whereNotNull('magento_entity_id')->get();
         ECHO "<p>Closed orders sync... (".count($orders).")</p>";
         foreach ($orders as $order) {

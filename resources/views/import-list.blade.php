@@ -33,15 +33,24 @@
                     <p>The product has been published into your store successfully.</p>
                </div>                
             </div>
+            <div class="alertan level2 alert-publish-all-ready" style="display: none;">
+               <div class="agrid">
+                    <p><strong>The products have been published into your store successfully!</strong></p>
+               </div>                
+            </div>
 
-                <div class="sendtoshopify" style="display: none;">
-                    <div class="checksend">
+
+
+                @can("plan_view-my-products")
+                <div class="sendtoshopify" style="display: block;">
+                    <div class="checksend" style="float: left; margin-right: 20px; margin-top: 10px;">
                         <input title="Select all products" type="checkbox" id="check-all">
                     </div>
                     <div>
                         <button class='btn-import-list-send-all'>Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
                     </div>
                 </div>
+                @endcan
                 
                 @foreach ($array_products as $ap)
                 <div class="productboxelement import-product" id='product{{$ap->id_import_list}} data-id='{{$ap->id_import_list}}'>
@@ -49,7 +58,7 @@
                     <div class="producttabs">                       
                         <div class="headertabs">
                            <div class="checkt">
-                               <input type="checkbox" id="check-{{$ap->id_import_list}}" class="checkbox" style="display: none;">
+                               <input type="checkbox" id="check-{{$ap->id_import_list}}" class="checkbox" style="display: block;">
                            </div>
                             <div class="tabs">
                                 
@@ -61,10 +70,11 @@
                             </div>
                             <div class="buttons import-actions">
                                 {{--@can('plan_delete-product-import-list')--}}
-                                <button class='delete btn-import-list-delete' data-id="{{$ap->id_import_list}}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                                <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot class='delete @can("plan_view-my-products") btn-import-list-delete @endcan' data-id="{{$ap->id_import_list}}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                                 {{--@endcan--}}
                                 {{--@can('plan_publish-product-import-list')--}}
-                                <button class='sendto btn-import-list-send btn-import-list-send-{{$ap->id_import_list}} @cannot("plan_view-my-products") verModal @endcannot' data-id="{{$ap->id_import_list}}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                                <button  @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot class='sendto btn-import-list-send btn-import-list-send-{{$ap->id_import_list}} @cannot("plan_view-my-products") verModal @endcannot' data-id="{{$ap->id_import_list}}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                                <button class="sendto sending btn-import-list-send3 btn-import-list-send3-{{$ap->id_import_list}}" data-shopifyid="0" style="display:none">Sending...</button>
                                 <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-{{$ap->id_import_list}}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>
                                 {{--@endcan--}}
                             </div>
@@ -81,7 +91,7 @@
                                        <h3>
                                            {{$ap->name}}
                                        </h3>
-                                       <dv class="editform">
+                                       <div class="editform">
                                            <div class="full">
                                                <label for="">Change product name</label>
                                                <input type="text" id="name{{$ap->id_import_list}}" value='{{$ap->name}}'>
@@ -98,7 +108,7 @@
                                                <label for="">Tags <span class="simple-tooltip" title="You can create your own tags separated by commas.">?</span></label>
                                                <input type="text" id="tags{{$ap->id_import_list}}">
                                            </div>
-                                       </dv>
+                                       </div>
                                    </div>
                                </div>
                                 
@@ -222,7 +232,7 @@
             </div>
             
         </div>
-    </div>  
+    </div>
 
 
 </div>
@@ -242,43 +252,66 @@
     </div>  
 </div>
 
+<div id="alert-checkbox" class="modal fade" role="dialog" data-backdrop="true">
+  <div class="modal-dialog modal-dialog-centered">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header" style="display:block">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+      </div>        
+      <div class="modal-body">
+        <p style="text-align:center;">At least one checkbox must be selected</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="{{ asset('js/ckeditor/ckeditor.js') }}"></script>
+
 
 <script type="text/javascript">
   $(document).ready(function() {
 
   $('.verModal').click(function(e){
     e.preventDefault();
-    alert("Upgrade your plan to perform this action.");
+    $('#upgrade-plans-modal').modal('show');
+    //alert("Upgrade your plan to perform this action.");
   });
 
-/*
 
     $(".editor").each(function(index, ele) {
-      CKEDITOR.replace($(ele).attr('id'), {});
+        CKEDITOR.replace($(ele).attr('id'), {});
     });
-*/
+
 
     $(".edit-in-shopify").click(function() {
       window.location.href = $(this).attr('data-url');
     });
     $('.btn-import-list-send').click(function() {
 
+
+
       let productId = $(this).data('id');
       let images = [];
       $("input.chk-img" + productId + ":checked").each(function(index, ele) {
         images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
       });
+        
+        $('.btn-import-list-send-' + productId).hide();
+        $('.btn-import-list-send3-' + productId).show();
+      
       let btn = $(this);
       btn.attr('disabled', true);
       let product = {
         id: productId,
         name: $('#name' + productId).val(),
-        weight: $('#weight' + productId).text(),
+        weight: $('#weight' + productId).text().trim(),
         price: $('#price' + productId).val(),
         cost: $('#cost' + productId).val(),
         //price: $('#price' + productId).data('price'),
-        //description: CKEDITOR.instances['description' + productId].getData(),
-        description: $('#description' + productId).val(),
+        description: CKEDITOR.instances['description' + productId].getData(),
         product_type: $('#type' + productId).val(),
         tags: $('#tags' + productId).val(),
         collections: $('#collections' + productId).val(),
@@ -290,11 +323,11 @@
         "_token": "{{ csrf_token() }}",
         product: product
       }, function(data, status) {
-        console.log(data.id_shopify);
+
         btn.attr('disabled', false);
         //$("#product" + productId).hide();
         $('.alert-publish-single').show();
-        $('.btn-import-list-send-' + productId).hide();
+        $('.btn-import-list-send3-' + productId).hide();
         $('.btn-import-list-send2-' + productId).show();
         $('.btn-import-list-send2-' + productId).attr('data-shopifyid', data.id_shopify);
       }).fail(function(data) {
@@ -326,53 +359,82 @@
 
       //Get all checked products
       let products = [];
+
+      let nProd = $("input.checkbox:checked").length;
+ 
+        if(nProd > 0){
+          $(this).attr('disabled',true);
+          $('.alert-publish-all').show();
+          $('.alert-publish-all-ready').hide();       
+        }
+      
       $("input.checkbox:checked").each(function(index, ele) {
         let productId = $(ele).attr('id').split('-')[1];
         let images = [];
-        console.log("productId: " + productId);
+        
+        products.push({
+          id: productId,
+        });        
+
+        //Disable send to shopify Buttons
+        $('.btn-import-list-send-' + productId).attr('disabled',true);
+        
 
         // data array of all checked products
         $("input.chk-img" + productId + ":checked").each(function(index, ele) {
           images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
         });
-        products.push({
-          id: productId,
-          name: $('#name' + productId).val(),
-          weight: $('#weight' + productId).text(),
-          price: $('#price' + productId).val(),
-          //price: $('#price' + productId).data('price'),
-          //description: CKEDITOR.instances['description' + productId].getData(),
-          description: $('#description' + productId).val(),
-          product_type: $('#type' + productId).val(),
-          tags: $('#tags' + productId).val(),
-          collections: $('#collections' + productId).val(),
-          sku: $('#sku' + productId).val(),
-          profit: $('#profit' + productId).val(),
-          images: images
-        });
+        
+          let product = {
+            id: productId,
+            name: $('#name' + productId).val(),
+            weight: $('#weight' + productId).text().trim(),
+            price: $('#price' + productId).val(),
+            cost: $('#cost' + productId).val(),
+            //price: $('#price' + productId).data('price'),
+            description: CKEDITOR.instances['description' + productId].getData(),
+            //description: $('#description' + productId).val(),
+            product_type: $('#type' + productId).val(),
+            tags: $('#tags' + productId).val(),
+            collections: $('#collections' + productId).val(),
+            sku: $('#sku' + productId).val(),
+            profit: $('#profit' + productId).val(),
+            images: images
+          };
 
+          $.post('{{url("/publish-product")}}', {
+            "_token": "{{ csrf_token() }}",
+            product: product
+          }, function(data, status) {
+            
+            $('.btn-import-list-send-' + productId).attr('disabled',false);
+            //$("#product" + productId).hide();
+            //('.alert-publish-single').show();
+            $('.btn-import-list-send-' + productId).hide();
+            $('.btn-import-list-send2-' + productId).show();
+            //$('.btn-import-list-send2-' + productId).attr('data-shopifyid', data.id_shopify);
+             nProd = nProd - 1;
+      
+            if(nProd == 0){
+                $('.alert-publish-all').hide();
+                $('.alert-publish-all-ready').show();    
+            }            
+          }).fail(function(data) {
+            if(data.status == 403)
+              $('#upgrade-plans-modal').modal('show')
+            //$("#upgrade-plans-modal").appendTo("body");
+          });
       });
+      
+      $(this).attr('disabled',false);
+
 
       let btn = $(this);
       if(products.length==0){
         alert('At least one checkbox must be selected');
         return;
       }
-
-      $.post('{{url("/publish-all-products")}}', {
-        "_token": "{{ csrf_token() }}",
-        products: products
-      }, function(data, status) {
-        for(let i=0;i<products;i++){
-          $("#product" + products[i].id).hide();
-        }
-        $('.alert-publish-all').show();
-        console.log('mensaje: ' + data.result);
-      }).fail(function(data) {
-        if(data.status == 403)
-          $('#upgrade-plans-modal').modal('show')
-        //$("#upgrade-plans-modal").appendTo("body");
-      });
+    
     }); //Close send all function
 
   }); //Close document ready

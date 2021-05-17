@@ -157,39 +157,6 @@ class ImportListController extends Controller
     {
 
         $this->authorize('plan_bulk-publish-product-import-list');
-/*
-        //Save products in DB (this products will be published by cron)
-
-        foreach($request->products as $pr){
-            $sendToShopify = new ProductsToSend;
-
-            $sendToShopify->id_product = $pr['id'];
-            $sendToShopify->name = $pr['name'];
-            $sendToShopify->weight = $pr['weight'];
-            $sendToShopify->price = $pr['price'];
-            $sendToShopify->description = $pr['description'];
-            $sendToShopify->product_type = $pr['product_type'];
-            $sendToShopify->tags = $pr['tags'];
-            $sendToShopify->collections = $pr['collections'];
-            $sendToShopify->sku = $pr['sku'];
-            $sendToShopify->profit = $pr['profit'];
-            $sendToShopify->images = '';
-            $sendToShopify->id_merchant = Auth::User()->id;
-
-            $sendToShopify->save();
-        }
-
-
-
-        Log::info("LOG-REQUESTBULKPRODUCTS-new");
-        Log::info($request->products);
-
-
-        $result = 'ok';
-
-*/        
-
-      //Developed by Oscar
 
         $result = 'error';
 
@@ -204,14 +171,11 @@ class ImportListController extends Controller
         }
 
         foreach ($request->products as $product) {
-            //if(ShopifyBulkPublish::dispatch(Auth::User(), $product,$published)->delay(now()->addSeconds(10)))
             if(ShopifyBulkPublish::dispatchNow(Auth::User(), $product,$published))
                 $result = 'ok';
             sleep(10);
-
         }
 
-        
         return response()->json(array('result' => $result));
     }
 

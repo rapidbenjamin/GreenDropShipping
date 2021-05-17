@@ -266,7 +266,7 @@
         <h4 class="modal-title">Plans</h4>
       </div>
       <div class="modal-body">
-        <p>Upgrade your plan to perform this action. <a href="{{url('/plans')}}">View plans</a></p>
+        <p>Upgrade your plan to perform this action. <a href="{{url('/plans#planBottom')}}">View plans</a></p>
       </div>
     </div>
 

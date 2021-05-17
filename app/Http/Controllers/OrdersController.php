@@ -107,6 +107,7 @@ class OrdersController extends Controller
 	public function show(Order $orders)
 	{
 		$this->authorize('plan_view-manage-orders');
+	    if(Auth::user()->id == $orders->id_customer){
 		$osa = OrderShippingAddress::select('order_shipping_address.*')
 			->where('order_shipping_address.id_order', $orders->id)
 			->first();
@@ -119,36 +120,15 @@ class OrdersController extends Controller
 			->where('status.id', $orders->fulfillment_status)
 			->first();
 
-/* OLD  No se puede traer el profit porque no aplica para productos borrados del shopify
-		$order_products = OrderDetails::select(
-			'order_details.sku',
-			'order_details.price',
-			'order_details.quantity',
-			'products.name',
-			'products.images',
-			'my_products.profit'
-		)
-			->join('products', 'order_details.sku', 'products.sku')
-			->join('import_list', 'import_list.id_product', 'products.id')
-			->join('my_products', 'import_list.id', 'my_products.id_imp_product')
-			->whereNull('my_products.deleted_at')
-			->where('import_list.id_customer', Auth::user()->id)
-			->where('order_details.id_order', $orders->id)->get();
-*/
-
 
 		$order_products = OrderDetails::select(
 			'order_details.sku',
 			'order_details.price',
 			'order_details.quantity',
 			'products.name',
-			'products.images',
-		)
-			->join('products', 'order_details.sku', 'products.sku')
-			->where('order_details.id_order', $orders->id)->get();
-
-
-
+			'products.images'
+		)->join('products', 'order_details.sku', 'products.sku')
+            ->where('order_details.id_order', $orders->id)->get();
 
 		foreach ($order_products as $pro) {
 			$pro->image_url = env('URL_MAGENTO_IMAGES') . json_decode($pro->images)[0]->file;
@@ -177,6 +157,9 @@ class OrdersController extends Controller
 			'states' => MOrder::USAstates(),
 			'state_key' => MOrder::getSateIdByName($osa->province)
 		));
+	    }else{
+	        return redirect('orders');
+	    }
 	}
 
 
@@ -224,7 +207,7 @@ class OrdersController extends Controller
 			->join('products as p', 'p.sku', 'od.sku')
 			->join('status as st2', 'st2.id', 'orders.fulfillment_status')->whereIn('orders.id', explode(',', $request->orders))
 			->where('orders.id_customer', Auth::user()->id)->get()->toArray();
-		
+
 		self::GDSLOG('Export Order', 'Export Order => ' . $request->orders);
 
 		$now = gmdate("D, d M Y H:i:s");
@@ -232,7 +215,7 @@ class OrdersController extends Controller
 		header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
 		header("Last-Modified: {$now} GMT");
 
-		// force download  
+		// force download
 		header("Content-Type: application/force-download");
 		header("Content-Type: application/octet-stream");
 		header("Content-Type: application/download");
@@ -287,7 +270,7 @@ class OrdersController extends Controller
 			$order->update_merchant_id = Auth::user()->id;
 			$order->update_date = date('Y-m-d H:i:s');
 			$order->save();
-			
+
 			//update address
 			self::GDSLOG('New Address', '------');
 			self::GDSLOG('address1', '=>' . $order->address1);

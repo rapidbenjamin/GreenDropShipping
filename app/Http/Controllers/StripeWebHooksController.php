@@ -56,7 +56,6 @@ class StripeWebHooksController extends Controller
 
     {
 
-        Log::info($request->all());
 
         $payment_session = PaymentSession::where('id_session', $request->data['object']['id'])->first();
 
@@ -89,14 +88,20 @@ class StripeWebHooksController extends Controller
             foreach ($orders as $order) {
 
                $magento_order = MOrder::createOrderv2($order);
-               Log::info("CUSTOMPAULO-MAGENTOORDER");
-               Log::info($magento_order);
 
                $order->magento_quote_id = $magento_order['quote_id'].'';
 
                $order->magento_order_id = $magento_order['reserved_order_id'];
 
                $order->save();
+               
+               if($order->magento_order_id != NULL){
+                
+                    $msg = 'Id Stripe Payment: '.$payment_session->payment_intent;
+               
+                    MOrder::commentOrder($order->magento_entity_id,$msg);                  
+                   
+               }
 
             }
 
@@ -132,7 +137,6 @@ class StripeWebHooksController extends Controller
 
     {
 
-        Log::info($request->all());
 
         $payment_session = PaymentSession::where('id_session', $request->data['object']['id'])->first();
 

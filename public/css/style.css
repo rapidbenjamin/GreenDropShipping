@@ -1946,7 +1946,7 @@ svg {
   width: 100%;
   max-width: 224px;
   box-sizing: border-box;
-  padding-right:20px;x;
+  padding-right:20px;
   border-radius: 10px;
   cursor: pointer;
   flex: 0 1 224px;
@@ -3785,3 +3785,5 @@ ul.subcategories-content li.hide {
 .tokentext p {
   font-size: 17px;
 }
+
+ .producttabs .imagewrap img{max-height:100%;}

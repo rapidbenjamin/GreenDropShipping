@@ -1,22 +1,10 @@
 @extends('layouts.app')
 
-
-
 @section('content')
 
-
-
-
-
 <div class="indexContent" data-page_name="PLANS">
-
-
         <div class="maincontent">
-
-
             <div class="wrapinsidecontent">
-
-
 
           @if(Auth::user()->plan == 'free')
 
@@ -30,7 +18,7 @@
 
                          img/infogray@3x.png 3x">
 
-                    <p>You have a free plan. <a href="/plans">Click here to upgrade your plan.</a></p>
+                    <p>You have a free plan. <a href="/plans#planBottom">Click here to upgrade your plan.</a></p>
 
                </div>                
 
@@ -39,20 +27,26 @@
             @endif
 
   
+            @if(Auth::user()->api_status == 'pending')
 
-        @if(Request()->update=='true')
-
-            <div class="alertan level2">
+            <div class="alertan">
 
                <div class="agrid">
 
-                    <p><strong>Success!</strong> The plan has been successfully updated.</p>
+                   <img src="img/infogray.png"
+
+                     srcset="img/infogray@2x.png 2x,
+
+                         img/infogray@3x.png 3x">
+
+                    <p>You have done an upgrade request to BASIC plan.  It will be in pending status while the current payment in shopify is approved!</a></p>
 
                </div>                
 
             </div>
 
             @endif
+  
 
 
 
@@ -173,35 +167,18 @@
                       </div>
 
                       <div class="wrappc">
-
                           <p><strong>This plan allows you to view all products and create import lists.</strong></p>
 
                            <ul>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> Browse GreenDropShip’s Complete Catalog of Products
-</li>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> View over 20,000 Brand Name Products
-</li>
-
+								<li><i class="fa fa-check" aria-hidden="true"></i> Browse GreenDropShip’s Complete Catalog of Products</li>
+								<li><i class="fa fa-check" aria-hidden="true"></i> View over 20,000 Brand Name Products</li>
 								<li><i class="fa fa-check" aria-hidden="true"></i> Create Product Import Lists</li>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> Automated Inventory Syncing
-</li>
-
+								<li><i class="fa fa-check" aria-hidden="true"></i> Automated Inventory Syncing</li>
 								<li><i class="fa fa-check" aria-hidden="true"></i> Customer Support</li>
-
                            </ul>
-
-                            
-
-                            
-
-                           
-
                       </div>
 
-                      
+                 
 
                       <div class="buttonsp">
 
@@ -240,36 +217,17 @@
                       </div>
 
                       <div class="wrappc">
-
                           <p><strong>This plan allows you to add products to your store and process up to 100 orders a month.</strong></p>
-
                            <ul>
-
-
 								<li><i class="fa fa-check" aria-hidden="true"></i> Browse GreenDropShip’s Complete Catalog of Products</li>
-
 								<li><i class="fa fa-check" aria-hidden="true"></i> Import Unlimited Products into your Shopify Store</li>
-
 								<li><i class="fa fa-check" aria-hidden="true"></i> Bulk Importing</li>
-
 								<li><i class="fa fa-check" aria-hidden="true"></i> Process Up to {{env('LIMIT_ORDERS')}} Orders a Month</li>
-
 								<li><i class="fa fa-check" aria-hidden="true"></i> Automated Inventory Syncing</li>
-
 								<li><i class="fa fa-check" aria-hidden="true"></i> Customer Support</li>
-
 								<li><i class="fa fa-check" aria-hidden="true"></i> Automated Order Fulfillment</li>
-
-                <li><i class="fa fa-check" aria-hidden="true"></i> *Requires an annual GreenDropShip membership</li>
-
+								<li><i class="fa fa-check" aria-hidden="true"></i> *Requires an annual GreenDropShip membership</li>
                            </ul>
-
-                            
-
-                            
-
-                           
-
                       </div>
 
                       
@@ -311,35 +269,17 @@
                       </div>
 
                       <div class="wrappc">
-
-                          <p><strong>This solution for high volume sellers offers unlimited monthly orders.</strong></p>
-
-                           <ul>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> Browse GreenDropShip’s Complete Catalog of Products</li>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> Import Unlimited Products into your Shopify Store</li>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> Bulk Importing</li>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> Automated Inventory Syncing</li>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> Process Unlimited Monthly Orders</li>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> Automated Order Fulfillment</li>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> Customer Support</li>
-
-								<li><i class="fa fa-check" aria-hidden="true"></i> *Requires an annual GreenDropShip membership</li>
-
-                           </ul>
-
-                            
-
-                            
-
-                           
-
+                          <p><strong>This solution for high volume sellers offers 50,000 monthly orders.</strong></p>
+                          <ul>
+                              <li><i class="fa fa-check" aria-hidden="true"></i> Browse GreenDropShip’s Complete Catalog of Products</li>
+                              <li><i class="fa fa-check" aria-hidden="true"></i> Import Unlimited Products into your Shopify Store</li>
+                              <li><i class="fa fa-check" aria-hidden="true"></i> Bulk Importing</li>
+                              <li><i class="fa fa-check" aria-hidden="true"></i> Process Up to 50,000 Orders a Month</li>
+                              <li><i class="fa fa-check" aria-hidden="true"></i> Automated Inventory Syncing</li>
+                              <li><i class="fa fa-check" aria-hidden="true"></i> Customer Support</li>
+                              <li><i class="fa fa-check" aria-hidden="true"></i> Automated Order Fulfillment</li>
+                              <li><i class="fa fa-check" aria-hidden="true"></i> *Requires an annual GreenDropShip membership</li>
+                          </ul>
                       </div>
 
                       
@@ -368,7 +308,7 @@
 
 </div>
 
-
+   <a id='planBottom'></a>  
 
 <script type="text/javascript">
 
@@ -469,14 +409,10 @@
               if(plan == 'free'){
                 window.location.href = "{{url('/plans/update-success')}}";
               }
-
-
             }).fail(function(data) {
-
               $('.token-error').show();
                window.location.href = "{{url('/plans/update-failure')}}";
-
-            });        
+            });
       }
  
 
