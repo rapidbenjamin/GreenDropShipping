@@ -7,7 +7,7 @@
 
 
             <div class="wrapinsidecontent">
-              
+
             @if(Auth::user()->plan == 'free')
             <div class="alertan">
                <div class="agrid">
@@ -15,28 +15,28 @@
                      srcset="img/infogray@2x.png 2x,
                          img/infogray@3x.png 3x">
                     <p>You have a free plan. <a href="/plans">Click here to upgrade your plan.</a></p>
-               </div>                
+               </div>
             </div>
             @endif
             <div class="alertan level2">
                <div class="agrid">
                     <p>You can edit product details before adding products to your store.</p>
-               </div>                
+               </div>
             </div>
             <div class="alertan level2 alert-publish-all" style="display: none;">
                <div class="agrid">
                     <p><strong>Publishing in Progress!</strong> We´re currently publishing your products into your store.</p>
-               </div>                
+               </div>
             </div>
             <div class="alertan level2 alert-publish-single" style="display: none;">
                <div class="agrid">
                     <p>The product has been published into your store successfully.</p>
-               </div>                
+               </div>
             </div>
             <div class="alertan level2 alert-publish-all-ready" style="display: none;">
                <div class="agrid">
                     <p><strong>The products have been published into your store successfully!</strong></p>
-               </div>                
+               </div>
             </div>
 
 
@@ -51,22 +51,22 @@
                     </div>
                 </div>
                 @endcan
-                
+
                 @foreach ($array_products as $ap)
                 <div class="productboxelement import-product" id='product{{$ap->id_import_list}} data-id='{{$ap->id_import_list}}'>
                     <h2>{{$ap->name}}</h2>
-                    <div class="producttabs">                       
+                    <div class="producttabs">
                         <div class="headertabs">
                            <div class="checkt">
                                <input type="checkbox" id="check-{{$ap->id_import_list}}" class="checkbox" style="display: block;">
                            </div>
                             <div class="tabs">
-                                
+
                                   <a href=".tab-1" class="thetab active"> Product </a>
                                   <a href=".tab-2" class="thetab"> Description </a>
                                   <a href=".tab-3" class="thetab"> Pricing </a>
                                   <a href=".tab-4" class="thetab"> Images </a>
-                               
+
                             </div>
                             <div class="buttons import-actions">
                                 {{--@can('plan_delete-product-import-list')--}}
@@ -111,7 +111,7 @@
                                        </div>
                                    </div>
                                </div>
-                                
+
                             </div>
                             <div class="tab-2 tabcontent wpadding import-content import-description">
                                 <textarea class="texteditor editor" name="" id="description{{$ap->id_import_list}}" cols="30" rows="10">{!! $ap->description !!}</textarea>
@@ -120,18 +120,18 @@
                                 <table class="greentable" cellspacing="0">
                                         <thead>
                                             <tr>
-                                                
+
                                                 <th>
                                                     SKU	 <span class="simple-tooltip" title="Do not change this SKU in your Shopify store.">?</span>
                                                 </th>
                                                 <th>
-                                                    HEIGHT	
+                                                    HEIGHT
                                                 </th>
                                                 <th>
                                                     WIDTH
                                                 </th>
                                                 <th>
-                                                    LENGTH		
+                                                    LENGTH
                                                 </th>
                                                 <th>
                                                     WEIGHT
@@ -148,12 +148,13 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            
+
                                             <tr class="productdatarow">
-                                               
+
                                                 <td data-label="SKU" class="skutd">
                                                     <input type="text" id="sku{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$ap->sku}}"
                                                     disabled="disabled">
+                                                    <input type="hidden" id="upc{{$ap->id_import_list}}" value="{{$ap->upc}}" />
                                                 </td>
                                                 <td data-label="HEIGHT">
                                                     {{$ap->ship_height}}
@@ -171,10 +172,10 @@
                                                   <div class="costgrid">
                                                     <div>
                                                       $
-                                                    </div> 
+                                                    </div>
                                                     <input type="text" id="cost{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$ap->price}}" disabled="disabled">
                                                   </div>
-                                                    
+
                                                 </td>
                                                 <td data-label="PROFIT (%) " class="w100">
                                                   <span class="simple-tooltip" title="First tooltip">?</span>
@@ -184,7 +185,7 @@
                                                            %
                                                        </div>
                                                    </div>
-                                                    
+
                                                 </td>
                                                 <td data-label="PRICE" class="w100">
                                                    <div class="inputprice">
@@ -199,12 +200,12 @@
                                                        <input type="text" class="box-price" id="price{{$ap->id_import_list}}" data-price="{{$ap->price}}" data-id="{{$ap->id_import_list}}" value="{{number_format((100*$ap->price)/ (100+$profit), 2,'.','')}}" >
                                                        @endif
                                                    </div>
-                                                     
+
                                                 </td>
-                                                
+
                                             </tr>
-                                            
-                                            
+
+
                                         </tbody>
                                     </table>
                             </div>
@@ -220,17 +221,17 @@
                                         </div>
                                     </div>
                                     @endfor
-                                   
+
                                 </div>
                             </div>
                         </div>
-                       
+
                     </div>
                 </div>
                 @endforeach
-                
+
             </div>
-            
+
         </div>
     </div>
 
@@ -244,12 +245,12 @@
                <!-- /pagination -->
 
 
-            
-                
+
+
             </div>
-            
+
         </div>
-    </div>  
+    </div>
 </div>
 
 <div id="alert-checkbox" class="modal fade" role="dialog" data-backdrop="true">
@@ -259,7 +260,7 @@
     <div class="modal-content">
       <div class="modal-header" style="display:block">
         <button type="button" class="close" data-dismiss="modal">×</button>
-      </div>        
+      </div>
       <div class="modal-body">
         <p style="text-align:center;">At least one checkbox must be selected</p>
       </div>
@@ -298,27 +299,30 @@
       $("input.chk-img" + productId + ":checked").each(function(index, ele) {
         images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
       });
-        
+
         $('.btn-import-list-send-' + productId).hide();
         $('.btn-import-list-send3-' + productId).show();
-      
+
       let btn = $(this);
       btn.attr('disabled', true);
+
       let product = {
-        id: productId,
-        name: $('#name' + productId).val(),
-        weight: $('#weight' + productId).text().trim(),
-        price: $('#price' + productId).val(),
-        cost: $('#cost' + productId).val(),
-        //price: $('#price' + productId).data('price'),
-        description: CKEDITOR.instances['description' + productId].getData(),
-        product_type: $('#type' + productId).val(),
-        tags: $('#tags' + productId).val(),
-        collections: $('#collections' + productId).val(),
-        sku: $('#sku' + productId).val(),
-        profit: $('#profit' + productId).val(),
-        images: images
+          id: productId,
+          name: $('#name' + productId).val(),
+          weight: $('#weight' + productId).text().trim(),
+          price: $('#price' + productId).val(),
+          cost: $('#cost' + productId).val(),
+          //price: $('#price' + productId).data('price'),
+          description: CKEDITOR.instances['description' + productId].getData(),
+          product_type: $('#type' + productId).val(),
+          tags: $('#tags' + productId).val(),
+          collections: $('#collections' + productId).val(),
+          sku: $('#sku' + productId).val(),
+          upc: $('#upc' + productId).val(),
+          profit: $('#profit' + productId).val(),
+          images: images
       };
+
       $.post('{{url("/publish-product")}}', {
         "_token": "{{ csrf_token() }}",
         product: product
@@ -361,31 +365,31 @@
       let products = [];
 
       let nProd = $("input.checkbox:checked").length;
- 
+
         if(nProd > 0){
           $(this).attr('disabled',true);
           $('.alert-publish-all').show();
-          $('.alert-publish-all-ready').hide();       
+          $('.alert-publish-all-ready').hide();
         }
-      
+
       $("input.checkbox:checked").each(function(index, ele) {
         let productId = $(ele).attr('id').split('-')[1];
         let images = [];
-        
+
         products.push({
           id: productId,
-        });        
+        });
 
         //Disable send to shopify Buttons
         $('.btn-import-list-send-' + productId).attr('disabled',true);
-        
+
 
         // data array of all checked products
         $("input.chk-img" + productId + ":checked").each(function(index, ele) {
           images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
         });
-        
-          let product = {
+
+        let product = {
             id: productId,
             name: $('#name' + productId).val(),
             weight: $('#weight' + productId).text().trim(),
@@ -398,15 +402,16 @@
             tags: $('#tags' + productId).val(),
             collections: $('#collections' + productId).val(),
             sku: $('#sku' + productId).val(),
+            upc: $('#upc' + productId).val(),
             profit: $('#profit' + productId).val(),
             images: images
-          };
+        };
 
           $.post('{{url("/publish-product")}}', {
             "_token": "{{ csrf_token() }}",
             product: product
           }, function(data, status) {
-            
+
             $('.btn-import-list-send-' + productId).attr('disabled',false);
             //$("#product" + productId).hide();
             //('.alert-publish-single').show();
@@ -414,18 +419,18 @@
             $('.btn-import-list-send2-' + productId).show();
             //$('.btn-import-list-send2-' + productId).attr('data-shopifyid', data.id_shopify);
              nProd = nProd - 1;
-      
+
             if(nProd == 0){
                 $('.alert-publish-all').hide();
-                $('.alert-publish-all-ready').show();    
-            }            
+                $('.alert-publish-all-ready').show();
+            }
           }).fail(function(data) {
             if(data.status == 403)
               $('#upgrade-plans-modal').modal('show')
             //$("#upgrade-plans-modal").appendTo("body");
           });
       });
-      
+
       $(this).attr('disabled',false);
 
 
@@ -434,11 +439,9 @@
         alert('At least one checkbox must be selected');
         return;
       }
-    
+
     }); //Close send all function
 
   }); //Close document ready
 </script>
-
-
 @endsection

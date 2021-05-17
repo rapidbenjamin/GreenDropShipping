@@ -35,6 +35,7 @@ class ShopifyAdminApi
                     "vendor" => 'GreenDropShip',
                     "variants" => array(
                         0 => array(
+                            'barcode' => $product['upc'],
                             "weight" => $product['weight'],
                             "price" => (float)$product['price'],
                             "sku" => $product['sku'],
