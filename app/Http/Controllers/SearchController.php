@@ -26,6 +26,8 @@ class SearchController extends Controller
 		$this->authorize('view-merchant-search');
 		$dbProducts = (new Products)->newQuery();
 
+        $only_in_stock = $request->only_in_stock;
+
 		if ($request->select_category != "") {
 			if ($request->txt_search == "") {
 				$dbProducts = Products::where('categories', 'like', '%"category_id":"' . $request->select_category . '"%');
@@ -53,8 +55,14 @@ class SearchController extends Controller
 					$query->orWhere('name', 'like', '%' . $word . '%');
 				}
 			});
+
+            $dbProducts->orWhere('sku', trim($request->txt_search))
+                ->orWhere('upc', trim($request->txt_search));
 		}
 
+        if ($only_in_stock) {
+            $dbProducts->where('stock', '>', 0);
+        }
 		//Exclude products in import-list
 
 		$notin = ImportList::where('id_customer', Auth::User()->id)->pluck('id_product');

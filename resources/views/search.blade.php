@@ -55,6 +55,10 @@
                                   @endforeach
                               </select>
                            </div>
+	                       <div>
+		                       <input type="checkbox" name="only_in_stock" id="only_in_stock" {{ Request()->only_in_stock ? 'checked' : '' }}/>
+		                       <label for="only_in_stock">Show only products that are in stock</label>
+	                       </div>
                        </div>
                        
                        <div class="subcategories">
