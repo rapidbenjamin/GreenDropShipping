@@ -1,0 +1,225 @@
+/*** admin css ***/
+
+body.admin { 
+    .titlebox {
+        background-color: #fff;
+        
+        h1 {
+            color: #6a6c6f;
+        }
+    }
+    
+    .leftmenu {
+        background-color: #1a6e34;
+        
+        .mainmenu li a p {
+            color: #fff;
+        }
+        
+        .mainmenu li ul li  {
+            color: #fff;
+        }
+        
+        .currenuser h3 {
+            color: #fff;
+        }
+        
+        .currenuser p {
+            color: #fff;
+        }
+        
+        .mainmenu li ul li a {
+            color: #fff;
+        }
+        
+        .mainmenu li.active a {
+            background-color: #203e1d;
+        }
+        
+        .mainmenu li a:hover {
+            background-color: #203e1d;
+        }
+    }
+    
+    .panel-left {
+        background-color: #fff;
+        border: 1px solid #dbe3f2;
+        
+        .cwrap {
+            padding: 17px;
+            
+            .tab-body-right {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+        }
+        
+        
+        .tab-custom {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+            list-style: none; 
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+            color: #6a6c6f;
+            
+            @media (max-width: 1050px) {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+            }
+            
+            li {
+                cursor: pointer;
+                padding: 17px;
+                
+                &:hover {
+                    background-color: #1a6e34;
+                    color: #fff;
+                }
+                
+                @media (max-width: 1050px) {
+                    display: grid;
+                    grid-template-columns: 1fr auto;
+                    align-items: center;
+                    padding: 8px;
+                }
+            }
+            
+            span {
+                font-size: 17px;
+                font-weight: 700;
+            }
+        }
+        
+        .tab-custom-right {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            list-style: none; 
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+            color: #6a6c6f;
+            
+            li {
+                cursor: pointer;
+                padding: 17px;
+                display: grid;
+                align-items: center;
+                
+                &:hover {
+                    background-color: #1a6e34;
+                    color: #fff;
+                }
+            }
+        }
+    }
+    
+    .panel-settings {
+        display: grid;
+        grid-template-columns: auto 1fr auto minmax(auto, 160px) auto  minmax(auto, 160px) minmax(auto, 80px);
+        column-gap: 20px;
+        background-color: #fff;
+        border: 1px solid #dbe3f2;
+        padding: 9px;
+        align-items: center;
+        margin-bottom: 20px;
+        
+        @media (max-width: 1500px) {
+            grid-row-gap: 10px;
+            grid-template-columns: 1fr minmax(auto, 50px) 1fr minmax(auto, 50px) 1fr minmax(auto, 80px);
+        }
+        
+        @media (max-width: 1150px) {
+            grid-template-columns: 1fr;
+        }
+        
+        
+        
+        .admin-title {
+            font-size: 30px;
+            font-weight: 800;
+            color: #6a6c6f;
+            margin-right: 40px;
+            
+            @media (max-width: 1600px) {
+                font-size: 25px;
+            }
+            
+            @media (max-width: 1500px) {
+                grid-column: span 6;
+                text-align: center;
+                margin-right: 0;
+            }
+            
+            @media (max-width: 1150px) {
+                grid-column: span 1;
+                font-size: 17px;
+            }
+
+        }
+        
+        input {
+            border: 1px solid #dbe3f2;
+            color: #6a6c6f;
+            font-size: 16px;
+        }
+        
+        label {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a6e34;
+        }
+        
+        .admin-b1 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            
+            button {
+                border-radius: 0;
+                background-color: #fff;
+                border: none;
+                border-left: 1px solid #dbe3f2;
+                border-top: 1px solid #dbe3f2;
+                border-bottom: 1px solid #dbe3f2;
+                font-size: 20px;
+                color: #6a6c6f;
+                cursor: pointer;
+                
+                &:hover {
+                    background-color: #edf0f5;
+                }
+                
+                &:last-child {
+                   border-right: 1px solid #dbe3f2; 
+                }
+            }
+        }
+    }
+    
+    .adtwocol {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        column-gap: 30px;
+        
+        @media (max-width: 1150px) {
+            grid-template-columns: 1fr;
+            grid-row-gap: 20px;
+        }
+        
+        
+    }
+    
+    .basicbtn {
+        background-color: #1a6e34;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+        padding: 5px;
+        letter-spacing: 1px;
+    }
+}

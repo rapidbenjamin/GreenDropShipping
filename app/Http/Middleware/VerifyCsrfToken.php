@@ -19,6 +19,10 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        //
+        'create-order-webkook',
+        'check-payment-success',
+        'check-payment-fail',
+        'callback',
+        'install'
     ];
 }
