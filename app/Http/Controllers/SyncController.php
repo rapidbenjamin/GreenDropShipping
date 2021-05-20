@@ -39,45 +39,31 @@ class SyncController extends Controller
         $t = time();
         echo ('Start: ' . date("h:i:s", $t));
 
-
-        //UPDATE STOCK FROM MAGENTO TO MIDDLEWARE
         $inventory = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
-        $productIds = [];
-        foreach ($inventory as $item) {
-            $productIds[$item->product_id] = $item->product_id;
-        }
-        $products = Products::wherein('id', $productIds)->get()->all();
-        $productsArr = [];
-        foreach ($products as $product) {
-            $productsArr[$product->id] = $product;
-        }
         $bulksize = 30000;
         $bulkcount = 0;
         $tempQuery = 'update Products set stock = (case';
         $proIds = [];
         $query = "";
         foreach ($inventory as $item) {
-            try {
-                $product = $productsArr[$item->product_id];
+            $product = Products::find($item->product_id);
+            if ($product != null && $product->stock != $item->quantity) {
                 $proIds[$item->product_id] = $item->product_id;
-                if ($product != null && $product->stock != ($item->quantity + 5)) {
-                    if ($item->quantity == null) {
-                        $item->quantity = 0;
-                    }
-                    $tempQuery .= ' when id=' . $item->product_id . ' then ' . $item->quantity;
-                    $bulkcount++;
+                if ($item->quantity == null) {
+                    $item->quantity = 0;
                 }
-                if ($bulkcount == $bulksize) {
-                    try {
-                        $query  = $tempQuery . " end) where id in" . "(" . implode(",", $proIds) . ")";
-                        DB::statement($query);
-                    } catch (Exception $ex) {
-                    }
-                    $tempQuery = 'update Products set stock = (case';
-                    $proIds = [];
-                    $bulkcount = 0;
+                $tempQuery .= ' when id=' . $item->product_id . ' then ' . $item->quantity;
+                $bulkcount++;
+            }
+            if ($bulkcount == $bulksize) {
+                try {
+                    $query  = $tempQuery . " end) where id in" . "(" . implode(",", $proIds) . ")";
+                    DB::statement($query);
+                } catch (Exception $ex) {
                 }
-            } catch (Exception $ex) {
+                $tempQuery = 'update Products set stock = (case';
+                $proIds = [];
+                $bulkcount = 0;
             }
         }
         if ($bulkcount > 0) {
@@ -88,34 +74,26 @@ class SyncController extends Controller
                 // echo $ex->getMessage();
             }
         }
+        echo $query;
 
         // Retrieving location_id and inventory_item_id to store inventory
         $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify')->get();
-        $customerIds = [];
-        foreach ($myProducts as $mp) {
-            $customerIds[$mp->id_customer] = $mp->id_customer;
-        }
-        $merchants = User::wherein('id', $customerIds)->get();
-        $merchantsArr = [];
-        foreach ($merchants as $merchant) {
-            $merchantsArr[$merchant->id] = $merchant;
-        }
-
         $bulksize = 10000;
         $bulkcount = 0;
         $tempQuery = 'update my_products set location_id_shopify = (case';
         $myProductIds = [];
         $query = "";
+
         foreach ($myProducts as $mp) {
             try {
-                $merchant = $merchantsArr[$mp->id_customer];
+                $merchant = User::find($mp->id_customer);
                 $myProductIds[$mp->id] = $mp->id;
                 $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
                 $location_id = '';
                 if($res['result'] == 1){
                     $location_id=$res['location_id'];
                 }
-                $tempQuery .= ' when id_customer=' . $mp->id_customer . ' then ' . $location_id;
+                $tempQuery .= ' when id=' . $mp->id . ' then ' . $location_id;
                 $bulkcount++;
                 if ($bulkcount == $bulksize) {
                     try{
@@ -132,12 +110,13 @@ class SyncController extends Controller
                 }
                 sleep(1);
             } catch (Exception $ex) {
-                // echo $ex->getMessage();
+                echo $ex->getMessage();
             }
         }
+        echo $query;
         if ($bulkcount > 0) {
             try {
-                $query = $tempQuery . " end) where id_customer in" . "(" . implode(",", $customerIds) . ")";
+                $query = $tempQuery . " end) where id in" . "(" . implode(",", $myProductIds) . ")";
                 DB::statement($query);
             } catch (Exception $ex) {
                 // echo $ex->getMessage();
@@ -149,18 +128,15 @@ class SyncController extends Controller
             // Oscar desarrolla para cada producto actualizar el stock en cada tienda shopify
             //Este es el punto 18 del test
             try {
-                $merchant = $merchantsArr[$mp->id_customer];
-                try{
-                    $res = ShopifyAdminApi::updateProductIventory($merchant, $mp->id_product, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
-                }
-                catch(Exception $ex){
-                    // echo $ex->getMessage();
-                }
-                sleep(1);
+                $merchant = User::find($mp->id_customer);
+                $res = ShopifyAdminApi::updateProductIventory($merchant, $mp->id_product, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
+                echo $res['result'] . '<br>';
+                sleep(10);
             } catch (Exception $ex) {
-                // echo $ex->getMessage();
+                echo $ex->getMessage();
             }
         }
+
 
         $t = time();
         echo ('End: ' . date("h:i:s", $t));

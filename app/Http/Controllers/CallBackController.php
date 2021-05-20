@@ -96,7 +96,6 @@ class CallBackController extends Controller
             "client_id" => env('SHOPIFY_API_KEY'), // Your API key
             "client_secret" => env('SHOPIFY_SECRET_KEY'), // Your app credentials (secret key)
             "code" => $code, // Grab the access key from the URL
-            "accessMode" => "offline"
         );
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
