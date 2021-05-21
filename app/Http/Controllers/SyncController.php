@@ -54,7 +54,7 @@ class SyncController extends Controller
             fputcsv($file, array($row['Product Id'], $row['Website Id'], $row['Stock Id'], $row['Quantity'], $row['Is Salable'], $row['SKU']));
         }
         fclose($file);
-        DB::statement("DROP TABLE temp_mg_product");
+        DB::statement("DROP TABLE IF EXISTS temp_mg_product");
         DB::statement("
         CREATE TABLE `temp_mg_product` (
             `product_id` int(10) NOT NULL,
