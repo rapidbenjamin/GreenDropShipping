@@ -25,7 +25,6 @@ use Illuminate\Support\Facades\Storage;
 use App\ProductsToSend;
 use App\Settings;
 use App\Jobs\ShopifyBulkPublish;
-use PDO;
 
 class SyncController extends Controller
 {
@@ -39,163 +38,105 @@ class SyncController extends Controller
     {
         $t = time();
         echo ('Start: ' . date("h:i:s", $t));
-        $stocksData = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
-        $columns = array('Product Id', 'Website Id', 'Stock Id', 'Quantity', 'Is Salable', 'SKU');
 
-        $file = fopen(base_path().'/storage/app/csv/magento_stock.csv', 'w');
-        fputcsv($file, $columns);
-        foreach ($stocksData as $task) {
-            $row['Product Id']  = $task->product_id;
-            $row['Website Id']    = $task->website_id;
-            $row['Stock Id']    = $task->stock_id;
-            $row['Quantity']  = $task->quantity;
-            $row['Is Salable']  = $task->is_salable;
-            $row['SKU']  = $task->sku;
-            fputcsv($file, array($row['Product Id'], $row['Website Id'], $row['Stock Id'], $row['Quantity'], $row['Is Salable'], $row['SKU']));
+        $inventory = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
+        $bulksize = 30000;
+        $bulkcount = 0;
+        $tempQuery = 'update Products set stock = (case';
+        $proIds = [];
+        $query = "";
+        foreach ($inventory as $item) {
+            $product = Products::find($item->product_id);
+            if ($product != null && $product->stock != $item->quantity) {
+                $proIds[$item->product_id] = $item->product_id;
+                if ($item->quantity == null) {
+                    $item->quantity = 0;
+                }
+                $tempQuery .= ' when id=' . $item->product_id . ' then ' . $item->quantity;
+                $bulkcount++;
+            }
+            if ($bulkcount == $bulksize) {
+                try {
+                    $query  = $tempQuery . " end) where id in" . "(" . implode(",", $proIds) . ")";
+                    DB::statement($query);
+                } catch (Exception $ex) {
+                }
+                $tempQuery = 'update Products set stock = (case';
+                $proIds = [];
+                $bulkcount = 0;
+            }
         }
-        fclose($file);
-        Log::info('--------------------------');
-        DB::statement("
-        CREATE TABLE `temp_mg_product` (
-            `product_id` int(10) NOT NULL,
-            `website_id` smallint(5) DEFAULT NULL,
-            `stock_id` smallint(5) DEFAULT NULL,
-            `quantity` decimal(14,0) DEFAULT NULL,
-            `is_salable` smallint(5) DEFAULT NULL,
-            `sku` varchar(192) COLLATE utf8_unicode_ci DEFAULT NULL,
-            PRIMARY KEY (`product_id`),
-            UNIQUE KEY `SKU` (`sku`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
-        );
-        $path = str_replace("\\", "/", base_path());
-        DB::connection()->getpdo()->exec("
-            LOAD DATA LOCAL INFILE '".$path."/storage/app/csv/magento_stock.csv' INTO TABLE temp_mg_product
-            FIELDS TERMINATED BY ','
-            IGNORE 1 LINES"
-        );
+        if ($bulkcount > 0) {
+            try {
+                $query  = $tempQuery . " end) where id in" . "(" . implode(",", $proIds) . ")";
+                DB::statement($query);
+            } catch (Exception $ex) {
+                // echo $ex->getMessage();
+            }
+        }
+        echo $query;
 
-        Log::info('xxxxxxxxxxxxxxxxxxxxxx');
-        // DB::statement("
-        //     UPDATE products, temp_mg_product
-        //     SET products.stock = temp_mg_product.quantity
-        //     WHERE  products.sku = temp_mg_product.sku AND products.stock != temp_mg_product.quantity"
-        // );
-        DB::statement("
-            UPDATE products, temp_mg_product
-            SET products.stock = temp_mg_product.quantity
-            WHERE  products.sku = temp_mg_product.sku AND products.stock != temp_mg_product.quantity"
-        );
+        // Retrieving location_id and inventory_item_id to store inventory
+        $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify')->get();
+        $bulksize = 10000;
+        $bulkcount = 0;
+        $tempQuery = 'update my_products set location_id_shopify = (case';
+        $myProductIds = [];
+        $query = "";
 
-        Log::info('xxxxxxxxxxxxxxxxxxxxxx');
-        // $inventory = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
-        // $bulksize = 30000;
-        // $bulkcount = 0;
-        // $tempQuery = 'update Products set stock = (case';
-        // $proIds = [];
-        // $query = "";
-        // foreach ($inventory as $item) {
-        //     $product = Products::find($item->product_id);
-        //     if ($product != null && $product->stock != $item->quantity) {
-        //         $proIds[$item->product_id] = $item->product_id;
-        //         if ($item->quantity == null) {
-        //             $item->quantity = 0;
-        //         }
-        //         $tempQuery .= ' when id=' . $item->product_id . ' then ' . $item->quantity;
-        //         $bulkcount++;
-        //     }
-        //     if ($bulkcount == $bulksize) {
-        //         try {
-        //             $query  = $tempQuery . " end) where id in" . "(" . implode(",", $proIds) . ")";
-        //             DB::statement($query);
-        //         } catch (Exception $ex) {
-        //         }
-        //         $tempQuery = 'update Products set stock = (case';
-        //         $proIds = [];
-        //         $bulkcount = 0;
-        //     }
-        // }
-        // if ($bulkcount > 0) {
-        //     try {
-        //         $query  = $tempQuery . " end) where id in" . "(" . implode(",", $proIds) . ")";
-        //         DB::statement($query);
-        //     } catch (Exception $ex) {
-        //         // echo $ex->getMessage();
-        //     }
-        // }
-        // echo $query;
+        foreach ($myProducts as $mp) {
+            try {
+                $merchant = User::find($mp->id_customer);
+                $myProductIds[$mp->id] = $mp->id;
+                $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
+                $location_id = '';
+                if($res['result'] == 1){
+                    $location_id=$res['location_id'];
+                }
+                $tempQuery .= ' when id=' . $mp->id . ' then ' . $location_id;
+                $bulkcount++;
+                if ($bulkcount == $bulksize) {
+                    try{
+                        $query = $tempQuery . " end) where id in" . "(" . implode(",", $myProductIds) . ")";
+                        DB::statement($query);
+                    }
+                    catch(Exception $ex){
+                        // echo $ex->getMessage();
+                    }
+                    $tempQuery = 'update my_products set location_id_shopify = (case';
+                    $bulkcount = 0;
+                    $myProductIds = [];
+                    break;
+                }
+                sleep(1);
+            } catch (Exception $ex) {
+                echo $ex->getMessage();
+            }
+        }
+        echo $query;
+        if ($bulkcount > 0) {
+            try {
+                $query = $tempQuery . " end) where id in" . "(" . implode(",", $myProductIds) . ")";
+                DB::statement($query);
+            } catch (Exception $ex) {
+                // echo $ex->getMessage();
+            }
+        }
 
-        // // Retrieving location_id and inventory_item_id to store inventory
-        // $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify')->get();
-        // $bulksize = 10000;
-        // $bulkcount = 0;
-        // $tempQuery = 'update my_products set location_id_shopify = (case';
-        // $myProductIds = [];
-        // $query = "";
+        //UPDATE STOCK IN SHOPIFY STORES
+        foreach ($myProducts as $mp) {
+            // Oscar desarrolla para cada producto actualizar el stock en cada tienda shopify
+            //Este es el punto 18 del test
+            try {
+                $merchant = User::find($mp->id_customer);
+                $res = ShopifyAdminApi::updateProductIventory($merchant, $mp->id_product, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
+                echo $res['result'] . '<br>';
+                sleep(10);
+            } catch (Exception $ex) {
+                echo $ex->getMessage();
+            }
+        }
 
-        // foreach ($myProducts as $mp) {
-        //     try {
-        //         $merchant = User::find($mp->id_customer);
-        //         Log::info($merchant);
-        //         $myProductIds[$mp->id] = $mp->id;
-        //         $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
-        //         $location_id = '';
-        //         if($res['result'] == 1){
-        //             $location_id=$res['location_id'];
-        //         }
-        //         $tempQuery .= ' when id=' . $mp->id . ' then ' . $location_id;
-        //         $bulkcount++;
-        //         if ($bulkcount == $bulksize) {
-        //             try{
-        //                 $query = $tempQuery . " end) where id in" . "(" . implode(",", $myProductIds) . ")";
-        //                 DB::statement($query);
-        //             }
-        //             catch(Exception $ex){
-        //                 // echo $ex->getMessage();
-        //             }
-        //             $tempQuery = 'update my_products set location_id_shopify = (case';
-        //             $bulkcount = 0;
-        //             $myProductIds = [];
-        //             break;
-        //         }
-        //         sleep(1);
-        //     } catch (Exception $ex) {
-        //         echo $ex->getMessage();
-        //     }
-        // }
-        // echo $query;
-        // if ($bulkcount > 0) {
-        //     try {
-        //         $query = $tempQuery . " end) where id in" . "(" . implode(",", $myProductIds) . ")";
-        //         DB::statement($query);
-        //     } catch (Exception $ex) {
-        //         // echo $ex->getMessage();
-        //     }
-        // }
-
-        // DB::statement("
-        //     UPDATE my_products
-        //     LEFT JOIN temp_mg_product ON my_products.id_product = temp_mg_product.product_id
-        //     SET my_products.cron = TRUE
-        //     WHERE my_products.stock != temp_mg_product.quantity"
-        // );
-        // //UPDATE STOCK IN SHOPIFY STORES
-        // foreach ($myProducts as $mp) {
-        //     // Oscar desarrolla para cada producto actualizar el stock en cada tienda shopify
-        //     //Este es el punto 18 del test
-        //     try {
-        //         if($mp->cron){
-        //             $merchant = User::find($mp->id_customer);
-        //             Log::info($merchant);
-        //             $res = ShopifyAdminApi::updateProductIventory($merchant, $mp->id_product, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
-        //             echo $res['result'] . '<br>';
-        //             sleep(1);
-        //         }
-        //     } catch (Exception $ex) {
-        //         echo $ex->getMessage();
-        //     }
-        // }
-
-        // DB::statement("DROP TABLE temp_mg_product");
 
         $t = time();
         echo ('End: ' . date("h:i:s", $t));
