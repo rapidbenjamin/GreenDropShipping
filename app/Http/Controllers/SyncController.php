@@ -40,28 +40,20 @@ class SyncController extends Controller
         $t = time();
         echo ('Start: ' . date("h:i:s", $t));
         $stocksData = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
-        $columns = array('Product Id', 'Website Id', 'Stock Id', 'Quantity', 'Is Salable', 'SKU');
 
-        $file = fopen(base_path().'/storage/app/magento_stock.csv', 'w');
-        fputcsv($file, $columns);
+        $rows[]= implode(",",['Product Id','Quantity', 'SKU']);
         foreach ($stocksData as $task) {
             $row['Product Id']  = $task->product_id;
-            $row['Website Id']    = $task->website_id;
-            $row['Stock Id']    = $task->stock_id;
             $row['Quantity']  = $task->quantity;
-            $row['Is Salable']  = $task->is_salable;
             $row['SKU']  = $task->sku;
-            fputcsv($file, array($row['Product Id'], $row['Website Id'], $row['Stock Id'], $row['Quantity'], $row['Is Salable'], $row['SKU']));
+            $rows[] = implode(',',$row);
         }
-        fclose($file);
+        Storage::disk('local')->put('magento_stock.csv', implode("\n",$rows));
         DB::statement("DROP TABLE IF EXISTS temp_mg_product");
         DB::statement("
         CREATE TABLE `temp_mg_product` (
             `product_id` int(10) NOT NULL,
-            `website_id` smallint(5) DEFAULT NULL,
-            `stock_id` smallint(5) DEFAULT NULL,
             `quantity` decimal(14,0) DEFAULT NULL,
-            `is_salable` smallint(5) DEFAULT NULL,
             `sku` varchar(192) COLLATE utf8_unicode_ci DEFAULT NULL,
             PRIMARY KEY (`product_id`),
             UNIQUE KEY `SKU` (`sku`)
@@ -83,14 +75,12 @@ class SyncController extends Controller
         DB::statement("
             UPDATE my_products
             INNER JOIN temp_mg_product ON my_products.id_product = temp_mg_product.product_id
-            SET my_products.cron = 1
+            SET my_products.cron = 1, my_products.stock = temp_mg_product.quantity
             WHERE my_products.stock != temp_mg_product.quantity"
         );
 
         $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify')->where('cron','1')->get();
-
         foreach ($myProducts as $mp) {
-
             try {
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY
