@@ -49,9 +49,8 @@ class SyncController extends Controller
             $rows[] = implode(',',$row);
         }
         Storage::disk('local')->put('magento_stock.csv', implode("\n",$rows));
-        DB::statement("DROP TABLE IF EXISTS temp_mg_product");
         DB::statement("
-        CREATE TABLE `temp_mg_product` (
+        CREATE TABLE IF NOT EXISTS `temp_mg_product` (
             `product_id` int(10) NOT NULL,
             `quantity` decimal(14,0) DEFAULT NULL,
             `sku` varchar(192) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -59,6 +58,7 @@ class SyncController extends Controller
             UNIQUE KEY `SKU` (`sku`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
         );
+        DB::statement("TRUNCATE TABLE temp_mg_product");
         $path = str_replace("\\", "/", base_path());
         DB::connection()->getpdo()->exec("
             LOAD DATA LOCAL INFILE '".$path."/storage/app/magento_stock.csv' INTO TABLE temp_mg_product
@@ -96,7 +96,6 @@ class SyncController extends Controller
                 echo $ex->getMessage();
             }
         }
-
 
         $t = time();
         echo ('End: ' . date("h:i:s", $t));
