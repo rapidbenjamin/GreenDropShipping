@@ -40,8 +40,7 @@ class SyncController extends Controller
         $t = time();
         echo ('Start: ' . date("h:i:s", $t));
         $stocksData = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
-
-        $rows[]= implode(",",['Product Id','Quantity', 'SKU']);
+        $rows=[];
         foreach ($stocksData as $task) {
             $row['Product Id']  = $task->product_id;
             $row['Quantity']  = $task->quantity;
@@ -63,7 +62,7 @@ class SyncController extends Controller
         DB::connection()->getpdo()->exec("
             LOAD DATA LOCAL INFILE '".$path."/storage/app/magento_stock.csv' INTO TABLE temp_mg_product
             FIELDS TERMINATED BY ','
-            IGNORE 1 LINES"
+        "
         );
 
         DB::statement("
@@ -85,6 +84,7 @@ class SyncController extends Controller
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY
                 $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
+                Log::info($res);
                 $mp->location_id_shopify = $res['location_id'];
                 $mp->cron=0;
                 $mp->save();
