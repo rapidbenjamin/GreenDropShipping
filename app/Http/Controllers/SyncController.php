@@ -40,13 +40,6 @@ class SyncController extends Controller
         $t = time();
         echo ('Start: ' . date("h:i:s", $t));
         $stocksData = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
-        $this->updateStocksData($stocksData);
-        $t = time();
-        echo ('End: ' . date("h:i:s", $t));
-        return 'success';
-    }
-    public function updateStocksData($stocksData)
-    {
         $rows=[];
         foreach ($stocksData as $task) {
             $row['product_id']  = $task->product_id;
@@ -85,16 +78,30 @@ class SyncController extends Controller
             WHERE my_products.stock != temp_mg_product.quantity"
         );
 
-        $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify')->where('cron','1')->get();
+        $t = time();
+        echo ('End: ' . date("h:i:s", $t));
+        return 'success';
+    }
+
+
+    public function syncShopifyStock (Request $request) {
+        $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify');
+        if (isset($request) && $request->filled('user_id') && $request->user_id>0)
+            $myProducts = $myProducts->where('id_customer',$request->user_id);
+        $myProducts = $myProducts->where('cron','1')->get();
         foreach ($myProducts as $mp) {
             try {
                 $merchant = User::find($mp->id_customer);
-                // GET LOCATION FROM SHOPIFY
-                $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
-                $mp->location_id_shopify = $res['location_id'];
+                // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
+                if (!($mp->location_id_shopify>0))
+                {
+                    $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
+                    $mp->location_id_shopify = $res['location_id'];
+                    sleep(1);
+                }
                 $mp->cron=0;
                 $mp->save();
-                sleep(1);
+
                 //UPDATE STOCK IN SHOPIFY STORES
                 $res = ShopifyAdminApi::updateProductIventory($merchant, $mp->id_product, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
                 sleep(1);
@@ -102,19 +109,6 @@ class SyncController extends Controller
                 echo $ex->getMessage();
             }
         }
-    }
-
-    public function syncShopifyStock (Request $request) {
-        $myProducts = MyProducts::select('id_product');
-        if ($request->filled('user_id') && $request->user_id>0)
-            $myProducts = $myProducts->where('id_customer',$request->user_id);
-        $myProducts = $myProducts->get();
-        $mpIds=[];
-        foreach($myProducts as $mp) $mpIds[]=$mp->id_product;
-        $stocksData = collect(DB::connection('mysql_magento')
-        ->select('SELECT * FROM `mg_inventory_stock_1`'))
-                        ->whereIn('product_id', $mpIds);
-        $this->updateStocksData($stocksData);
     }
 
     public function arregloSku()
