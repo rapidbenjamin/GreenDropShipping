@@ -65,6 +65,7 @@ Route::get('/sync-magento', 'SyncController@index');
 Route::get('/sync-magento/categories', 'SyncController@syncCategories');
 Route::get('/sync-magento/products', 'SyncController@syncProducts');
 Route::get('/sync-magento/stock', 'SyncController@syncStock');
+Route::post('/sync-magento/sync-shopify-stock', 'SyncController@syncShopifyStock');
 Route::get('/sync-magento/wp', 'SyncController@syncWP');
 Route::get('/sync-magento/arreglosku', 'SyncController@arregloSku');
 Route::get('/sync-magento/tracking-number', 'SyncController@setTrackingNumber');

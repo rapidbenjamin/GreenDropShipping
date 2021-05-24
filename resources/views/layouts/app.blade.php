@@ -59,7 +59,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
-                       
+
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -101,12 +101,12 @@
     <!--left menu2 -->
     @if(Auth::user())
     <div class="leftmenu2" id="menu">
-           
+
            <div class="topel">
               <div class="currenuser">
                     <div class="avatar">
                         <img src="img/user_avatar.png">
-                    </div>               
+                    </div>
                     <div>
                         <h3>{{Auth::user()->name}}</h3>
                         <p><a href="https://{{Auth::user()->shopify_url}}" target="_blank">Go to Shopify Store</a></p>
@@ -134,7 +134,7 @@
                                          img/mproduct@3x.png 3x">
                             <p>Manage Product</p>
                         </a>
-                        
+
                         <ul>
                             <li>
                                 <a href="{{ url('/search-products') }}">
@@ -180,18 +180,18 @@
                     </li>
                     @endcan
                     @endif
-                </ul>  
+                </ul>
            </div>
-            
-            
-            
+
+
+
             <ul class="mainmenu footermenu">
                 <li>
                     <a href="{{ url('/settings') }}">
                         <img src="{{ asset('img/settings.png') }}" srcset="img/settings@2x.png 2x,
                                  img/settings@3x.png 3x">
                         <p>Settings</p>
-                        
+
                     </a>
                 </li>
                 <li>
@@ -199,7 +199,7 @@
                         <img src="{{ asset('img/info.png') }}" srcset="img/info@2x.png 2x,
                                  img/info@3x.png 3x">
                         <p>Your Plan</p>
-                        
+
                     </a>
                 </li>
                 <li>
@@ -207,7 +207,7 @@
                         <img src="{{ asset('img/info.png') }}" srcset="img/info@2x.png 2x,
                                  img/info@3x.png 3x">
                         <p>Help</p>
-                        
+
                     </a>
                 </li>
             </ul>
@@ -230,14 +230,14 @@
                        <i class="fa fa-times" aria-hidden="true"></i>
                    </span>
                </div>
-                  <a href="/"> 
+                  <a href="/">
                     <img class="mainlogo" src="{{ asset('img/logo.png') }}">
                   </a>
             </div>
             <div class="titlebox">
                 <h1 id="pageName"></h1>
             </div>
-        </header> 
+        </header>
 
 
           <div class="wrapcontent">
@@ -247,7 +247,7 @@
                        @include('menu.admin-menu')
                    @else
                       @include('menu.menu')
-                   @endcan               
+                   @endcan
                </div>
              </div>
              <div class="maincontent">@yield('content')</div>
@@ -302,7 +302,7 @@
       </div>
       <div class="modal-body">
           <ul id="shipping-methods">
-            
+
           </ul>
       </div>
       <div class="modal-footer">
@@ -312,4 +312,24 @@
 
   </div>
 </div>
+<script type="text/javascript">
+  $(document).ready(function() {
+    var usr_id = "{{Auth::user()->id}}";
+    function syncStockAjax(){
+        if(usr_id){
+            $.ajax({
+                type: 'POST',
+                url: '/sync-magento/sync-shopify-stock',
+                data: {
+                    user_id: usr_id,
+                    "_token": "{{ csrf_token() }}",
+                },
+            });
+        }
+    }
+    syncStockAjax();
+    setInterval(syncStockAjax,60000);
+  });
+</script>
+
 </html>

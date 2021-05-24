@@ -85,30 +85,41 @@ class SyncController extends Controller
 
 
     public function syncShopifyStock (Request $request) {
-        $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify');
-        if (isset($request) && $request->filled('user_id') && $request->user_id>0)
-            $myProducts = $myProducts->where('id_customer',$request->user_id);
-        $myProducts = $myProducts->where('cron','1')->get();
-        foreach ($myProducts as $mp) {
-            try {
-                $merchant = User::find($mp->id_customer);
-                // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
-                if (!($mp->location_id_shopify>0))
-                {
-                    $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
-                    $mp->location_id_shopify = $res['location_id'];
-                    sleep(1);
-                }
-                $mp->cron=0;
-                $mp->save();
 
-                //UPDATE STOCK IN SHOPIFY STORES
-                $res = ShopifyAdminApi::updateProductIventory($merchant, $mp->id_product, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
-                sleep(1);
-            } catch (Exception $ex) {
-                echo $ex->getMessage();
+        if(!\Session::get('is_bg_running')){
+            \Session::put('is_bg_running', 1);
+            $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify');
+            if (isset($request) && $request->filled('user_id') && $request->user_id>0)
+                $myProducts = $myProducts->where('id_customer',$request->user_id);
+            $myProducts = $myProducts->where('cron','1')->take(50)->get();
+            $updatedCount= 0;
+            foreach ($myProducts as $mp) {
+                try {
+                    $merchant = User::find($mp->id_customer);
+                    // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
+                    if (!($mp->location_id_shopify>0))
+                    {
+                        $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
+                        $mp->location_id_shopify = $res['location_id'];
+                        sleep(1);
+                    }
+                    $mp->cron=0;
+                    $mp->save();
+
+                    //UPDATE STOCK IN SHOPIFY STORES
+                    $res = ShopifyAdminApi::updateProductIventory($merchant, $mp->id_product, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
+                    sleep(1);
+                    $updatedCount++;
+                } catch (Exception $ex) {
+                    echo $ex->getMessage();
+                }
             }
+            echo $updatedCount." items' stock has been updated";
         }
+        else
+            echo "Another background process is already running";
+        \Session::put('is_bg_running', 0);
+
     }
 
     public function arregloSku()
