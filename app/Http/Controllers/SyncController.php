@@ -40,11 +40,18 @@ class SyncController extends Controller
         $t = time();
         echo ('Start: ' . date("h:i:s", $t));
         $stocksData = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
+        $this->updateStocksData($stocksData);
+        $t = time();
+        echo ('End: ' . date("h:i:s", $t));
+        return 'success';
+    }
+    public function updateStocksData($stocksData)
+    {
         $rows=[];
         foreach ($stocksData as $task) {
-            $row['Product Id']  = $task->product_id;
-            $row['Quantity']  = $task->quantity;
-            $row['SKU']  = $task->sku;
+            $row['product_id']  = $task->product_id;
+            $row['quantity']  = $task->quantity;
+            $row['sku']  = $task->sku;
             $rows[] = implode(',',$row);
         }
         Storage::disk('local')->put('magento_stock.csv', implode("\n",$rows));
@@ -84,7 +91,6 @@ class SyncController extends Controller
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY
                 $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
-                Log::info($res);
                 $mp->location_id_shopify = $res['location_id'];
                 $mp->cron=0;
                 $mp->save();
@@ -96,10 +102,19 @@ class SyncController extends Controller
                 echo $ex->getMessage();
             }
         }
+    }
 
-        $t = time();
-        echo ('End: ' . date("h:i:s", $t));
-        return 'success';
+    public function syncShopifyStock (Request $request) {
+        $myProducts = MyProducts::select('id_product');
+        if ($request->filled('user_id') && $request->user_id>0)
+            $myProducts->where('id_customer',$request->user_id);
+        $myProducts = $myProducts->get();
+        $mpIds=[];
+        foreach($myProducts as $mp) $mpIds[]=$mp->id_product;
+        $stocksData = collect(DB::connection('mysql_magento')
+        ->select('SELECT * FROM `mg_inventory_stock_1`'))
+                        ->whereIn('product_id', $mpIds);
+        $this->updateStocksData($stocksData);
     }
 
     public function arregloSku()
