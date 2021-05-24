@@ -107,7 +107,7 @@ class SyncController extends Controller
     public function syncShopifyStock (Request $request) {
         $myProducts = MyProducts::select('id_product');
         if ($request->filled('user_id') && $request->user_id>0)
-            $myProducts->where('id_customer',$request->user_id);
+            $myProducts = $myProducts->where('id_customer',$request->user_id);
         $myProducts = $myProducts->get();
         $mpIds=[];
         foreach($myProducts as $mp) $mpIds[]=$mp->id_product;
