@@ -1,62 +1,34 @@
 <?php
 
-
-
 namespace App\Http\Controllers;
 
-
-
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Auth;
-
 use App\User;
 use App\ShopifyWebhook;
 use App\Libraries\Shopify\ShopifyAdminApi;
 use App\DashboardSteps;
 
-
-
 class HomeController extends Controller
-
 {
-
     /**
-
      * Create a new controller instance.
-
      *
-
      * @return void
-
      */
-
     public function __construct()
-
     {
-
         $this->middleware('auth');
-
         //$this->checkWebhook();
-
     }
 
-
-
     /**
-
      * Show the application dashboard.
-
      *
-
      * @return \Illuminate\Contracts\Support\Renderable
-
      */
-
     public function index()
-
     {
-
         $this->authorize('view-merchant-dashboard'); 
 
         $steps = DashboardSteps::find(\Auth::user()->id);
@@ -66,17 +38,11 @@ class HomeController extends Controller
             $steps = new DashboardSteps();
 
             $steps->id = \Auth::user()->id;
-
             $steps->step1 = 0;
-
             $steps->step2 = 0;
-
             $steps->step3 = 0;
-
             $steps->step4 = 0;
-
             $steps->step5 = 0;
-
             $steps->step6 = 0;
 
             $steps->save();
@@ -84,11 +50,8 @@ class HomeController extends Controller
         }
 
         return view('home',Array(
-
             'user' => \Auth::user(),
-
             'steps' => $steps,
-
         ));
 
     }
@@ -98,7 +61,6 @@ class HomeController extends Controller
 
         $existInShopify = 0;
 
-
         foreach($result['body']['webhooks'] as $wh){
 
             //exist in shopify?
@@ -107,11 +69,9 @@ class HomeController extends Controller
                 $id_webhook = $wh['id'];
                 //exist in App?
                 $id_shWebhook = ShopifyWebhook::where('id_hook',$id_webhook)->where('id_customer',$user->id)->first();
+
                 if($id_shWebhook){
-                    //$id_hook = $wh['id'];
-                    //$data = json_encode($wh);
-                    //ShopifyWebhook::where('id_customer', $user->id)->update(['id_hook' => $id_hook]);
-                    //ShopifyWebhook::where('id_customer', $user->id)->update(['data' => $data]);
+                    //Monitoring    
                 }else{
                     //Create row
                     $hook = new ShopifyWebhook();
@@ -121,11 +81,7 @@ class HomeController extends Controller
                     $hook->data = json_encode($wh);
                     $hook->save();
                 }
-                
             }
-
-
-             
         }  
 
         return true;     

@@ -16,6 +16,15 @@
                            {{$order->order_number_shopify}}
                        </div>
 
+                       @if($order->magento_order_id)
+                           <div class="date">
+                               GDS Order
+                           </div>
+                           <div>
+                               #{{$order->magento_order_id}}
+                           </div>
+                       @endif
+
                        <div class="date">
                            Date
                        </div>

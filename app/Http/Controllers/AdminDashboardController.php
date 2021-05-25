@@ -26,17 +26,18 @@ class AdminDashboardController extends Controller
     public function index()
     {
         $this->authorize('view-admin-dashboard');
-        return view('admin_dashboard', [
-            //'sales'=>Order::where
-        ]);
+
+        return view('admin_dashboard', []);
     }
 
     public function logs()
     {
         $this->authorize('view-admin-dashboard');
         $logs = Storage::disk('local')->files('gds');
+
         $lastLog = [];
         $logs_current = [];
+
         if(count($logs)){
             $lastLog = $logs[count($logs)-1];
             $contents = Storage::get($lastLog);
@@ -44,18 +45,23 @@ class AdminDashboardController extends Controller
 
             foreach($rows as $row){
                 $row = explode('|',$row);
+
                 $loge = new stdClass();
                 $loge->date = $row[0];
                 $loge->merchant = $row[1];
                 $loge->action = $row[2];
                 $loge->message = $row[3];
+
                 $logs_current[] = $loge;
             }
         }
+
         //SPLIT
         $split = 6;//six month
+
         if(count($logs)>$split){//delete after
             $lim = count($logs) - $split;
+
             for($i=0;$i<$lim;$i++){
                 Storage::delete($logs[$i]);
             }
@@ -68,7 +74,6 @@ class AdminDashboardController extends Controller
     }
 
     public function downloadLog(Request $request){
-
         $file = storage_path('app/'.$request->log);
         $filetype=filetype($file);
         $filename=basename($file);
@@ -80,7 +85,6 @@ class AdminDashboardController extends Controller
 
     public function getData(Request $request)
     {
-
         return response()->json([
             'sales' => DB::table('orders')->where('financial_status', OrderStatus::Paid)->whereDate('created_at', '>=', $request->from)
                 ->whereDate('created_at', '<=', $request->to)->select(array(DB::Raw('ROUND(sum(total),2) as Total'), DB::Raw('DATE(created_at) as date_at')))
@@ -122,5 +126,6 @@ class AdminDashboardController extends Controller
             ->groupBy('date_at')->get()
 
         ]);
+
     }
 }

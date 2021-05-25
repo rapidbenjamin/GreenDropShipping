@@ -200,7 +200,7 @@
 
                 <li data-name="HELP CENTER">
 
-                    <a href="http://greendropship.com/knowledge-base" target="_blank">
+                    <a href="https://help.greendropship.com/hc/en-us/categories/1260800665930-GreenDropShip-App-for-Shopify" target="_blank">
 
                         <img src="{{ asset('img/info.png') }}" srcset="img/info@2x.png 2x,
 

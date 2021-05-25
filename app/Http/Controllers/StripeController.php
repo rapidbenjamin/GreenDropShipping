@@ -6,6 +6,7 @@ use App\Libraries\OrderStatus;
 use App\MonthlyRecurringPlan;
 use App\Order;
 use App\PaymentSession;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -27,27 +28,8 @@ class StripeController extends Controller
 
     public function createCheckoutSession(Request $request)
     {
-        //dd(explode("|",$request->shipping));
-        //dd($request->shipping());
-        //env('URL_MAGENTO')
-        //$shipping = explode("|", $request->shipping);
-        //$carrier = $shipping[0];
-        //$method = $shipping[1];
-        //$amount = $shipping[2];
-        //$title = $shipping[3];
-        //dd($carrier,$method);
+
         $orders = Order::whereIn('id', $request->orders)->where('financial_status', OrderStatus::Outstanding)->get();
-        /*
-        $current_period = MonthlyRecurringPlan::where('current', 1)->where('merchant_id', Auth::user()->id)->first();
-        if (Auth::user()->plan == 'basic' && $current_period != null) {
-            $total_period_orders = $current_period->orders;
-
-            //dd(($total_period_orders + count($orders)) , env('LIMIT_ORDERS', 1));
-            if (($total_period_orders + count($orders)) > env('LIMIT_ORDERS', 1)) {
-                return response()->json(['message' => 'Order limit is reached'], 406);
-            }
-        }*/
-
 
         Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
         $line_items = array();
@@ -55,19 +37,18 @@ class StripeController extends Controller
             return response()->json(['message' => 'yo have to select valid orders'], 500);
         }
 
+        $description = "";
         foreach ($orders as $order) {
             if ($order != null) {
-                //$order->shipping_method_code = $carrier;
-                //$order->shipping_carrier_code = $method;
-                //$order->shipping_price = $amount;
-                //$order->shipping_title = $title;
-                //$order->save();
+                $user = User::find($order->id_customer);
                 $line_items[] = [
                     'name' => 'Order ' . $order->order_number_shopify,
                     'amount' => ($order->total + $order->shipping_price) * 100,
                     'quantity' => 1,
                     'currency' => 'usd',
+                    'description' => "Order {$order->order_number_shopify} - Store Id: {$user->id} {$user->shopify_url}"
                 ];
+                $description .= "Order {$order->order_number_shopify} - Store Id: {$user->id} {$user->shopify_url}\n";
             }
         }
 
@@ -75,8 +56,13 @@ class StripeController extends Controller
             'payment_method_types' => ['card'],
             'line_items' => $line_items,
             'mode' => 'payment',
+            'customer_email' => $user->email,
+            'client_reference_id' => $user->id,
             'success_url' => env('APP_URL') . '/orders?payment=success',
             'cancel_url' => env('APP_URL') . '/orders?payment=cancel',
+            'payment_intent_data' => [
+                'description' => $description
+            ]
         ]);
 
         if (isset($session->id)) {

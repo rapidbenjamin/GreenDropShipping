@@ -55,7 +55,6 @@ class CallBackController extends Controller
 
 
                 //Installing webhook to get new orders from Shopify
-
                 ShopifyAdminApi::createWebhook($user,'orders/create', env('APP_URL').'/create-order-webkook');
 
 

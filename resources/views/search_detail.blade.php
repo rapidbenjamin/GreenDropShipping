@@ -25,9 +25,11 @@
                         <p>Note: To edit the product info you must add it to an import list first.</p>
                     </div>
                     <div>
-
+                        @php $k=0; $main_image = ""; @endphp
                        <ul class="thumbnails">
                          @foreach ($product->mini_images as $image)
+                            @php if($k == 0)$main_image = $image; @endphp
+                            @php $k++; @endphp
                            <li>
                               <a href="{{$image}}" data-fancybox="gallery">
                                 <img class="imgThumb" src="{{$image}}" data-img="{{$image}}">
@@ -39,8 +41,8 @@
                     </div>
                     <div>
                        <div class="productmainimage">
-                          <a href="{{$image}}" class="maingreenproducimagelink detailImage" data-fancybox="gallery">
-                              <img src="{{$image}}" class="maingreenproducimage" >
+                          <a href="{{$main_image}}" class="maingreenproducimagelink detailImage" data-fancybox="gallery">
+                              <img src="{{$main_image}}" class="maingreenproducimage" >
                           </a>                           
                        </div>                        
                     </div>

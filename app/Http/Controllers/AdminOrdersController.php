@@ -23,12 +23,11 @@ class AdminOrdersController extends Controller
     {
         $this->middleware('auth');
 	}
-    
+
     public function index(Request $request)
     {
-        $this->authorize('view-admin-orders'); 
+        $this->authorize('view-admin-orders');
 
-        
         $order_list = Order::select('orders.*','osa.first_name','osa.last_name','st1.name as status1','st1.color as color1',
         'st2.name as status2','st2.color as color2','us.name as merchant_name')
         ->join('order_shipping_address as osa','orders.id','osa.id_order')
@@ -36,7 +35,6 @@ class AdminOrdersController extends Controller
         ->join('status as st2','st2.id','orders.fulfillment_status')
         ->join('users as us','us.id','orders.id_customer');
 
-        
         if($request->idOrder!=''&&$request->idOrder>0){
             $order_list = $order_list->where('order_number_shopify','#'.$request->idOrder);
         }
@@ -65,12 +63,10 @@ class AdminOrdersController extends Controller
             'order' => $request->order,
             'status' => Status::get()
         ));
-
     }
-    
+
     public function show(Order $orders)
     {
-        
         $osa = OrderShippingAddress::select('order_shipping_address.*')
                 ->where('order_shipping_address.id_order',$orders->id)
                 ->first();
@@ -93,18 +89,21 @@ class AdminOrdersController extends Controller
                 ->where('import_list.id_customer',$orders->id_customer)
                 ->whereNull('my_products.deleted_at')
                 ->where('order_details.id_order',$orders->id)->get();
-                
+
         foreach($order_products as $pro){
             $pro->image_url = env('URL_MAGENTO_IMAGES').json_decode($pro->images)[0]->file;
         }       
+
         $sessionPay = PaymentSession::where('id_orders','like',"%$orders->id%")
             ->whereDate('created_at','>=', $orders->created_at)->orderBy('id','desc')->first();
 
         $user_canceled = User::find($orders->user_id_canceled);
         $user_canceled_name = '';
+
         if($user_canceled!=null){
             $user_canceled_name = $user_canceled->name;
         }    
+
         return view('admin_orders_detail',Array(
                 'order' => $orders,
                 'osa' => $osa,
@@ -124,12 +123,12 @@ class AdminOrdersController extends Controller
         $order->user_id_canceled = Auth::user()->id;
         $order->canceled_at = date('Y-m-d H:i:s');
 		$order->save();
+
 		return redirect('admin/orders');
     }
-    
+
     public function exportCSV(Request $request)
     {
-        //dd(1);
         $order_list = Order::select('orders.id','orders.order_number_shopify','orders.total_shopify', 'osa.first_name', 'osa.last_name', 'p.name','st1.name as financial_state',
         'st2.name as order_state','od.price','od.quantity')
 		->join('order_shipping_address as osa', 'orders.id', 'osa.id_order')
@@ -137,13 +136,16 @@ class AdminOrdersController extends Controller
 		->join('order_details as od', 'orders.id', 'od.id_order')
 		->join('products as p', 'p.sku', 'od.sku')
 		->join('status as st2', 'st2.id', 'orders.fulfillment_status')->get()->toArray();
+
 		
+
         $now = gmdate("D, d M Y H:i:s");
+
         header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
         header("Cache-Control: max-age=0, no-cache, must-revalidate, proxy-revalidate");
         header("Last-Modified: {$now} GMT");
 
-        // force download  
+        // force download
         header("Content-Type: application/force-download");
         header("Content-Type: application/octet-stream");
         header("Content-Type: application/download");
@@ -151,15 +153,15 @@ class AdminOrdersController extends Controller
         // disposition / encoding on response body
         header("Content-Disposition: attachment;filename=orders.csv");
 		header("Content-Transfer-Encoding: binary");
-		
-		//$merchants = Order::select('id','order_number_shopify','total_shopify')->whereIn('id', explode(',',$request->orders))->get()->toArray();
+
         ob_start();
         $df = fopen("php://output", 'w');
-       
         fwrite($df, implode(";", array_keys(reset($order_list)))."\n");
+
         foreach ($order_list as $merchant) {
             fwrite($df, implode(";", $merchant)."\n");
         }
+
         fclose($df);
         echo ob_get_clean();
         die();

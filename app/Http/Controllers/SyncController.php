@@ -35,6 +35,50 @@ class SyncController extends Controller
         return view('settings');
     }
 
+    public function shopifyupgraded()
+    {
+
+        //get users with api_status = pending
+        $users_list = User::select('id')->where('api_status','pending')->get();
+
+        foreach ($users_list as $ul) {
+
+            $user = User::find($ul["id"]);
+
+            $res = ShopifyAdminApi::getStatusRecurringCharge($user);
+
+            //Validate plan's status
+            if($res == 'accepted' || $res == 'active' ){
+                $user->api_status = 'accepted';
+                $user->plan = 'basic';
+                $user->save();
+            }
+
+            echo '<p>id user: '.$ul["id"].'</p>';
+            echo '<p>request: '.ShopifyAdminApi::getStatusRecurringCharge($user).'</p>';
+        }
+
+        //get users with api_status = pending
+        $users_list = User::select('id')->where('api_status','accepted')->get();
+
+        foreach ($users_list as $ul) {
+
+            $user = User::find($ul["id"]);
+
+            $res2 = ShopifyAdminApi::getStatusRecurringCharge($user);
+
+            //Validate plan's status
+            if($res2 == 'declined' || $res2 == 'expired' || $res2 == 'frozen' || $res2 == 'cancelled'){
+                $user->api_status = 'pending';
+                $user->plan = 'free';
+                $user->save();
+            }
+
+        }
+
+        return 'success';
+    }
+
     public function syncStock()
     {
         $t = time();
@@ -165,6 +209,9 @@ class SyncController extends Controller
 
 
 
+    public function arregloSku()
+    {
+            //This function is used by testing
     }
 
 
@@ -188,7 +235,6 @@ class SyncController extends Controller
                 echo '<p>merchant id ' . $pts["id_merchant"] . '  --- id product ' . $pts["id_product"] . '</p>';
                 echo print_r($user);
 
-                //echo $res['result'] . '<br>';
                 sleep(10);
             } catch (Exception $ex) {
                 echo $ex->getMessage();
@@ -213,6 +259,7 @@ class SyncController extends Controller
             if (count($querymg)) {
                 //Update tracking number in middleware DB
                 $order->tracking_code = $querymg[0]->track_number;
+                $order->fulfillment_status = 6;
                 $order->save();
 
                 //Update fulfillment in shopify store
@@ -257,7 +304,6 @@ class SyncController extends Controller
 
 
                 //Outputs
-                echo 'Tracking updated for order_id' . $order->id;
                 Log::info('Tracking updated for order_id' . $order->id);
             }
         }
@@ -311,12 +357,21 @@ class SyncController extends Controller
                         $product->id = $item->id;
                         $product->sku = $item->sku;
                     }
+
+                    $attribute_upc_index = array_search('upc', array_column($item->custom_attributes, 'attribute_code'));
+
+                    $attribute_upc = NULL;
+
+                    if ($attribute_upc_index !== false) {
+                        $attribute_upc = (string) $item->custom_attributes[$attribute_upc_index]->value;
+                    }
+
                     $product->id = $item->id;
                     $product->name = $item->name;
                     $product->price = $item->price;
-                    //$product->stock = 0;
+                    $product->stock = 0;
                     $product->brand = '';
-                    $product->upc = '';
+                    $product->upc = $attribute_upc;
                     $product->image_url = '';
                     $product->weight = isset($item->weight) ? $item->weight : 0;
                     $product->type_id = $item->type_id;
@@ -395,7 +450,7 @@ class SyncController extends Controller
 
     public function getRecursiveCategories($children_data, &$categoriesIds)
     {
-        //dd($children_data);
+
         foreach ($children_data as $Mcategory) {
             try {
                 $categoriesIds[] = $Mcategory->id;
@@ -403,10 +458,11 @@ class SyncController extends Controller
                 if ($category == null) {
                     $category = new Category();
                     $category->id = $Mcategory->id;
+                    $category->is_active = $Mcategory->is_active;
                 }
                 $category->parent_id = $Mcategory->parent_id;
                 $category->name = $Mcategory->name;
-                $category->is_active = $Mcategory->is_active;
+                //$category->is_active = $Mcategory->is_active;
                 $category->level = $Mcategory->level;
                 $category->position = $Mcategory->position;
                 $category->save();
@@ -443,7 +499,6 @@ class SyncController extends Controller
         }
 
         //Update state Pending to Processing
-
         $orders = Order::where('fulfillment_status', 5)->whereNotNull('magento_order_id')->whereNotNull('magento_entity_id')->get();
         echo "<p>Updating pending orders... (" . count($orders) . ")</p>";
         foreach ($orders as $order) {
@@ -474,6 +529,8 @@ class SyncController extends Controller
                 }
             }
         }
+*/
+
 
         //Process closed orders
 
