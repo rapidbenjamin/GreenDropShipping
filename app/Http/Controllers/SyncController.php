@@ -134,8 +134,8 @@ class SyncController extends Controller
             \Session::put('is_bg_running', 1);
             $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify');
             if (isset($request) && $request->filled('user_id') && $request->user_id>0)
-                $myProducts = $myProducts->where('id_customer',$request->user_id);
-            $myProducts = $myProducts->where('cron','1')->take(50)->get();
+                $myProducts = $myProducts->where('id_customer',$request->user_id)->take(50);
+            $myProducts = $myProducts->where('cron','1')->get();
             $updatedCount= 0;
             foreach ($myProducts as $mp) {
                 try {
