@@ -314,7 +314,7 @@
 </div>
 <script type="text/javascript">
   $(document).ready(function() {
-    var usr_id = "{{Auth::user()->id}}";
+    var usr_id = "{{Auth::user() ? Auth::user()->id : 0}}";
     function syncStockAjax(){
         if(usr_id){
             $.ajax({
