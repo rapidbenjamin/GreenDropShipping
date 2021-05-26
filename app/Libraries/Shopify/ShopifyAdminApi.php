@@ -42,7 +42,6 @@ class ShopifyAdminApi
                             "weight" => $product['weight'],
                             "price" => (float)$product['price'],
                             "cost" => (float)$product['cost'],
-                            "compare_at_price" => (float)$product['compare_at_price'],
                             "sku" => $product['sku'],
                             "fulfillment_service" => "Greendropship",
                             "inventory_management" => "Greendropship",
