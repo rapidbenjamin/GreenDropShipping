@@ -21,7 +21,10 @@ class ShopifyAdminApi
         if ($productModel != null) {
             $inventory_quantity = $productModel->stock;
         }
-
+        $images = [];
+        foreach($product['images'] as $img){
+            $images[] = (object) ['src' => $img];
+        };
         $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-07/products.json', json_encode(
             array(
                 'product' => array(
@@ -38,12 +41,15 @@ class ShopifyAdminApi
                             'barcode' => $product['upc'],
                             "weight" => $product['weight'],
                             "price" => (float)$product['price'],
+                            "cost" => (float)$product['cost'],
+                            "compare_at_price" => (float)$product['compare_at_price'],
                             "sku" => $product['sku'],
                             "fulfillment_service" => "Greendropship",
                             "inventory_management" => "Greendropship",
                             "inventory_quantity" => $inventory_quantity
                         )
-                    )
+                    ),
+                    "images"=> $images,
                 )
             )
         ));
@@ -70,23 +76,6 @@ class ShopifyAdminApi
         }
     }
 
-
-    public static function updateCost($user, $id_shopify, $inventory_item_id, $cost)
-    {
-
-        $result = ShopifyAdminApi::request($user, 'PUT', '/admin/api/2020-10/inventory_items/'.$inventory_item_id.'.json', json_encode(
-            array(
-                'inventory_item' => array(
-                    "id" => $id_shopify,
-                    "cost" => $cost
-                    )
-                )
-            )
-        );
-    }
-
-
-
     public static function getShopInformation($user)
     {
         $result = ShopifyAdminApi::request(
@@ -97,32 +86,6 @@ class ShopifyAdminApi
 
         return $result['body']['shop'];
 
-    }
-
-
-
-    public static function publicImageProduct($user, $shopify_id, $image)
-    {
-        $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-07/products/' . $shopify_id . '/images.json', json_encode(
-            array(
-                'image' => array(
-                    'src' => $image
-                )
-            )
-        ));
-
-        if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 200)) {
-            return array(
-                'result' => 1,
-            );
-        } else if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 429)) {
-            return array(
-                'result' => 2,
-                'retry-after' => $result['retry-after']
-            );
-        } else {
-            throw new Exception("can't publish image of product to shopofy -> HTTP_CODE: " . $result['HTTP_CODE'] . '->stack: ' . $image);
-        }
     }
 
     public static function getCollections($user)

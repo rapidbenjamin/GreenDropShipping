@@ -73,28 +73,6 @@ class ShopifyBulkPublish implements ShouldQueue
                 $myProducts->inventory_item_id_shopify = $response_product['inventory_item_id'];
                 $myProducts->save();
 
-
-                //Update cost
-                $response_create_cost = ShopifyAdminApi::updateCost($this->user, $myProducts->id_shopify, $myProducts->inventory_item_id_shopify, $this->product['cost']);
-
-                foreach ($response_product['images'] as $image) {
-                    $j = 0;
-                    do {
-                        $response_image = ShopifyAdminApi::publicImageProduct($this->user, $myProducts->id_shopify, $image);
-                        if ((int)$response_image['result'] == 1) {
-                            break;
-                        } else if ((int)$response_image['result'] == 2) {
-                            Log::info('Shopify ID' . $myProducts->id_shopify . ' - retry-after: ' . (int)$response_image['retry-after']);
-                            sleep((int)$response_image['retry-after']);
-                        }
-                        $j++;
-                    } while ($attemps == $j);
-                }
-
-                //$response_product = ShopifyAdminApi::createProduct($this->user, $this->product);
-                //create collection
-                //$name = 'collection1,collection2,collection3,collection4';
-
                 $collections_split = explode(',', $this->product['collections']);
 
                 foreach ($collections_split as $item) {
