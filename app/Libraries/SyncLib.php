@@ -257,58 +257,94 @@ class SyncLib
             'searchCriteria[filterGroups][1][filters][0][value]' => 1,
             'searchCriteria[filterGroups][1][filters][0][condition_type]' => "eq"
         ];
-        $productsIds = [];
         $t = time();
         echo ('Start: ' . date("h:i:s", $t));
 
         $continue = true;
         $page = 1;
         $Mtotal_count = $total_count = 0;
+        DB::statement(
+            "CREATE TABLE IF NOT EXISTS `temp_products` (
+                `id` bigint(20) NOT NULL,
+                `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+                `price` double(8,2) NOT NULL,
+                `weight` float DEFAULT NULL,
+                `type_id` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `status` tinyint(1) DEFAULT NULL,
+                `visibility` tinyint(1) DEFAULT NULL,
+                `categories` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `images` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `attributes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `stock_info` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `upc` varchar(70) COLLATE utf8mb4_unicode_ci NOT NULL,
+                UNIQUE KEY `sku` (`sku`) USING HASH,
+                KEY `id` (`id`)
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+        DB::statement("TRUNCATE TABLE temp_products");
+        Storage::disk('local')->delete('magento_products.csv');
         while ($continue) {
             $Mproduct = json_decode(MProduct::get($filter, 255, $page));
+            $Mtotal_count = $Mproduct->total_count;
             $Mitems = $Mproduct->items;
-            $Mtotal_count = $Mproduct->total_count; //always the same
+            $rows = [];
             foreach ($Mitems as $item) {
-                try {
-                    $productsIds[] = $item->id;
-                    $product = Products::find($item->id);
-                    if ($product == null) {
-                        $product = new Products();
-                        $product->id = $item->id;
-                        $product->sku = $item->sku;
-                    }
-                    $attribute_upc_index = array_search('upc', array_column($item->custom_attributes, 'attribute_code'));
-                    $attribute_upc = NULL;
-                    if ($attribute_upc_index !== false) {
-                        $attribute_upc = (string) $item->custom_attributes[$attribute_upc_index]->value;
-                    }
-                    $product->id = $item->id;
-                    $product->name = $item->name;
-                    $product->price = $item->price;
-                    $product->stock = 0;
-                    $product->brand = '';
-                    $product->upc = $attribute_upc;
-                    $product->image_url = '';
-                    $product->weight = isset($item->weight) ? $item->weight : 0;
-                    $product->type_id = $item->type_id;
-                    $product->status = $item->status;
-                    $product->visibility = $item->visibility;
-                    $product->categories = json_encode(isset($item->extension_attributes->category_links) ? $item->extension_attributes->category_links : null);
-                    $product->images = json_encode(isset($item->media_gallery_entries) ? $item->media_gallery_entries : null);
-                    $product->stock_info = json_encode(isset($item->extension_attributes->stock_item) ? $item->extension_attributes->stock_item : null);
-                    $product->attributes = json_encode(isset($item->custom_attributes) ? $item->custom_attributes : null);
-                    $product->save();
-                    $total_count++;
-                    echo 'SKU: ' . $item->sku . '<br>';
-                } catch (Exception $ex) {
-                    echo 'Error' . $ex->getMessage() . '-' . $item->sku;;
-                }
+                $attribute_upc_index = array_search('upc', array_column($item->custom_attributes, 'attribute_code'));
+                $row['id']  = $item->id;
+                $row['sku']  = $item->sku;
+                $row['name']  = $item->name;
+                $row['price']  = $item->price;
+                $row['weight']  = isset($item->weight) ? $item->weight : 0;
+                $row['type_id']  = $item->type_id;
+                $row['status']  = $item->status;
+                $row['visibility']  = $item->visibility;
+                $row['categories']  = json_encode(isset($item->extension_attributes->category_links) ? $item->extension_attributes->category_links : null);
+                $row['images']  = json_encode(isset($item->media_gallery_entries) ? $item->media_gallery_entries : null);
+                $row['attributes']  = json_encode(isset($item->custom_attributes) ? $item->custom_attributes : null);
+                $row['stock_info']  = json_encode(isset($item->extension_attributes->stock_item) ? $item->extension_attributes->stock_item : null);
+                $row['upc']  = $attribute_upc_index ? $item->custom_attributes[$attribute_upc_index]->value : null;
+                $rows[] = implode('@', $row);
+                $total_count++;
             }
+            Storage::disk('local')->append('magento_products.csv', implode("\n", $rows));
+
             $page++;
             echo 'Num: ' . $total_count . '<br>';
             $continue = $total_count != $Mtotal_count;
         }
-        DB::table('products')->whereNotIn('id', $productsIds)->delete();
+        $path = str_replace("\\", "/", base_path());
+        DB::connection()->getpdo()->exec(
+            "LOAD DATA LOCAL INFILE '" . $path . "/storage/app/magento_products.csv' INTO TABLE temp_products
+            FIELDS TERMINATED BY '@'"
+        );
+        DB::statement(
+            "UPDATE products
+            INNER JOIN temp_products ON products.sku = temp_products.sku
+            SET products.name = temp_products.name,
+                products.price = temp_products.price,
+                products.weight = temp_products.weight,
+                products.type_id = temp_products.type_id,
+                products.status = temp_products.status,
+                products.visibility = temp_products.visibility,
+                products.images = temp_products.images,
+                products.attributes = temp_products.attributes,
+                products.stock_info = temp_products.stock_info,
+                products.upc = temp_products.upc"
+        );
+        DB::statement(
+            "INSERT INTO `products`(`id`,`sku`,`name`,`price`,`stock`,`brand`,`image_url`,`weight`,`type_id`,`status`,`visibility`,`categories`,`images`,`attributes`,`stock_info`,`upc`)
+            SELECT temp_products.id, temp_products.sku,temp_products.name,temp_products.price, 0, '', '',temp_products.weight,temp_products.type_id,temp_products.status,temp_products.visibility,temp_products.categories,temp_products.images,temp_products.attributes,temp_products.stock_info, temp_products.upc
+            FROM temp_products LEFT JOIN products ON temp_products.sku = products.sku
+            WHERE products.sku IS NULL"
+        );
+        DB::statement(
+            "DELETE products.* FROM products
+            LEFT JOIN temp_products ON temp_products.sku = products.sku
+            WHERE temp_products.sku IS NULL"
+        );
+        $t = time();
+        echo ('End: ' . date("h:i:s", $t));
         return 'Success';
     }
 
