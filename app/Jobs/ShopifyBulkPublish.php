@@ -30,7 +30,7 @@ class ShopifyBulkPublish implements ShouldQueue
      */
     public $tries = 1;
 
-    protected $product;
+    protected $products;
     protected $user;
     protected $published;
 
@@ -39,10 +39,10 @@ class ShopifyBulkPublish implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($user, $product,$published)
+    public function __construct($user, $products,$published)
     {
         //
-        $this->product = $product;
+        $this->products = $products;
         $this->user = $user;
         $this->published = $published;
     }
@@ -54,49 +54,51 @@ class ShopifyBulkPublish implements ShouldQueue
      */
     public function handle()
     {
-        $attemps = 3;
-        $i = 0;
-        $collections = ShopifyAdminApi::getCollections($this->user);
+        foreach ($this->products as $product) {
+            $attemps = 3;
+            $i = 0;
+            $collections = ShopifyAdminApi::getCollections($this->user);
 
-        do {
-            $response_product = ShopifyAdminApi::createProduct($this->user, $this->product,$this->published);
-            if ((int)$response_product['result'] == 1) {
+            do {
+                $response_product = ShopifyAdminApi::createProduct($this->user, $product,$this->published);
+                if ((int)$response_product['result'] == 1) {
 
-                $row = ImportList::where('id',$this->product['id'])->get()->first();
-                $myProducts = new MyProducts();
-                $myProducts->id_customer = $this->user->id;
-                $myProducts->id_imp_product = $this->product['id'];
-                $myProducts->profit =  $this->product['profit'];
-                $myProducts->id_shopify = $response_product['shopify_id'];
-                $myProducts->id_variant_shopify = $response_product['variant_id'];
-                $myProducts->id_product = $row['id_product'];
-                $myProducts->inventory_item_id_shopify = $response_product['inventory_item_id'];
-                $myProducts->save();
+                    $row = ImportList::where('id',$product['id'])->get()->first();
+                    $myProducts = new MyProducts();
+                    $myProducts->id_customer = $this->user->id;
+                    $myProducts->id_imp_product = $product['id'];
+                    $myProducts->profit =  $product['profit'];
+                    $myProducts->id_shopify = $response_product['shopify_id'];
+                    $myProducts->id_variant_shopify = $response_product['variant_id'];
+                    $myProducts->id_product = $row['id_product'];
+                    $myProducts->inventory_item_id_shopify = $response_product['inventory_item_id'];
+                    $myProducts->save();
 
-                $collections_split = explode(',', $this->product['collections']);
+                    $collections_split = explode(',', $product['collections']);
 
-                foreach ($collections_split as $item) {
-                    $filtered = $collections->first(function ($value) use ($item) {
-                        return trim($item) != '' && $value['name'] == trim($item);
-                    });
+                    foreach ($collections_split as $item) {
+                        $filtered = $collections->first(function ($value) use ($item) {
+                            return trim($item) != '' && $value['name'] == trim($item);
+                        });
 
-                    if ($filtered == null) { //no existe
-                        $collectionId = ShopifyAdminApi::createCustomCollection($this->user, $item);
+                        if ($filtered == null) { //no existe
+                            $collectionId = ShopifyAdminApi::createCustomCollection($this->user, $item);
+                        }
+                        else{
+                            $collectionId = $filtered['id'];
+                        }
+                        if ($collectionId != 0) {
+                            $result = ShopifyAdminApi::addProductToCustomCollection($this->user, $myProducts->id_shopify, $collectionId);
+                        }
                     }
-                    else{
-                        $collectionId = $filtered['id'];
-                    }
-                    if ($collectionId != 0) {
-                        $result = ShopifyAdminApi::addProductToCustomCollection($this->user, $myProducts->id_shopify, $collectionId);
-                    }
+                    break;
+                } else if ((int)$response_product['result'] == 2) {
+                    Log::info($product['name'] . ' - retry-after: ' . (int)$response_product['retry-after']);
+                    sleep((int)$response_product['retry-after']);
                 }
-                break;
-            } else if ((int)$response_product['result'] == 2) {
-                Log::info($this->product['name'] . ' - retry-after: ' . (int)$response_product['retry-after']);
-                sleep((int)$response_product['retry-after']);
-            }
-            $i++;
-        } while ($attemps == $i);
+                $i++;
+            } while ($attemps == $i);
+        }
     }
 
     /**

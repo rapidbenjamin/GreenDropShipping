@@ -76,6 +76,7 @@ Route::get('/sync-magento/shopifyupgraded', 'SyncController@shopifyupgraded');
 
 /* Shopify*/
 Route::post('/publish-product', 'ImportListController@publishShopify');
+Route::post('/check-publish-products', 'ImportListController@checkPublishProducts');
 Route::post('/publish-all-products', 'ImportListController@publishAllShopify');
 Route::post('/create-order-webkook', 'ShopifyWebHooksController@createOrder');
 Route::post('/customer-data-request-webhook', 'ShopifyWebHooksController@customerDataRequest');

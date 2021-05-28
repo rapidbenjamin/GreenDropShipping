@@ -180,7 +180,7 @@
                                                 <td data-label="PROFIT (%) " class="w100">
                                                   <span class="simple-tooltip" title="First tooltip">?</span>
                                                    <div class="inpupercent">
-                                                       <input type="text" class="box-profit" id="profit{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$profit}}"> 
+                                                       <input type="text" class="box-profit" id="profit{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$profit}}">
                                                        <div class="percent">
                                                            %
                                                        </div>
@@ -375,60 +375,33 @@
       $("input.checkbox:checked").each(function(index, ele) {
         let productId = $(ele).attr('id').split('-')[1];
         let images = [];
+        if($('.btn-import-list-send-' + productId).is(":visible")){
 
-        products.push({
-          id: productId,
-        });
-
-        //Disable send to shopify Buttons
-        $('.btn-import-list-send-' + productId).attr('disabled',true);
-
-
-        // data array of all checked products
-        $("input.chk-img" + productId + ":checked").each(function(index, ele) {
-          images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
-        });
-
-        let product = {
-            id: productId,
-            name: $('#name' + productId).val(),
-            weight: $('#weight' + productId).text().trim(),
-            price: $('#price' + productId).val(),
-            cost: $('#cost' + productId).val(),
-            //price: $('#price' + productId).data('price'),
-            description: CKEDITOR.instances['description' + productId].getData(),
-            //description: $('#description' + productId).val(),
-            product_type: $('#type' + productId).val(),
-            tags: $('#tags' + productId).val(),
-            collections: $('#collections' + productId).val(),
-            sku: $('#sku' + productId).val(),
-            upc: $('#upc' + productId).val(),
-            profit: $('#profit' + productId).val(),
-            images: images
-        };
-
-          $.post('{{url("/publish-product")}}', {
-            "_token": "{{ csrf_token() }}",
-            product: product
-          }, function(data, status) {
-
-            $('.btn-import-list-send-' + productId).attr('disabled',false);
-            //$("#product" + productId).hide();
-            //('.alert-publish-single').show();
             $('.btn-import-list-send-' + productId).hide();
-            $('.btn-import-list-send2-' + productId).show();
-            //$('.btn-import-list-send2-' + productId).attr('data-shopifyid', data.id_shopify);
-             nProd = nProd - 1;
+            $('.btn-import-list-send3-' + productId).show();
+            $('.btn-import-list-send-' + productId).attr('disabled',true);
 
-            if(nProd == 0){
-                $('.alert-publish-all').hide();
-                $('.alert-publish-all-ready').show();
-            }
-          }).fail(function(data) {
-            if(data.status == 403)
-              $('#upgrade-plans-modal').modal('show')
-            //$("#upgrade-plans-modal").appendTo("body");
-          });
+            // data array of all checked products
+            $("input.chk-img" + productId + ":checked").each(function(index, ele) {
+            images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
+            });
+
+            products.push({
+                id: productId,
+                name: $('#name' + productId).val(),
+                weight: $('#weight' + productId).text().trim(),
+                price: $('#price' + productId).val(),
+                cost: $('#cost' + productId).val(),
+                description: CKEDITOR.instances['description' + productId].getData(),
+                product_type: $('#type' + productId).val(),
+                tags: $('#tags' + productId).val(),
+                collections: $('#collections' + productId).val(),
+                sku: $('#sku' + productId).val(),
+                upc: $('#upc' + productId).val(),
+                profit: $('#profit' + productId).val(),
+                images: images
+            });
+        }
       });
 
       $(this).attr('disabled',false);
@@ -439,8 +412,47 @@
         alert('At least one checkbox must be selected');
         return;
       }
+      else{
+        $.post('{{url("/publish-all-products")}}', {
+            "_token": "{{ csrf_token() }}",
+            products: products
+            }, function(data, status) {
+
+            }).fail(function(data) {
+            if(data.status == 403)
+                $('#upgrade-plans-modal').modal('show')
+        });
+
+      }
 
     }); //Close send all function
+
+    var usr_id = "{{Auth::user() ? Auth::user()->id : 0}}";
+    function publishProductsAjax(){
+        let product_ids = [];
+        $("input.checkbox:checked").each(function(index, ele) {
+            product_ids.push($(ele).attr('id').split('-')[1]);
+        });
+        if(usr_id && product_ids.length){
+            $.ajax({
+                type: 'POST',
+                url: '/check-publish-products',
+                data: {
+                    user_id: usr_id,
+                    product_ids: product_ids,
+                    "_token": "{{ csrf_token() }}",
+                },
+            })
+                .then(res => {
+                    res.id_shopify.forEach(productId => {
+                        $('.btn-import-list-send3-' + productId).hide();
+                        $('.btn-import-list-send2-' + productId).show();
+                    });
+                });
+        }
+    }
+    publishProductsAjax();
+    setInterval(publishProductsAjax,15000);
 
   }); //Close document ready
 </script>

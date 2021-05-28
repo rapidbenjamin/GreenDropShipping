@@ -136,7 +136,7 @@ class ImportListController extends Controller
 
         }
 
-        ShopifyBulkPublish::dispatchNow(Auth::User(), $request->product, $published);
+        ShopifyBulkPublish::dispatchNow(Auth::User(), [$request->product], $published);
 
         $myproduct = MyProducts::select('id_shopify')->where('id_customer', Auth::User()->id)->where('id_imp_product', $request->product['id'])->first();
 
@@ -169,15 +169,44 @@ class ImportListController extends Controller
             $published = $settings->set1 == 1;
 
         }
+        DB::statement(
+            "CREATE TABLE IF NOT EXISTS `temp_publish_products` (
+                `id` int(11) NOT NULL,
+                `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `payload` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                `user_id` int(11) DEFAULT NULL
+            ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
+        $rows = [];
 
         foreach ($request->products as $product) {
-            if(ShopifyBulkPublish::dispatchNow(Auth::User(), $product,$published))
-                $result = 'ok';
-            sleep(10);
+            $row['id'] = $product['id'];
+            $row['sku'] = $product['sku'];
+            $row['payload'] = json_encode($product);
+            $row['user_id'] = Auth::User()->id;
+            $rows[] = $row;
         }
+        DB::table('temp_publish_products')->insert($rows);
+
+        if(ShopifyBulkPublish::dispatch(Auth::User(), $request->products ,$published))
+            $result = 'ok';
 
         return response()->json(array('result' => $result));
     }
 
+    public function checkPublishProducts(Request $request)
+
+    {
+
+        $this->authorize('view-merchant-import-list');
+        $user_id = $request->user_id;
+        $product_ids = $request->product_ids;
+        $prods = MyProducts::where('id_customer', $user_id)->whereIn('id_imp_product', $product_ids)->pluck('id_imp_product');
+        return response()->json(array(
+            'result' => $prods != null,
+            'id_shopify' => $prods != null ? $prods : 0
+        ));
+
+    }
 }
 
