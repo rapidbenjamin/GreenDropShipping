@@ -291,14 +291,15 @@ class ShopifyAdminApi
         }
     }
 
-    public static function updateCost($user, $id_variant, $cost)
+    public static function updateCostPrice($user, $id_variant, $price, $cost)
     {
 
         ShopifyAdminApi::request($user, 'PUT', '/admin/api/2021-04/variants/'.$id_variant.'.json', json_encode(
             array(
                 'variant' => array(
                     "id" => $id_variant,
-                    "cost" => $cost
+                    "cost" => $cost,
+                    "price" => $price
                     )
                 )
             )

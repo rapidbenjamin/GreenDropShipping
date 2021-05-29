@@ -93,8 +93,8 @@ class SyncLib
         $updatedCount = 0;
         foreach ($myProducts as $mp) {
             try {
-                $product = Products::find($mp->id_product);
-                $cost = $product->price / (1 + $mp->profit / 100);
+                $product = json_decode(Products::find($mp->id_product));
+                $price = $product->price * (1 + $mp->profit / 100);
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
                 if (!($mp->location_id_shopify > 0)) {
@@ -107,7 +107,8 @@ class SyncLib
 
                 //UPDATE STOCK IN SHOPIFY STORES
                 ShopifyAdminApi::updateProductIventory($merchant, $mp, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
-                ShopifyAdminApi::updateCost($merchant, $mp->id_variant_shopify, $cost);
+                sleep(1);
+                ShopifyAdminApi::updateCostPrice($merchant, $mp->id_variant_shopify, $price, $product->price );
                 sleep(1);
                 $updatedCount++;
             } catch (Exception $ex) {
@@ -320,6 +321,15 @@ class SyncLib
             "LOAD DATA LOCAL INFILE '" . $path . "/storage/app/magento_products.csv' INTO TABLE temp_products
             FIELDS TERMINATED BY '@'"
         );
+
+        DB::statement(
+            "UPDATE products
+            INNER JOIN temp_products ON temp_products.sku = products.sku
+            INNER JOIN my_products ON my_products.id_product = products.id
+            SET my_products.cron = 1
+            WHERE temp_products.price != products.price"
+        );
+
         DB::statement(
             "UPDATE products
             INNER JOIN temp_products ON products.sku = temp_products.sku
