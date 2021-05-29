@@ -291,6 +291,19 @@ class ShopifyAdminApi
         }
     }
 
+    public static function updateCost($user, $id_variant, $cost)
+    {
+
+        ShopifyAdminApi::request($user, 'PUT', '/admin/api/2021-04/variants/'.$id_variant.'.json', json_encode(
+            array(
+                'variant' => array(
+                    "id" => $id_variant,
+                    "cost" => $cost
+                    )
+                )
+            )
+        );
+    }
 
     public static function getLocationIdForIvewntory($user, $inventory_item_ids)
     {

@@ -93,19 +93,21 @@ class SyncLib
         $updatedCount = 0;
         foreach ($myProducts as $mp) {
             try {
+                $product = Products::find($mp->id_product);
+                $cost = $product->price / (1 + $mp->profit / 100);
                 $merchant = User::find($mp->id_customer);
-                echo var_dump($merchant);
                 // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
                 if (!($mp->location_id_shopify > 0)) {
                     $res = ShopifyAdminApi::getLocationIdForIvewntory($merchant, $mp->inventory_item_id_shopify);
-                    $mp->location_id_shopify = $res['location_id'];
+                    $mp->location_id_shopify = $res['inventory_levels'][0]['location_id'];
                     sleep(1);
                 }
                 $mp->cron = 0;
                 $mp->save();
 
                 //UPDATE STOCK IN SHOPIFY STORES
-                $res = ShopifyAdminApi::updateProductIventory($merchant, $mp, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
+                ShopifyAdminApi::updateProductIventory($merchant, $mp, $mp->location_id_shopify, $mp->inventory_item_id_shopify);
+                ShopifyAdminApi::updateCost($merchant, $mp->id_variant_shopify, $cost);
                 sleep(1);
                 $updatedCount++;
             } catch (Exception $ex) {
