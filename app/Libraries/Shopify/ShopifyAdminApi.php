@@ -63,6 +63,7 @@ class ShopifyAdminApi
                 'shopify_id' => $result['body']['product']['id'],
                 'variant_id' => $result['body']['product']['variants'][0]['id'],
                 'inventory_item_id' => $result['body']['product']['variants'][0]['inventory_item_id'],
+                'inventory_quantity' => $result['body']['product']['variants'][0]['inventory_quantity'],
                 'images' => $product['images']
             );
         } else if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 429)) {
@@ -291,15 +292,26 @@ class ShopifyAdminApi
         }
     }
 
-    public static function updateCostPrice($user, $id_variant, $price, $cost)
+    public static function updateCostPriceStock($user, $myProduct, $price, $cost)
     {
-
-        ShopifyAdminApi::request($user, 'PUT', '/admin/api/2021-04/variants/'.$id_variant.'.json', json_encode(
-            array(
-                'variant' => array(
-                    "id" => $id_variant,
-                    "cost" => $cost,
-                    "price" => $price
+        $inventory_quantity = 0;
+        if ($myProduct != null) {
+            $inventory_quantity = $myProduct->stock;
+        }
+        ShopifyAdminApi::request(
+            $user,
+            'PUT',
+            '/admin/api/2021-04/products/'.$myProduct->id_shopify.'.json',
+            json_encode(
+                array(
+                    "product" => array(
+                        "id" => $myProduct->id_shopify,
+                        'variant' => array(
+                            "id" => $myProduct->id_variant_shpoify,
+                            "cost" => $cost,
+                            "price" => $price,
+                            "inventory_quantity" => $inventory_quantity
+                        )
                     )
                 )
             )

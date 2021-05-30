@@ -72,6 +72,7 @@ class ShopifyBulkPublish implements ShouldQueue
                     $myProducts->id_variant_shopify = $response_product['variant_id'];
                     $myProducts->id_product = $row['id_product'];
                     $myProducts->inventory_item_id_shopify = $response_product['inventory_item_id'];
+                    $myProducts->stock = $response_product['inventory_quantity'];
                     $myProducts->save();
 
                     $collections_split = explode(',', $product['collections']);
