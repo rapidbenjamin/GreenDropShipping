@@ -349,8 +349,9 @@ class SyncLib
             WHERE products.sku IS NULL"
         );
         DB::statement(
-            "DELETE products.* FROM products
+            "UPDATE products
             LEFT JOIN temp_products ON temp_products.sku = products.sku
+            SET stock = 0
             WHERE temp_products.sku IS NULL"
         );
         $t = time();

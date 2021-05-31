@@ -17,32 +17,32 @@ class ShopifyAdminApi
     public static function createProduct($user, $product, $published = false)
     {
         $inventory_quantity = 0;
-        $productModel = Products::where('sku', $product['sku'])->first();
+        $productModel = Products::where('sku', $product->sku)->first();
         if ($productModel != null) {
             $inventory_quantity = $productModel->stock;
         }
         $images = [];
-        foreach($product['images'] as $img){
+        foreach($product->images as $img){
             $images[] = (object) ['src' => $img];
         };
         $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-07/products.json', json_encode(
             array(
                 'product' => array(
-                    "title" => $product['name'],
-                    "body_html" => $product['description'],
+                    "title" => $product->name,
+                    "body_html" => $product->description,
                     "published_at" => date("Y-m-d\TH:i:s"),
-                    "product_type" => $product['product_type'],
+                    "product_type" => $product->product_type,
                     "published_scope" => 'global',
-                    "tags" => $product['tags'],
+                    "tags" => $product->tags,
                     "published" => $published,
                     "vendor" => 'GreenDropShip',
                     "variants" => array(
                         0 => array(
-                            'barcode' => $product['upc'],
-                            "weight" => $product['weight'],
-                            "price" => (float)$product['price'],
-                            "cost" => (float)$product['cost'],
-                            "sku" => $product['sku'],
+                            'barcode' => $product->upc,
+                            "weight" => $product->weight,
+                            "price" => (float)$product->price,
+                            "cost" => (float)$product->cost,
+                            "sku" => $product->sku,
                             "fulfillment_service" => "Greendropship",
                             "inventory_management" => "Greendropship",
                             "inventory_quantity" => $inventory_quantity
@@ -64,7 +64,7 @@ class ShopifyAdminApi
                 'variant_id' => $result['body']['product']['variants'][0]['id'],
                 'inventory_item_id' => $result['body']['product']['variants'][0]['inventory_item_id'],
                 'inventory_quantity' => $result['body']['product']['variants'][0]['inventory_quantity'],
-                'images' => $product['images']
+                'images' => $product->images
             );
         } else if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 429)) {
             return array(

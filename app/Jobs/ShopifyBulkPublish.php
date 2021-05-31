@@ -60,14 +60,14 @@ class ShopifyBulkPublish implements ShouldQueue
             $collections = ShopifyAdminApi::getCollections($this->user);
 
             do {
-                $response_product = ShopifyAdminApi::createProduct($this->user, $product,$this->published);
+                $response_product = ShopifyAdminApi::createProduct($this->user, json_decode($product),$this->published);
                 if ((int)$response_product['result'] == 1) {
 
-                    $row = ImportList::where('id',$product['id'])->get()->first();
+                    $row = ImportList::where('id',json_decode($product)->id)->get()->first();
                     $myProducts = new MyProducts();
                     $myProducts->id_customer = $this->user->id;
-                    $myProducts->id_imp_product = $product['id'];
-                    $myProducts->profit =  $product['profit'];
+                    $myProducts->id_imp_product = json_decode($product)->id;
+                    $myProducts->profit =  json_decode($product)->profit;
                     $myProducts->id_shopify = $response_product['shopify_id'];
                     $myProducts->id_variant_shopify = $response_product['variant_id'];
                     $myProducts->id_product = $row['id_product'];
@@ -75,7 +75,7 @@ class ShopifyBulkPublish implements ShouldQueue
                     $myProducts->stock = $response_product['inventory_quantity'];
                     $myProducts->save();
 
-                    $collections_split = explode(',', $product['collections']);
+                    $collections_split = explode(',', json_decode($product)->collections);
 
                     foreach ($collections_split as $item) {
                         $filtered = $collections->first(function ($value) use ($item) {
@@ -94,7 +94,7 @@ class ShopifyBulkPublish implements ShouldQueue
                     }
                     break;
                 } else if ((int)$response_product['result'] == 2) {
-                    Log::info($product['name'] . ' - retry-after: ' . (int)$response_product['retry-after']);
+                    Log::info(json_decode($product)->name . ' - retry-after: ' . (int)$response_product['retry-after']);
                     sleep((int)$response_product['retry-after']);
                 }
                 $i++;

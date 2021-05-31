@@ -136,7 +136,7 @@ class ImportListController extends Controller
 
         }
 
-        ShopifyBulkPublish::dispatchNow(Auth::User(), [$request->product], $published);
+        ShopifyBulkPublish::dispatchNow(Auth::User(), [json_encode((object) $request->product)], $published);
 
         $myproduct = MyProducts::select('id_shopify')->where('id_customer', Auth::User()->id)->where('id_imp_product', $request->product['id'])->first();
 
@@ -187,8 +187,8 @@ class ImportListController extends Controller
             $rows[] = $row;
         }
         DB::table('temp_publish_products')->insert($rows);
-
-        if(ShopifyBulkPublish::dispatch(Auth::User(), $request->products ,$published))
+        $temp_publish_products = DB::table('temp_publish_products')->where('user_id', Auth::User()->id)->pluck('payload');
+        if(ShopifyBulkPublish::dispatch(Auth::User(), json_decode($temp_publish_products) ,$published))
             $result = 'ok';
 
         return response()->json(array('result' => $result));
@@ -202,6 +202,7 @@ class ImportListController extends Controller
         $user_id = $request->user_id;
         $product_ids = $request->product_ids;
         $prods = MyProducts::where('id_customer', $user_id)->whereIn('id_imp_product', $product_ids)->pluck('id_imp_product');
+        DB::table('temp_publish_products')->whereIn('id', $prods)->delete();
         return response()->json(array(
             'result' => $prods != null,
             'id_shopify' => $prods != null ? $prods : 0
