@@ -16,9 +16,15 @@ class CallBackController extends Controller
      */
     public function index(Request $request)
     {
-        return redirect("https://" . $request->input('shop') . "/admin/oauth/authorize?client_id="
-            . env('SHOPIFY_API_KEY') . "&scope=read_orders,write_orders,write_products,read_inventory,write_inventory,read_locations,read_fulfillments,write_fulfillments&redirect_uri=" . urlencode(env('APP_URL'))."/callback");
+        $user = User::where('shopify_url', $request->input('shop'))->first();
+        $mode = '';
 
+        if ( ! empty($user)) {
+            $mode = 'per-user';
+        }
+
+        return redirect("https://" . $request->input('shop') . "/admin/oauth/authorize?client_id="
+            . env('SHOPIFY_API_KEY') . "&scope=read_orders,write_orders,write_products,read_inventory,write_inventory,read_locations,read_fulfillments,write_fulfillments&redirect_uri=" . urlencode(env('APP_URL'))."/callback&grant_options[]=" . $mode);
     }
 
     /**
