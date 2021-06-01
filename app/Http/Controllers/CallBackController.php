@@ -43,8 +43,7 @@ class CallBackController extends Controller
         if (hash_equals($hmac, $computed_hmac)) {
             $result = $this->generateToken($params['code'],$params['shop']);
             $user = User::where('shopify_url', $params['shop'])->first();
-            //$user = User::where('shopify_url', $params['shop'])
-             //   ->where('email', $result['associated_user']['email'] ?? '')->first();
+
             if(!$user){
                 $user = new User();
                 $user->name = $result['associated_user']['first_name'] . $result['associated_user']['last_name'];
@@ -72,15 +71,6 @@ class CallBackController extends Controller
             }else{
                 $user->shopify_token = $result['access_token'];
                 $user->save();
-                /*
-                //Installing FulfillmentService in Merchant Store
-                if($user->fulfillment_installed == 0){
-                    ShopifyAdminApi::createFulfillmentService($user);
-                }
-                */
-
-                //ShopifyAdminApi::createWebhook($user,'orders/create', env('APP_URL').'/create-order-webkook');
-
 
                 auth()->login($user);// Login and "remember" the given user...
 
