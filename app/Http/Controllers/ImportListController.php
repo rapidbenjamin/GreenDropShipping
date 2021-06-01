@@ -169,14 +169,7 @@ class ImportListController extends Controller
             $published = $settings->set1 == 1;
 
         }
-        DB::statement(
-            "CREATE TABLE IF NOT EXISTS `temp_publish_products` (
-                `id` int(11) NOT NULL,
-                `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `payload` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `user_id` int(11) DEFAULT NULL
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-        );
+
         $rows = [];
 
         foreach ($request->products as $product) {
