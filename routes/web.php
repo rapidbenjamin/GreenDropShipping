@@ -65,7 +65,7 @@ Route::get('/sync-magento', 'SyncController@index');
 Route::get('/sync-magento/categories', 'SyncController@syncCategories');
 Route::get('/sync-magento/products', 'SyncController@syncProducts');
 Route::get('/sync-magento/stock', 'SyncController@syncStock');
-Route::get('/sync-magento/stockShopify', 'SyncController@syncStockUpdateInShopifyStores');
+Route::post('/sync-magento/sync-shopify-stock', 'SyncController@syncShopifyStock');
 Route::get('/sync-magento/wp', 'SyncController@syncWP');
 Route::get('/sync-magento/arreglosku', 'SyncController@arregloSku');
 Route::get('/sync-magento/tracking-number', 'SyncController@setTrackingNumber');
@@ -76,6 +76,7 @@ Route::get('/sync-magento/shopifyupgraded', 'SyncController@shopifyupgraded');
 
 /* Shopify*/
 Route::post('/publish-product', 'ImportListController@publishShopify');
+Route::post('/check-publish-products', 'ImportListController@checkPublishProducts');
 Route::post('/publish-all-products', 'ImportListController@publishAllShopify');
 Route::post('/create-order-webkook', 'ShopifyWebHooksController@createOrder');
 Route::post('/customer-data-request-webhook', 'ShopifyWebHooksController@customerDataRequest');

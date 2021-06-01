@@ -17,7 +17,7 @@ class CallBackController extends Controller
     public function index(Request $request)
     {
         return redirect("https://" . $request->input('shop') . "/admin/oauth/authorize?client_id="
-            . env('SHOPIFY_API_KEY') . "&scope=read_orders,write_orders,write_products,read_inventory,write_inventory,read_locations,read_fulfillments,write_fulfillments&redirect_uri=" . urlencode(env('APP_URL'))."/callback&grant_options[]=per-user");
+            . env('SHOPIFY_API_KEY') . "&scope=read_orders,write_orders,write_products,read_inventory,write_inventory,read_locations,read_fulfillments,write_fulfillments&redirect_uri=" . urlencode(env('APP_URL'))."/callback");
 
     }
 
@@ -37,7 +37,8 @@ class CallBackController extends Controller
         if (hash_equals($hmac, $computed_hmac)) {
             $result = $this->generateToken($params['code'],$params['shop']);
             $user = User::where('shopify_url', $params['shop'])->first();
-              
+            //$user = User::where('shopify_url', $params['shop'])
+             //   ->where('email', $result['associated_user']['email'] ?? '')->first();
             if(!$user){
                 $user = new User();
                 $user->name = $result['associated_user']['first_name'] . $result['associated_user']['last_name'];
@@ -52,7 +53,7 @@ class CallBackController extends Controller
                 //Installing FulfillmentService in Merchant Store
                 ShopifyAdminApi::createFulfillmentService($user);
 
-                
+
                 //Installing webhook to get new orders from Shopify
                 ShopifyAdminApi::createWebhook($user,'orders/create', env('APP_URL').'/create-order-webkook');
 
@@ -65,10 +66,19 @@ class CallBackController extends Controller
             }else{
                 $user->shopify_token = $result['access_token'];
                 $user->save();
+                /*
+                //Installing FulfillmentService in Merchant Store
+                if($user->fulfillment_installed == 0){
+                    ShopifyAdminApi::createFulfillmentService($user);
+                }
+                */
 
-                auth()->login($user);// Login and "remember" the given user...    
+                //ShopifyAdminApi::createWebhook($user,'orders/create', env('APP_URL').'/create-order-webkook');
 
-          
+
+                auth()->login($user);// Login and "remember" the given user...
+
+
             }
 
             return redirect()->home();
@@ -84,7 +94,7 @@ class CallBackController extends Controller
         $query = array(
             "client_id" => env('SHOPIFY_API_KEY'), // Your API key
             "client_secret" => env('SHOPIFY_SECRET_KEY'), // Your app credentials (secret key)
-            "code" => $code // Grab the access key from the URL
+            "code" => $code, // Grab the access key from the URL
         );
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

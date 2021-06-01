@@ -30,7 +30,7 @@ class ShopifyBulkPublish implements ShouldQueue
      */
     public $tries = 1;
 
-    protected $product;
+    protected $products;
     protected $user;
     protected $published;
 
@@ -39,10 +39,10 @@ class ShopifyBulkPublish implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($user, $product,$published)
+    public function __construct($user, $products,$published)
     {
         //
-        $this->product = $product;
+        $this->products = $products;
         $this->user = $user;
         $this->published = $published;
     }
@@ -54,71 +54,52 @@ class ShopifyBulkPublish implements ShouldQueue
      */
     public function handle()
     {
-        $attemps = 3;
-        $i = 0;
-        $collections = ShopifyAdminApi::getCollections($this->user);
+        foreach ($this->products as $product) {
+            $attemps = 3;
+            $i = 0;
+            $collections = ShopifyAdminApi::getCollections($this->user);
 
-        do {
-            $response_product = ShopifyAdminApi::createProduct($this->user, $this->product,$this->published);
-            if ((int)$response_product['result'] == 1) {
+            do {
+                $response_product = ShopifyAdminApi::createProduct($this->user, json_decode($product),$this->published);
+                if ((int)$response_product['result'] == 1) {
 
-                $row = ImportList::where('id',$this->product['id'])->get()->first();
-                $myProducts = new MyProducts();
-                $myProducts->id_customer = $this->user->id;
-                $myProducts->id_imp_product = $this->product['id'];
-                $myProducts->profit =  $this->product['profit'];
-                $myProducts->id_shopify = $response_product['shopify_id'];
-                $myProducts->id_variant_shopify = $response_product['variant_id'];
-                $myProducts->id_product = $row['id_product'];
-                $myProducts->inventory_item_id_shopify = $response_product['inventory_item_id'];
-                $myProducts->save();
+                    $row = ImportList::where('id',json_decode($product)->id)->get()->first();
+                    $myProducts = new MyProducts();
+                    $myProducts->id_customer = $this->user->id;
+                    $myProducts->id_imp_product = json_decode($product)->id;
+                    $myProducts->profit =  json_decode($product)->profit;
+                    $myProducts->id_shopify = $response_product['shopify_id'];
+                    $myProducts->id_variant_shopify = $response_product['variant_id'];
+                    $myProducts->id_product = $row['id_product'];
+                    $myProducts->inventory_item_id_shopify = $response_product['inventory_item_id'];
+                    $myProducts->stock = $response_product['inventory_quantity'];
+                    $myProducts->save();
 
+                    $collections_split = explode(',', json_decode($product)->collections);
 
-                //Update cost
-                $response_create_cost = ShopifyAdminApi::updateCost($this->user, $myProducts->id_shopify, $myProducts->inventory_item_id_shopify, $this->product['cost']);
+                    foreach ($collections_split as $item) {
+                        $filtered = $collections->first(function ($value) use ($item) {
+                            return trim($item) != '' && $value['name'] == trim($item);
+                        });
 
-                foreach ($response_product['images'] as $image) {
-                    $j = 0;
-                    do {
-                        $response_image = ShopifyAdminApi::publicImageProduct($this->user, $myProducts->id_shopify, $image);
-                        if ((int)$response_image['result'] == 1) {
-                            break;
-                        } else if ((int)$response_image['result'] == 2) {
-                            Log::info('Shopify ID' . $myProducts->id_shopify . ' - retry-after: ' . (int)$response_image['retry-after']);
-                            sleep((int)$response_image['retry-after']);
+                        if ($filtered == null) { //no existe
+                            $collectionId = ShopifyAdminApi::createCustomCollection($this->user, $item);
                         }
-                        $j++;
-                    } while ($attemps == $j);
+                        else{
+                            $collectionId = $filtered['id'];
+                        }
+                        if ($collectionId != 0) {
+                            $result = ShopifyAdminApi::addProductToCustomCollection($this->user, $myProducts->id_shopify, $collectionId);
+                        }
+                    }
+                    break;
+                } else if ((int)$response_product['result'] == 2) {
+                    Log::info(json_decode($product)->name . ' - retry-after: ' . (int)$response_product['retry-after']);
+                    sleep((int)$response_product['retry-after']);
                 }
-
-                //$response_product = ShopifyAdminApi::createProduct($this->user, $this->product);
-                //create collection
-                //$name = 'collection1,collection2,collection3,collection4';
-
-                $collections_split = explode(',', $this->product['collections']);
-
-                foreach ($collections_split as $item) {
-                    $filtered = $collections->first(function ($value) use ($item) {
-                        return trim($item) != '' && $value['name'] == trim($item);
-                    });
-
-                    if ($filtered == null) { //no existe
-                        $collectionId = ShopifyAdminApi::createCustomCollection($this->user, $item);
-                    }
-                    else{
-                        $collectionId = $filtered['id'];
-                    }
-                    if ($collectionId != 0) {
-                        $result = ShopifyAdminApi::addProductToCustomCollection($this->user, $myProducts->id_shopify, $collectionId);
-                    }
-                }
-                break;
-            } else if ((int)$response_product['result'] == 2) {
-                Log::info($this->product['name'] . ' - retry-after: ' . (int)$response_product['retry-after']);
-                sleep((int)$response_product['retry-after']);
-            }
-            $i++;
-        } while ($attemps == $i);
+                $i++;
+            } while ($attemps == $i);
+        }
     }
 
     /**

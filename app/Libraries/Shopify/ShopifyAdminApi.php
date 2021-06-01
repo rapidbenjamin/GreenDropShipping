@@ -17,33 +17,38 @@ class ShopifyAdminApi
     public static function createProduct($user, $product, $published = false)
     {
         $inventory_quantity = 0;
-        $productModel = Products::where('sku', $product['sku'])->first();
+        $productModel = Products::where('sku', $product->sku)->first();
         if ($productModel != null) {
             $inventory_quantity = $productModel->stock;
         }
-
+        $images = [];
+        foreach($product->images as $img){
+            $images[] = (object) ['src' => $img];
+        };
         $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-07/products.json', json_encode(
             array(
                 'product' => array(
-                    "title" => $product['name'],
-                    "body_html" => $product['description'],
+                    "title" => $product->name,
+                    "body_html" => $product->description,
                     "published_at" => date("Y-m-d\TH:i:s"),
-                    "product_type" => $product['product_type'],
+                    "product_type" => $product->product_type,
                     "published_scope" => 'global',
-                    "tags" => $product['tags'],
+                    "tags" => $product->tags,
                     "published" => $published,
                     "vendor" => 'GreenDropShip',
                     "variants" => array(
                         0 => array(
-                            'barcode' => $product['upc'],
-                            "weight" => $product['weight'],
-                            "price" => (float)$product['price'],
-                            "sku" => $product['sku'],
+                            'barcode' => $product->upc,
+                            "weight" => $product->weight,
+                            "price" => (float)$product->price,
+                            "cost" => (float)$product->cost,
+                            "sku" => $product->sku,
                             "fulfillment_service" => "Greendropship",
                             "inventory_management" => "Greendropship",
                             "inventory_quantity" => $inventory_quantity
                         )
-                    )
+                    ),
+                    "images"=> $images,
                 )
             )
         ));
@@ -58,7 +63,8 @@ class ShopifyAdminApi
                 'shopify_id' => $result['body']['product']['id'],
                 'variant_id' => $result['body']['product']['variants'][0]['id'],
                 'inventory_item_id' => $result['body']['product']['variants'][0]['inventory_item_id'],
-                'images' => $product['images']
+                'inventory_quantity' => $result['body']['product']['variants'][0]['inventory_quantity'],
+                'images' => $product->images
             );
         } else if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 429)) {
             return array(
@@ -70,23 +76,6 @@ class ShopifyAdminApi
         }
     }
 
-
-    public static function updateCost($user, $id_shopify, $inventory_item_id, $cost)
-    {
-
-        $result = ShopifyAdminApi::request($user, 'PUT', '/admin/api/2020-10/inventory_items/'.$inventory_item_id.'.json', json_encode(
-            array(
-                'inventory_item' => array(
-                    "id" => $id_shopify,
-                    "cost" => $cost
-                    )
-                )
-            )
-        );
-    }
-
-
-
     public static function getShopInformation($user)
     {
         $result = ShopifyAdminApi::request(
@@ -97,32 +86,6 @@ class ShopifyAdminApi
 
         return $result['body']['shop'];
 
-    }
-
-
-
-    public static function publicImageProduct($user, $shopify_id, $image)
-    {
-        $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-07/products/' . $shopify_id . '/images.json', json_encode(
-            array(
-                'image' => array(
-                    'src' => $image
-                )
-            )
-        ));
-
-        if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 200)) {
-            return array(
-                'result' => 1,
-            );
-        } else if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 429)) {
-            return array(
-                'result' => 2,
-                'retry-after' => $result['retry-after']
-            );
-        } else {
-            throw new Exception("can't publish image of product to shopofy -> HTTP_CODE: " . $result['HTTP_CODE'] . '->stack: ' . $image);
-        }
     }
 
     public static function getCollections($user)
@@ -329,6 +292,31 @@ class ShopifyAdminApi
         }
     }
 
+    public static function updateCostPriceStock($user, $myProduct, $price, $cost)
+    {
+        $inventory_quantity = 0;
+        if ($myProduct != null) {
+            $inventory_quantity = $myProduct->stock;
+        }
+        ShopifyAdminApi::request(
+            $user,
+            'PUT',
+            '/admin/api/2021-04/products/'.$myProduct->id_shopify.'.json',
+            json_encode(
+                array(
+                    "product" => array(
+                        "id" => $myProduct->id_shopify,
+                        'variant' => array(
+                            "id" => $myProduct->id_variant_shpoify,
+                            "cost" => $cost,
+                            "price" => $price,
+                            "inventory_quantity" => $inventory_quantity
+                        )
+                    )
+                )
+            )
+        );
+    }
 
     public static function getLocationIdForIvewntory($user, $inventory_item_ids)
     {
