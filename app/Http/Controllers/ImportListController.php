@@ -1,39 +1,18 @@
 <?php
 
-
-
 namespace App\Http\Controllers;
 
-
-
 use Illuminate\Http\Request;
-
 use App\Products;
-
 use App\MyProducts;
-
-use App\ProductsToSend;
-
 use Illuminate\Support\Facades\Auth;
-
-use App\Libraries\Shopify\ShopifyAdminApi;
-
-use App\ImportList;
-
 use App\Jobs\ShopifyBulkPublish;
-
 use App\Settings;
-
-use App\ShopifyBulk;
-
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Log;
 
 
-
 class ImportListController extends Controller
-
 {
 
     /**
