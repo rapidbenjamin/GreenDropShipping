@@ -1,39 +1,18 @@
 <?php
 
-
-
 namespace App\Http\Controllers;
 
-
-
 use Illuminate\Http\Request;
-
 use App\Products;
-
 use App\MyProducts;
-
-use App\ProductsToSend;
-
 use Illuminate\Support\Facades\Auth;
-
-use App\Libraries\Shopify\ShopifyAdminApi;
-
-use App\ImportList;
-
 use App\Jobs\ShopifyBulkPublish;
-
 use App\Settings;
-
-use App\ShopifyBulk;
-
 use Illuminate\Support\Facades\DB;
-
 use Illuminate\Support\Facades\Log;
 
 
-
 class ImportListController extends Controller
-
 {
 
     /**
@@ -153,61 +132,64 @@ class ImportListController extends Controller
 
 
     public function publishAllShopify(Request $request)
-
     {
-
         $this->authorize('plan_bulk-publish-product-import-list');
+
+        $user_id = Auth::User()->id;
 
         $result = 'error';
 
-        $settings = Settings::where('id_merchant', Auth::User()->id)->first();
+        $settings = Settings::where('id_merchant', $user_id)->first();
 
         $published = false;
 
         if ($settings != null) {
-
             $published = $settings->set1 == 1;
-
         }
-        DB::statement(
-            "CREATE TABLE IF NOT EXISTS `temp_publish_products` (
-                `id` int(11) NOT NULL,
-                `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `payload` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `user_id` int(11) DEFAULT NULL
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-        );
+
         $rows = [];
 
         foreach ($request->products as $product) {
-            $row['id'] = $product['id'];
-            $row['sku'] = $product['sku'];
-            $row['payload'] = json_encode($product);
-            $row['user_id'] = Auth::User()->id;
-            $rows[] = $row;
+            $rows[] = [
+                'id' => $product['id'],
+                'sku' => $product['sku'],
+                'payload' => json_encode($product),
+                'user_id' => $user_id
+            ];
         }
-        DB::table('temp_publish_products')->insert($rows);
-        $temp_publish_products = DB::table('temp_publish_products')->where('user_id', Auth::User()->id)->pluck('payload');
-        if(ShopifyBulkPublish::dispatch(Auth::User(), json_decode($temp_publish_products) ,$published))
-            $result = 'ok';
 
-        return response()->json(array('result' => $result));
+        DB::table('temp_publish_products')->insert($rows);
+
+        $temp_publish_products = DB::table('temp_publish_products')
+            ->where('user_id', $user_id)
+            ->pluck('payload');
+
+        if (ShopifyBulkPublish::dispatch(Auth::User(), json_decode($temp_publish_products), $published)) {
+            $result = 'ok';
+        }
+
+        return response()->json(['result' => $result]);
     }
 
     public function checkPublishProducts(Request $request)
-
     {
-
         $this->authorize('view-merchant-import-list');
+
         $user_id = $request->user_id;
         $product_ids = $request->product_ids;
-        $prods = MyProducts::where('id_customer', $user_id)->whereIn('id_imp_product', $product_ids)->pluck('id_imp_product');
-        DB::table('temp_publish_products')->whereIn('id', $prods)->delete();
-        return response()->json(array(
+
+        $prods = MyProducts::where('id_customer', $user_id)
+            ->whereIn('id_imp_product', $product_ids)
+            ->pluck('id_imp_product');
+
+        DB::table('temp_publish_products')
+            ->whereIn('id', $prods)
+            ->delete();
+
+        return response()->json([
             'result' => $prods != null,
             'id_shopify' => $prods != null ? $prods : 0
-        ));
-
+        ]);
     }
 }
 
