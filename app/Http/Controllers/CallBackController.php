@@ -83,15 +83,14 @@ class CallBackController extends Controller
         }
     }
 
+    protected function generateToken($code, $shop)
+    {
+        $query = [
+            'client_id' => env('SHOPIFY_API_KEY'),
+            'client_secret' => env('SHOPIFY_SECRET_KEY'),
+            'code' => $code
+        ];
 
-
-
-    protected function generateToken($code,$shop){
-        $query = array(
-            "client_id" => env('SHOPIFY_API_KEY'), // Your API key
-            "client_secret" => env('SHOPIFY_SECRET_KEY'), // Your app credentials (secret key)
-            "code" => $code, // Grab the access key from the URL
-        );
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_URL, "https://" . $shop . "/admin/oauth/access_token");
@@ -100,6 +99,7 @@ class CallBackController extends Controller
         $result = curl_exec($ch);
         curl_close($ch);
         $result = json_decode($result, true);
+
         return  $result;
     }
 }
