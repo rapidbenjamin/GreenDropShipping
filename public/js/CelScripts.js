@@ -345,14 +345,8 @@ angular
                 data.effectOnSearchPath = 1;
             }
 
-            // return $http.get('search-products-list')
-            //     .then(function (response) {
-            //         console.log(response);
-            //         return response.data.DoSearchParams;
-            //     });
             return $http.get(wcfServer + "DoSearchParams", { params: data })
                 .then(function (response) {
-                    console.log(response);
                     return response.data.DoSearchParams;
                 });
         };
@@ -1201,6 +1195,7 @@ angular
                 new_ids.push(JSON.parse(res.data));
                 window.localStorage.setItem('imported_ids', JSON.stringify(new_ids));
                 document.getElementById(`add-${JSON.parse(res.data)}`).hidden = true;
+                document.getElementById(`${JSON.parse(res.data)}`).href = 'import-list';
                 document.getElementById(`edit-${JSON.parse(res.data)}`).hidden = false;
             })
         };
@@ -1223,13 +1218,6 @@ angular
         localStorage.setItem("celUIT_key", celConfig.Settings.General.SiteKey);
 
         /* QueryString Parameters */
-        //if (!$location.$$html5) { /* If HTML 5 mode is disabled we need to use the standard locaion.search */
-        //const params = new Map(location.search.slice(1).split('&').map(kv => kv.split('=')))
-        //if (params.has(celConfig.Settings.General.DoSearchUrlParameter)) {
-        //$scope.data.query = $scope.searchQuery = escapeHtml(params.get(celConfig.Settings.General.DoSearchUrlParameter));
-        //$scope.searchPage = true;
-        //}
-        //} else
         var searchString = new URLSearchParams(location.search);
         if (searchString.get("q") !== null){
         	$scope.data.query = $scope.searchQuery = searchString.get("q");
@@ -1806,7 +1794,7 @@ angular
 
         return {
             restrict: "A",
-            template: "<div class=\"cuit_item_container\" ng-class=\"{ 'flex-box-column' : display == 'grid', 'flex-box-row' : display == 'list' }\"><!--	<div class=\"quickview\">              <a title=\"Quick View\" class=\"btn btn-xs  btn-quickview\"  data-target=\"#product-details-modal\"  data-toggle=\"modal\"  ng-click=\"store.selected = product\"> Quick View </a>     </div>-->   <a cel-prod-anlx class=\"product-details\" href=\"{{ product.ProductPageUrl }}\" target=\"_self\">        <div class=\"product-image\">       <!--	 <product-image product=\"product\"></product-image>-->            <img ng-src=\"{{product.ImageUrl}}\" on-error=\"{{ settings.ProductResults.NoImageUrl }}\" max-width=\"240px\" max-height=\"300px\" />        </div>               <div class=\"product-info\">            <div class=\"product-title\" ng-bind-html=\"product.Name | trust_html\"></div>            <div class=\"product-sku\">SKU #{{ product.Sku }}</div>             <div ng-if=\"product.is_in_stock==0\" class=\"product-stock\">{{ product.is_in_stock.replace('0','OUT OF STOCK') }}</div>                        <div ng-show=\"display == 'list'\" class=\"product-description hidden-sm\" ng-bind-html=\"product.Description | trust_html\">            </div>        </div>                 </a>    <div class=\"product-shop\" ng-if=\"product.Price !== '0'\">	    	 <div ng-if=\"settings.ProductResults.ShowRatings === true\" class=\"ratings-container\">	            <div class=\"ratings\">	                <span class=\"ratings-stars ratings-stars-off\">â˜…â˜…â˜…â˜…â˜…</span>	                <span class=\"ratings-stars ratings-stars-on\" ng-style=\"{ width: product.RatingStars + '%' }\">â˜…â˜…â˜…â˜…â˜…</span>	            </div>	        </div>    		 <div ng-show=\"product.Original_Price !== undefined && product.Original_Price !== product.Price && product.Original_Price !== '0.00'\" class=\"old-product-price\">{{ product.Original_Price | currency : \"$\" : 2  }}</div>	        <div ng-hide=\"settings.Magento.RealTimePrice === true && !priceLoaded\" class=\"product-price\">{{ product.Price | currency : \"$\" : 2 }}</div>	                 		</div> <!--End addtocard vtex -->		     <div class=\"add-to-cart\">		            <a ng-if=\"product.AddToCart === undefined\" cel-prod-anlx href=\"{{ product.ProductPageUrl }}\" target=\"_self\">{{ settings.Language.ViewDetails }}</a>		            <form ng-if=\"product.AddToCart !== undefined && formKey !== undefined\" data-role=\"tocart-form\">		                <input type=\"hidden\" name=\"product\" value=\"{{ product.mag_id }}\" />		                <input type=\"hidden\" name=\"uenc\" value=\"{{ uenc }}\" />		                <input type=\"hidden\" name=\"form_key\" value=\"{{ formKey }}\" />		                <div class=\"control\"><button cel-prod-anlx id=\"add-{{product.mag_id}}\" ng-click=\"addtoimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.AddToImportList }}\" class=\"btn-default\">{{ settings.Language.AddToImportList }}</button><button cel-prod-anlx id=\"edit-{{product.mag_id}}\" hidden ng-click=\"editonimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.EditOnImportList }}\" class=\"btn-default edit\">{{ settings.Language.EditOnImportList }}</button></div>		                		            </form>		      </div>     </div>       <!--ng repeat  <div class=\"modal fade\" id=\"product-details-modal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"myModalLabel\" aria-hidden=\"true\">    <div class=\"modal-dialog\">      <div class=\"modal-content\">        <div class=\"modal-body\">          {{product.name}}        </div>        <div class=\"modal-footer\">          <button type=\"button\" class=\"btn btn-default\" data-dismiss=\"modal\">Close</button>        </div>      </div>    </div>  </div>-->   </div>",
+            template: "<div class=\"cuit_item_container\" ng-class=\"{ 'flex-box-column' : display == 'grid', 'flex-box-row' : display == 'list' }\"><a cel-prod-anlx id=\"{{product.mag_id}}\" class=\"product-details\" href=\"{{ product.ProductPageUrl }}\" target=\"_self\">        <div class=\"product-image\"><img ng-src=\"{{product.ImageUrl}}\" on-error=\"{{ settings.ProductResults.NoImageUrl }}\" max-width=\"240px\" max-height=\"300px\" />        </div>               <div class=\"product-info\">            <div class=\"product-title\" ng-bind-html=\"product.Name | trust_html\"></div>            <div class=\"product-sku\">SKU #{{ product.Sku }}</div>             <div ng-if=\"product.is_in_stock==0\" class=\"product-stock\">{{ product.is_in_stock.replace('0','OUT OF STOCK') }}</div>                        <div ng-show=\"display == 'list'\" class=\"product-description hidden-sm\" ng-bind-html=\"product.Description | trust_html\">            </div>        </div>                 </a>    <div class=\"product-shop\" ng-if=\"product.Price !== '0'\">	    	 <div ng-if=\"settings.ProductResults.ShowRatings === true\" class=\"ratings-container\">	            <div class=\"ratings\">	                <span class=\"ratings-stars ratings-stars-off\">â˜…â˜…â˜…â˜…â˜…</span>	                <span class=\"ratings-stars ratings-stars-on\" ng-style=\"{ width: product.RatingStars + '%' }\">â˜…â˜…â˜…â˜…â˜…</span>	            </div>	        </div>    		 <div ng-show=\"product.Original_Price !== undefined && product.Original_Price !== product.Price && product.Original_Price !== '0.00'\" class=\"old-product-price\">{{ product.Original_Price | currency : \"$\" : 2  }}</div>	        <div ng-hide=\"settings.Magento.RealTimePrice === true && !priceLoaded\" class=\"product-price\">{{ product.Price | currency : \"$\" : 2 }}</div>	                 		</div> <!--End addtocard vtex -->		     <div class=\"add-to-cart\">		            <a ng-if=\"product.AddToCart === undefined\" cel-prod-anlx href=\"{{ product.ProductPageUrl }}\" target=\"_self\">{{ settings.Language.ViewDetails }}</a>		            <form ng-if=\"product.AddToCart !== undefined && formKey !== undefined\" data-role=\"tocart-form\">		                <input type=\"hidden\" name=\"product\" value=\"{{ product.mag_id }}\" />		                <input type=\"hidden\" name=\"uenc\" value=\"{{ uenc }}\" />		                <input type=\"hidden\" name=\"form_key\" value=\"{{ formKey }}\" />		                <div class=\"control\"><button cel-prod-anlx id=\"add-{{product.mag_id}}\" ng-click=\"addtoimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.AddToImportList }}\" class=\"btn-default\">{{ settings.Language.AddToImportList }}</button><button cel-prod-anlx id=\"edit-{{product.mag_id}}\" hidden ng-click=\"editonimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.EditOnImportList }}\" class=\"btn-default edit\">{{ settings.Language.EditOnImportList }}</button></div></form></div></div></div>",
             link: function (scope, elem, attr) {
                 imported_ids.forEach(imported_id => {
                     if(imported_id == scope.product.mag_id){
@@ -1824,70 +1812,10 @@ angular
                         scope.product.AddToCart = scope.product.AddToCart;
                     }
                 }
-          /* product view
-               $scope.store = {
-			    selected: {},
-			    products: null
-			  };
-			   $http.get('store-products.json').success(function(data) {
-			    scope.products = data;
-			  }); */
             }
         };
     }]);
 
-
-
-    /* product view
-
-angular.module('plunker', []);
-
-app.controller('celebrosUI', function($scope, $http) {
-  $scope.store = {
-    selected: {},
-    products: null
-  };
-
-  $http.get('store-products.json').success(function(data) {
-    $scope.store.products = data;
-  });
-});
-
-app.directive('productImage', function() {
-  return {
-    restrict: 'E',
-    templateUrl: 'includes/product-image.html',
-    controller: function() {
-      this.current = 0;
-      this.setCurrent = function(imageNumber) {
-        this.current = imageNumber || 0;
-      };
-    },
-    controllerAs: 'gallery'
-  };
-});
-
-app.directive('productTitle', function() {
-  return {
-    restrict: 'E',
-    templateUrl: 'includes/product-title.html',
-    scope: {
-      product: '=',
-    },
-  };
-});
-
-app.directive("productDescriptions", function() {
-  return {
-    restrict: 'E',
-    templateUrl: "includes/product-description.html",
-    scope: {
-      product: '=',
-    },
-  };
-});
-
- products view end*/
 
 angular
     .module("celebrosUI")
@@ -2380,11 +2308,6 @@ function stripHtml(html) {
     } while (html !== oldHtml);
     return html.replace(/</g, '&lt;');
 }
-
-//var sanitizeURI = stripHtml(decodeURI(window.location.href));
-//if (sanitizeURI !== window.location.href) {
-//    history.replaceState('', null, sanitizeURI);
-//}
 
 /* Then we need ot add the base URL so that AngularJS HTML5 works */
 var elem = document.createElement("base");
