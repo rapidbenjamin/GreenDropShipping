@@ -154,7 +154,8 @@ class ImportListController extends Controller
                 'id' => $product['id'],
                 'sku' => $product['sku'],
                 'payload' => json_encode($product),
-                'user_id' => $user_id
+                'user_id' => $user_id,
+                'action' => 'publish'
             ];
         }
 
@@ -162,6 +163,7 @@ class ImportListController extends Controller
 
         $temp_publish_products = DB::table('temp_publish_products')
             ->where('user_id', $user_id)
+            ->where('action', 'publish')
             ->pluck('payload');
 
         if (ShopifyBulkPublish::dispatch(Auth::User(), json_decode($temp_publish_products), $published)) {
