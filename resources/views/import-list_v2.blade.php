@@ -200,12 +200,7 @@
                                                 <div class="currency">
                                                     $
                                                 </div>
-                                                @if($profit < 100) <input type="text" class="box-price" id="price{{$ap->id_import_list}}" data-price="{{$ap->price}}" data-id="{{$ap->id_import_list}}" value="{{number_format((100*$ap->price)/ (100-$profit), 2,'.','')}}">
-                                                    @elseif($profit == 100)
-                                                    <input type="text" class="box-price" id="price{{$ap->id_import_list}}" data-price="{{$ap->price}}" data-id="{{$ap->id_import_list}}" value="{{number_format((100*$ap->price), 2,'.','')}}">
-                                                    @elseif($profit > 100)
-                                                    <input type="text" class="box-price" id="price{{$ap->id_import_list}}" data-price="{{$ap->price}}" data-id="{{$ap->id_import_list}}" value="{{number_format((100*$ap->price)/ (100+$profit), 2,'.','')}}">
-                                                    @endif
+                                                <input type="text" class="box-price" id="price{{$ap->id_import_list}}" data-price="{{$ap->price}}" data-id="{{$ap->id_import_list}}" value="{{number_format($ap->price * (100 + $profit) / 100, 2,'.','')}}">
                                             </div>
 
                                         </td>
@@ -264,71 +259,9 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $('#total_count').text("{{$total_count}}");
-        $('.verModal').click(function(e) {
-            e.preventDefault();
-            $('#upgrade-plans-modal').modal('show');
-            //alert("Upgrade your plan to perform this action.");
-        });
-
 
         $(".editor").each(function(index, ele) {
             CKEDITOR.replace($(ele).attr('id'), {});
-        });
-
-
-        $(".edit-in-shopify").click(function() {
-            window.location.href = $(this).attr('data-url');
-        });
-        $('.btn-import-list-send').click(function() {
-
-            let productId = $(this).data('id');
-            let images = [];
-            $("input.chk-img" + productId + ":checked").each(function(index, ele) {
-                images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
-            });
-
-            $('.btn-import-list-send-' + productId).hide();
-            $('.btn-import-list-send3-' + productId).show();
-
-            let btn = $(this);
-            btn.attr('disabled', true);
-
-            let product = {
-                id: productId,
-                name: $('#name' + productId).val(),
-                weight: $('#weight' + productId).text().trim(),
-                price: $('#price' + productId).val(),
-                cost: $('#cost' + productId).val(),
-                description: CKEDITOR.instances['description' + productId].getData(),
-                product_type: $('#type' + productId).val(),
-                tags: $('#tags' + productId).val(),
-                collections: $('#collections' + productId).val(),
-                sku: $('#sku' + productId).val(),
-                upc: $('#upc' + productId).val(),
-                profit: $('#profit' + productId).val(),
-                images: images
-            };
-
-            $.post('{{url("/publish-product")}}', {
-                "_token": "{{ csrf_token() }}",
-                product: product
-            }, function(data, status) {
-
-                btn.attr('disabled', false);
-                $('.alert-publish-single').show();
-                $('.btn-import-list-send3-' + productId).hide();
-                $('.btn-import-list-send2-' + productId).show();
-                $('.btn-import-list-send2-' + productId).attr('data-shopifyid', data.id_shopify);
-            }).fail(function(data) {
-                if (data.status == 403)
-                    $('#upgrade-plans-modal').modal('show')
-            });
-        });
-        $('.btn-import-list-send2').off('click');
-        $('.btn-import-list-send2').click(function(e) {
-            e.preventDefault();
-            window.open('http://{{Auth::user()->shopify_url}}/admin/products/', '_blank');
-            return false;
         });
 
         $('#check-all').click(function() {
@@ -439,5 +372,109 @@
         setInterval(publishProductsAjax, 15000);
 
     }); //Close document ready
+
+    $('#import-products').on('click', '.producttabs .thetab', function(e) {
+        e.preventDefault();
+        $(this).parents(".producttabs").find(".thetab").removeClass("active");
+        $(this).addClass("active");
+        var thetabid = $(this).attr("href");
+        $(this).parents(".producttabs").find(".tabcontent").removeClass("active");
+        $(this).parents(".producttabs").find(thetabid).addClass("active");
+    })
+    $('#import-products').on('click', '.btn-import-list-send', function() {
+        let productId = $(this).data('id');
+        let images = [];
+        $("input.chk-img" + productId + ":checked").each(function(index, ele) {
+            images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
+        });
+
+        $('.btn-import-list-send-' + productId).hide();
+        $('.btn-import-list-send3-' + productId).show();
+
+        let btn = $(this);
+        btn.attr('disabled', true);
+
+        let product = {
+            id: productId,
+            name: $('#name' + productId).val(),
+            weight: $('#weight' + productId).text().trim(),
+            price: $('#price' + productId).val(),
+            cost: $('#cost' + productId).val(),
+            description: CKEDITOR.instances['description' + productId].getData(),
+            product_type: $('#type' + productId).val(),
+            tags: $('#tags' + productId).val(),
+            collections: $('#collections' + productId).val(),
+            sku: $('#sku' + productId).val(),
+            upc: $('#upc' + productId).val(),
+            profit: $('#profit' + productId).val(),
+            images: images
+        };
+
+        $.post('{{url("/publish-product")}}', {
+            "_token": "{{ csrf_token() }}",
+            product: product
+        }, function(data, status) {
+
+            btn.attr('disabled', false);
+            $('.alert-publish-single').show();
+            $('.btn-import-list-send3-' + productId).hide();
+            $('.btn-import-list-send2-' + productId).show();
+            $('.btn-import-list-send2-' + productId).attr('data-shopifyid', data.id_shopify);
+        }).fail(function(data) {
+            if (data.status == 403)
+                $('#upgrade-plans-modal').modal('show')
+        });
+    });
+    $('#import-products').on('click', '.btn-import-list-delete', function() {
+        if (
+            confirm(
+                'Deleting the product will remove it from your Shopify store. Do you really want to delete it?'
+            )
+        ) {
+            var parameters = {
+                action: 'delete_import_list',
+                id_import_list: [$(this).data('id')]
+            }
+            $(`#delete-${$(this).data('id')}`).hide();
+            $(`#deleting-${$(this).data('id')}`).show();
+            $.getJSON(ajax_link, parameters, function (data) {
+                location.reload()
+            }).fail(function (data) {
+                console.log('error1', data.status)
+                if (data.status == 403) $('#upgrade-plans-modal').modal('show')
+            })
+        }
+    });
+    $('#import-products').on('change', '.box-profit', function() {
+        var id_product = $(this).data('id');
+        var cost = $('#cost' + id_product).val();
+        var profit = $(this).val();
+        if (profit > 0) {
+            var value = parseFloat((cost * (100 + profit * 1)) / 100).toFixed(2);
+        } else value = cost;
+
+        $('#price' + id_product).val(value);
+        $('#price' + id_product).data('price', value);
+    });
+    $('#import-products').on('change', '.box-price', function() {
+        var id_product = $(this).data('id');
+        var cost = $('#cost' + id_product).val();
+        var precio = $(this).val();
+        var value = 0;
+        if (precio > 0) {
+            value = parseFloat((precio - cost) / cost * 100).toFixed(2);
+        }
+        $('#profit' + id_product).val(value);
+        $('#profit' + id_product).data('profit', value);
+    });
+    $('#import-products').on('click', '.btn-import-list-send2', function(e) {
+        e.preventDefault();
+        window.open('http://{{Auth::user()->shopify_url}}/admin/products/', '_blank');
+    });
+    $('#import-products').on('click', '.verModal', function(e) {
+        e.preventDefault();
+        $('#upgrade-plans-modal').modal('show');
+    });
+
 </script>
 @endsection

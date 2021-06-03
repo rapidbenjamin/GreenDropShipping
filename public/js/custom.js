@@ -95,35 +95,13 @@ $(document).ready(function () {
             .show()
     })
 
-    $('.btn-import-list-delete').click(function () {
-        if (
-            confirm(
-                'Deleting the product will remove it from your Shopify store. Do you really want to delete it?'
-            )
-        ) {
-            var parameters = {
-                action: 'delete_import_list',
-                id_import_list: [$(this).data('id')]
-            }
-            $(`#delete-${$(this).data('id')}`).hide();
-            $(`#deleting-${$(this).data('id')}`).show();
-            $.getJSON(ajax_link, parameters, function (data) {
-                location.reload()
-            }).fail(function (data) {
-                console.log('error1', data.status)
-                if (data.status == 403) $('#upgrade-plans-modal').modal('show')
-                //$("#upgrade-plans-modal").appendTo("body");
-            })
-        }
-    })
-
     $('.btn-import-list-delete-all').click(function () {
         var product_ids = [];
-        $("input.checkbox:checked").each(function(index, ele) {
+        $('input.checkbox:checked').each(function (index, ele) {
             let product_id = $(ele).attr('id').split('-')[1];
             product_ids.push(product_id);
         });
-        if(product_ids.length){
+        if (product_ids.length) {
             if (
                 confirm(
                     'Deleting the products will remove it from your Shopify store. Do you really want to delete it?'
@@ -142,38 +120,11 @@ $(document).ready(function () {
                 }).fail(function (data) {
                     console.log('error1', data.status)
                     if (data.status == 403) $('#upgrade-plans-modal').modal('show')
-                    //$("#upgrade-plans-modal").appendTo("body");
                 })
             }
+        } else {
+            alert('At least one checkbox must be selected')
         }
-        else{
-            alert('At least one checkbox must be selected');
-        }
-    })
-
-    $('.box-profit').change(function () {
-        var id_product = $(this).data('id')
-        var cost = $('#cost' + id_product).val()
-        var profit = $(this).val()
-        if (profit != 0)
-            //var value = parseFloat(cost * ( 1 + (profit/100))).toFixed(2);
-            var value = parseFloat((100 * cost) / (100 - profit)).toFixed(2)
-        else value = cost
-
-        $('#price' + id_product).val(value)
-        $('#price' + id_product).data('price', value)
-    })
-
-    $('.box-price').change(function () {
-        var id_product = $(this).data('id')
-        var cost = $('#cost' + id_product).val()
-        var precio = $(this).val()
-        var value = 0
-        if (precio != 0)
-            value = parseFloat(((precio - cost) / precio) * 100).toFixed(2)
-
-        $('#profit' + id_product).val(value)
-        $('#profit' + id_product).data('profit', value)
     })
 
     /* MY PRODUCTS */
@@ -289,10 +240,10 @@ $(document).ready(function () {
         }
     })
     var action = '';
-    if(window.location.pathname == '/my-products'){
+    if (window.location.pathname == '/my-products') {
         action = 'my-products';
     }
-    if(window.location.pathname == '/import-list'){
+    if (window.location.pathname == '/import-list') {
         action = 'delete-import-list';
     }
     $('#page_size').change(function (event) {
@@ -303,12 +254,10 @@ $(document).ready(function () {
         }
         $.getJSON(ajax_link, parameters, function (res) {
             pagination(res);
-            if(res.improds){
-                console.log(res);
+            if (res.improds) {
                 showImportProducts(res.improds);
-            }
-            else{
-                showMyProducts(res);
+            } else {
+                showMyProducts(res.prods);
             }
         })
     })
@@ -322,14 +271,13 @@ $(document).ready(function () {
             page_size: page_size,
             page_number: page_number * 1 + 1
         }
-        if(total_count > page_size * page_number){
+        if (total_count > page_size * page_number) {
             $.getJSON(ajax_link, parameters, function (res) {
                 pagination(res);
-                if(res.improds){
+                if (res.improds) {
                     showImportProducts(res.improds);
-                }
-                else{
-                    showMyProducts(res);
+                } else {
+                    showMyProducts(res.prods);
                 }
             })
         }
@@ -341,14 +289,13 @@ $(document).ready(function () {
             page_size: $('#page_size').val(),
             page_number: $('#page_number').text() * 1 - 1
         }
-        if($('#page_number').text() > 1){
+        if ($('#page_number').text() > 1) {
             $.getJSON(ajax_link, parameters, function (res) {
                 pagination(res);
-                if(res.improds){
+                if (res.improds) {
                     showImportProducts(res.improds);
-                }
-                else{
-                    showMyProducts(res);
+                } else {
+                    showMyProducts(res.prods);
                 }
             })
         }
@@ -369,11 +316,11 @@ $(document).ready(function () {
         $('#page_number').text(data.page_number);
     }
 
-    function showMyProducts (data) {
-        $('.productdatarow').remove()
-        $('.shoproductrow').remove()
-        var str = ''
-        data.prods.forEach(product => {
+    function showMyProducts (products) {
+        $('.productdatarow').remove();
+        $('.shoproductrow').remove();
+        var str = '';
+        products.forEach(product => {
             str += `<tr class="productdatarow">
                 <td class="check">
                     <input type="checkbox" id="check-${product.id_shopify}" data-id="${product.id_my_products}" value="" class="checkbox">
@@ -387,13 +334,13 @@ $(document).ready(function () {
                     ${product.name}
                 </td>
                 <td data-label="COST GDS">
-                    ${Math.round(product.price * 100)/100}
+                    ${Math.round(product.price * 100) / 100}
                 </td>
                 <td data-label="PROFIT">
                     ${product.profit}%
                 </td>
                 <td data-label="RETAIL PRICE">
-                    ${Math.round((100 * product.price) * 100 / (100 - product.profit))/100}
+                    ${Math.round((100 * product.price * 100) / (100 - product.profit)) / 100}
                 </td>
                 <td data-label="SKU">
                     ${product.sku}
@@ -438,37 +385,29 @@ $(document).ready(function () {
                 </td>
             </tr>`
         })
-        str += `<script type="text/javascript">
-            $(".vplist").click(function(e) {
-                e.preventDefault();
-                var idp= $(this).attr('data-view');
-                if(!$(idp).hasClass("active")){
-                    $(".shoproductrow").removeClass("active");
-                    $(".productdatarow").removeClass("showp");
-                }
-
-                $(idp).toggleClass("active");
-                $(this).parents(".productdatarow").toggleClass("showp");
-            });
-        </script>`
-        $('#product_data').html(str);
+        $('#product_data').html(str)
     }
 
     function showImportProducts (data) {
-        $('.productboxelement').remove();
-        var csrf_token = $('meta[name="csrf-token"]').attr('content');
+        $('.productboxelement').remove()
         var str = '';
         data.products.forEach(product => {
             var image_str = '';
             var button_str = '';
-            if(data.plan == 'free'){
+            var price_str = '';
+            if (data.profit < 100) {
+                price_str += `<input type="text" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat((100 * product.price) / (100 - data.profit)).toFixed(2)}">`;
+            } else {
+                price_str += `<input type="text" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat(((100 + data.profit) * product.price) / 100).toFixed(2)}">`;
+            }
+
+            if (data.plan == 'free') {
                 button_str += `<button data-toggle="modal" data-target="#upgrade-plans-modal" class='delete id="delete-${product.id_import_list}" data-id="${product.id_import_list}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class='delete' id="deleting-${product.id_import_list}" style="display: none;" data-id="${product.id_import_list}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button data-toggle="modal" data-target="#upgrade-plans-modal" class='sendto btn-import-list-send btn-import-list-send-${product.id_import_list} verModal' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
                     <button class="sendto sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
                     <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-${product.id_import_list}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>`;
-            }
-            else{
+            } else {
                 button_str += `<button class='delete btn-import-list-delete' id="delete-${product.id_import_list}" data-id="${product.id_import_list}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class='delete' id="deleting-${product.id_import_list}" style="display: none;" data-id="${product.id_import_list}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class='sendto btn-import-list-send btn-import-list-send-${product.id_import_list}' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
@@ -597,7 +536,7 @@ $(document).ready(function () {
                                                 <div>
                                                     $
                                                 </div>
-                                                <input type="text" id="cost${product.id_import_list}" data-id="${product.id_import_list}" value="${Math.round(product.price*100)/100}" disabled="disabled">
+                                                <input type="text" id="cost${product.id_import_list}" data-id="${product.id_import_list}" value="${Math.round(product.price * 100) /100}" disabled="disabled">
                                             </div>
 
                                         </td>
@@ -616,7 +555,7 @@ $(document).ready(function () {
                                                 <div class="currency">
                                                     $
                                                 </div>
-                                                <input type="text" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${Math.round(10000*product.price/(100-data.profit))/100}">
+                                                ${price_str}
                                             </div>
 
                                         </td>
@@ -640,103 +579,10 @@ $(document).ready(function () {
 
         str += `<script src="js/ckeditor/ckeditor.js"></script>
         <script type="text/javascript">
-            $(".producttabs .thetab").click(function(e) {
-                e.preventDefault();
-                $(this).parents(".producttabs").find(".thetab").removeClass("active");
-                $(this).addClass("active");
-                var thetabid = $(this).attr("href");
-                $(this).parents(".producttabs").find(".tabcontent").removeClass("active");
-                $(this).parents(".producttabs").find(thetabid).addClass("active");
-
-            });
-            $('.verModal').click(function(e) {
-                e.preventDefault();
-                $('#upgrade-plans-modal').modal('show');
-            });
-
-
             $(".editor").each(function(index, ele) {
                 CKEDITOR.replace($(ele).attr('id'), {});
             });
-
-
-            $(".edit-in-shopify").click(function() {
-                window.location.href = $(this).attr('data-url');
-            });
-            $('.btn-import-list-send').click(function() {
-
-                let productId = $(this).data('id');
-                let images = [];
-                $("input.chk-img" + productId + ":checked").each(function(index, ele) {
-                    images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
-                });
-
-                $('.btn-import-list-send-' + productId).hide();
-                $('.btn-import-list-send3-' + productId).show();
-
-                let btn = $(this);
-                btn.attr('disabled', true);
-
-                let product = {
-                    id: productId,
-                    name: $('#name' + productId).val(),
-                    weight: $('#weight' + productId).text().trim(),
-                    price: $('#price' + productId).val(),
-                    cost: $('#cost' + productId).val(),
-                    description: CKEDITOR.instances['description' + productId].getData(),
-                    product_type: $('#type' + productId).val(),
-                    tags: $('#tags' + productId).val(),
-                    collections: $('#collections' + productId).val(),
-                    sku: $('#sku' + productId).val(),
-                    upc: $('#upc' + productId).val(),
-                    profit: $('#profit' + productId).val(),
-                    images: images
-                };
-
-                $.post('/publish-product', {
-                    "_token": '${csrf_token}',
-                    product: product
-                }, function(data, status) {
-
-                    btn.attr('disabled', false);
-                    $('.alert-publish-single').show();
-                    $('.btn-import-list-send3-' + productId).hide();
-                    $('.btn-import-list-send2-' + productId).show();
-                    $('.btn-import-list-send2-' + productId).attr('data-shopifyid', data.id_shopify);
-                }).fail(function(data) {
-                    if (data.status == 403)
-                        $('#upgrade-plans-modal').modal('show')
-                });
-            });
-            $('.btn-import-list-send2').off('click');
-            $('.btn-import-list-send2').click(function(e) {
-                e.preventDefault();
-                window.open('http://${data.shopify_url}/admin/products/', '_blank');
-                return false;
-            });
-            $('.btn-import-list-delete').click(function () {
-                if (
-                    confirm(
-                        'Deleting the product will remove it from your Shopify store. Do you really want to delete it?'
-                    )
-                ) {
-                    var product_id = $(this).data('id');
-                    var parameters = {
-                        action: 'delete_import_list',
-                        id_import_list: [${product_id}]
-                    }
-                    $("#delete-${product_id}").hide();
-                    $("#deleting-${product_id}").show();
-                    $.getJSON(ajax_link, parameters, function (data) {
-                        location.reload()
-                    }).fail(function (data) {
-                        console.log('error1', data.status)
-                        if (data.status == 403) $('#upgrade-plans-modal').modal('show')
-                    })
-                }
-            })
         </script>`
         $('#import-products').html(str);
     }
-
 })

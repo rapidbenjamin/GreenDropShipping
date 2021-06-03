@@ -53,7 +53,6 @@ class ShopifyAdminApi
             )
         ));
 
-
         if (isset($result['HTTP_CODE']) && $result['HTTP_CODE'] == 201) {
 
 
@@ -72,7 +71,7 @@ class ShopifyAdminApi
                 'retry-after' => $result['retry-after']
             );
         } else {
-            throw new Exception("can't publish product to shopofy -> HTTP_CODE: " . $result['HTTP_CODE'] . '-> stack: ' . $product['name']);
+            throw new Exception("can't publish product to shopofy -> HTTP_CODE: " . $result['HTTP_CODE'] . '-> stack: ' . $product->name);
         }
     }
 

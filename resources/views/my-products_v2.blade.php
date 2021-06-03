@@ -182,30 +182,6 @@
             }
         });
 
-        $('.edit-product').click(function() {
-            window.open('http://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');
-        });
-
-        $('.btn-mp-delete').click(function() {
-            if (confirm('Are you sure to delete this product from shopify?')) {
-                $(`#check-${$(this).data('myproductid')}`).prop('disabled', true);
-                $(`#delete-${$(this).data('myproductid')}`).hide();
-                $(`#deleting-${$(this).data('myproductid')}`).show();
-                $(`#deleted-${$(this).data('myproductid')}`).hide();
-                $.post('{{url("/delete-shopify-product")}}', {
-                    "_token": "{{ csrf_token() }}",
-                    product_id: $(this).data('myproductid')
-                }, function(data, status) {
-                    if (data.result) {
-                        $(`#delete-${data.product_id}`).hide();
-                        $(`#deleting-${data.product_id}`).hide();
-                        $(`#deleted-${data.product_id}`).show();
-                    }
-                });
-            }
-        });
-
-
         $('.btn-mp-delete-all').click(function() {
             let products = [];
             $("input.checkbox:checked").each(function(index, ele) {
@@ -266,6 +242,38 @@
         }
         publishProductsAjax();
         setInterval(publishProductsAjax, 15000);
+    });
+    $('#product_data').on('click', '.btn-mp-delete', function() {
+        if (confirm('Are you sure to delete this product from shopify?')) {
+            $(`#check-${$(this).data('myproductid')}`).prop('disabled', true);
+            $(`#delete-${$(this).data('myproductid')}`).hide();
+            $(`#deleting-${$(this).data('myproductid')}`).show();
+            $(`#deleted-${$(this).data('myproductid')}`).hide();
+            $.post('{{url("/delete-shopify-product")}}', {
+                "_token": "{{ csrf_token() }}",
+                product_id: $(this).data('myproductid')
+            }, function(data, status) {
+                if (data.result) {
+                    $(`#delete-${data.product_id}`).hide();
+                    $(`#deleting-${data.product_id}`).hide();
+                    $(`#deleted-${data.product_id}`).show();
+                }
+            });
+        }
+    })
+    $('#product_data').on('click', '.edit-product', function() {
+        window.open('http://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');
+    });
+    $('#product_data').on('click', '.vplist', function(e) {
+        e.preventDefault();
+        var idp= $(this).attr('data-view');
+        if(!$(idp).hasClass("active")){
+            $(".shoproductrow").removeClass("active");
+            $(".productdatarow").removeClass("showp");
+        }
+
+        $(idp).toggleClass("active");
+        $(this).parents(".productdatarow").toggleClass("showp");
     });
 </script>
 @endsection
