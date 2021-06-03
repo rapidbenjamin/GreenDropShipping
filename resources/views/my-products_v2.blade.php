@@ -86,7 +86,7 @@
                             {{ $pr->profit }}%
                         </td>
                         <td data-label="RETAIL PRICE">
-                            ${{number_format(100*$pr->price/ (100-$pr->profit), 2,'.','')}}
+                            ${{number_format($pr->price * (100 + $pr->profit) / 100, 2,'.','')}}
                         </td>
                         <td data-label="SKU">
                             {{$pr->sku}}
@@ -109,7 +109,7 @@
                                 </div>
                                 <div class="productdata">
                                     <h3>{{ $pr->name }}</h3>
-                                    <p class="price">Price ${{number_format(100*$pr->price/ (100-$pr->profit), 2,'.','')}}</p>
+                                    <p class="price">Price ${{number_format($pr->price * (100 + $pr->profit) / 100, 2,'.','')}}</p>
                                     <p>
                                         Stock: {{ $pr->stock }}
                                     </p>

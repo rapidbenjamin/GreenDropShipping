@@ -94,7 +94,7 @@ class SyncLib
         foreach ($myProducts as $mp) {
             try {
                 $product = json_decode(Products::find($mp->id_product));
-                $price = $product->price / (1 - $mp->profit / 100);
+                $price = $product->price * (100 + $mp->profit) / 100;
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
                 if (!($mp->location_id_shopify > 0)) {

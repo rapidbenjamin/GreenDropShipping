@@ -334,13 +334,13 @@ $(document).ready(function () {
                     ${product.name}
                 </td>
                 <td data-label="COST GDS">
-                    ${Math.round(product.price * 100) / 100}
+                    ${parseFloat(product.price).toFixed(2)}
                 </td>
                 <td data-label="PROFIT">
                     ${product.profit}%
                 </td>
                 <td data-label="RETAIL PRICE">
-                    ${Math.round((100 * product.price * 100) / (100 - product.profit)) / 100}
+                    ${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}
                 </td>
                 <td data-label="SKU">
                     ${product.sku}
@@ -363,7 +363,7 @@ $(document).ready(function () {
                         </div>
                         <div class="productdata">
                             <h3>${product.name}</h3>
-                            <p class="price">Price ${Math.round((100 * product.price) /(100 - product.profit))}</p>
+                            <p class="price">Price ${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}</p>
                             <p>
                                 Stock: ${product.stock}
                             </p>
@@ -394,12 +394,6 @@ $(document).ready(function () {
         data.products.forEach(product => {
             var image_str = '';
             var button_str = '';
-            var price_str = '';
-            if (data.profit < 100) {
-                price_str += `<input type="text" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat((100 * product.price) / (100 - data.profit)).toFixed(2)}">`;
-            } else {
-                price_str += `<input type="text" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat(((100 + data.profit) * product.price) / 100).toFixed(2)}">`;
-            }
 
             if (data.plan == 'free') {
                 button_str += `<button data-toggle="modal" data-target="#upgrade-plans-modal" class='delete id="delete-${product.id_import_list}" data-id="${product.id_import_list}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
@@ -555,7 +549,7 @@ $(document).ready(function () {
                                                 <div class="currency">
                                                     $
                                                 </div>
-                                                ${price_str}
+                                                <input type="text" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat(product.price * (100 + data.profit) / 100).toFixed(2)}">
                                             </div>
 
                                         </td>
