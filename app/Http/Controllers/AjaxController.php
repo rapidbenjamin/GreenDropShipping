@@ -66,7 +66,7 @@ class AjaxController extends Controller
         if ($parameters['action'] == 'delete_import_list') {
 
             $this->authorize('plan_delete-product-import-list');
-            $row = ImportList::find($parameters['id_import_list']);
+            $row = ImportList::whereIn('id', $parameters['id_import_list']);
             $row->delete();
 
             return json_encode(1);
@@ -108,6 +108,53 @@ class AjaxController extends Controller
             }
             return json_encode([
                 'prods' => $prods,
+                'total_count' => $total_count,
+                'page_size' => $page_size,
+                'page_number' => $page_number
+            ]);
+        }
+
+        if($parameters['action'] == 'delete-import-list') {
+            $this->authorize('plan_delete-product-import-list');
+            $this->authorize('plan_view-my-products');
+            $page_number = $parameters['page_number'];
+            $page_size = $parameters['page_size'];
+            $prods = Products::select('products.*', 'import_list.id as id_import_list')
+                ->join('import_list', 'import_list.id_product', '=', 'products.id')
+                ->whereNotIn('import_list.id', MyProducts::where('id_customer', Auth::User()->id)->pluck('id_imp_product'))
+                ->where('import_list.id_customer', Auth::user()->id)->orderBy('import_list.updated_at', 'desc');
+
+            $total_count = $prods->count();
+            $prods = $prods->skip(($page_number - 1) * $page_size)->take($page_size)->get();
+            foreach ($prods as $product) {
+                if ($product['images'] != null && count(json_decode($product['images'])) > 0)
+                    $product['image_url'] = env('URL_MAGENTO_IMAGES') . json_decode($product['images'])[0]->file;
+
+                $search = new SearchController;
+                $images = [];
+                foreach (json_decode($product['images']) as $image) {
+                    $images[] = env('URL_MAGENTO_IMAGES') . $image->file;
+                }
+                $product['description'] = $search->getAttributeByCode($product, 'description');
+                $product['size'] = $search->getAttributeByCode($product, 'size');
+                $product['images'] = $images;
+                $product['ship_height'] = round($search->getAttributeByCode($product, 'ship_height'), 2);
+                $product['ship_width'] = round($search->getAttributeByCode($product, 'ship_width'), 2);
+                $product['ship_length'] = round($search->getAttributeByCode($product, 'ship_length'), 2);
+            }
+            $settings = Settings::where('id_merchant', Auth::user()->id)->first();
+            if ($settings == null) {
+                $settings = new Settings();
+                $settings->set8 = 0;
+
+            }
+            return json_encode([
+                'improds' => [
+                    'products' => $prods,
+                    'profit' => $settings->set8,
+                    'plan' => Auth::User()->plan,
+                    'shopify_url' => Auth::User()->shopify_url
+                ],
                 'total_count' => $total_count,
                 'page_size' => $page_size,
                 'page_number' => $page_number

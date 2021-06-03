@@ -1948,12 +1948,10 @@ svg {
   border: solid 1px #e1e9ec;
 }
 .sendtoshopify button {
-  background-color: #44b955;
   display: grid;
   align-content: center;
   border: none;
   padding: 8px;
-  padding-left: 20px;
   font-family: Roboto;
   font-size: 16px;
   font-weight: bold;
@@ -1962,12 +1960,18 @@ svg {
   width: 100%;
   max-width: 224px;
   box-sizing: border-box;
-  padding-right:20px;
   border-radius: 10px;
   cursor: pointer;
   flex: 0 1 224px;
   display: flex;
   justify-content: center;
+}
+.sendtoshopify .btn-import-list-send-all {
+  background-color: #44b955;
+}
+.sendtoshopify .btn-import-list-delete-all {
+  background-color: #f39ca2;
+  margin-left: 10px;
 }
 .sendtoshopify button  img {
   display: inline-block;

@@ -30,8 +30,9 @@ class MyProductsController extends Controller
         $prods = Products::select('products.*', 'my_products.id_imp_product as id_my_product', 'my_products.id_shopify', 'my_products.id as id_my_products', 'my_products.profit')
             ->join('import_list', 'import_list.id_product', '=', 'products.id')
             ->join('my_products', 'my_products.id_imp_product', '=', 'import_list.id')
-            ->where('my_products.id_customer', Auth::user()->id)->whereNull('my_products.deleted_at')->orderBy('my_products.id', 'desc')->paginate(10);
-        $total_count = MyProducts::count();
+            ->where('my_products.id_customer', Auth::user()->id)->whereNull('my_products.deleted_at')->orderBy('my_products.id', 'desc');
+        $total_count = $prods->count();
+        $prods = $prods->paginate(10);
         $search = new SearchController;
         foreach ($prods as $product) {
             $product['brand'] = $search->getAttributeByCode($product, 'brand');
