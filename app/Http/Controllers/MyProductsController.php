@@ -46,7 +46,7 @@ class MyProductsController extends Controller
     {
         $this->authorize('view-merchant-my-products');
         $this->authorize('plan_view-my-products');
-        ShopifyBulkDelete::dispatchNow(Auth::User(), [$request->product_id]);
+        ShopifyBulkDelete::dispatchNow(Auth::User(), [$request->product_id], 'MyProducts');
         $result = MyProducts::where('id_shopify', $request->product_id)->get();
         return response()->json([
             'result' => count($result) == 0,
@@ -73,7 +73,7 @@ class MyProductsController extends Controller
             ->where('user_id', $user_id)
             ->where('action', 'delete')
             ->pluck('payload');
-        if (ShopifyBulkDelete::dispatch(Auth::User(), $temp_product_ids)) {
+        if (ShopifyBulkDelete::dispatch(Auth::User(), $temp_product_ids, 'MyProducts')) {
             $result = 'ok';
         }
 

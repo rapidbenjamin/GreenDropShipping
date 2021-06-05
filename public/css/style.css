@@ -1947,7 +1947,7 @@ svg {
   height: 21px;
   border: solid 1px #e1e9ec;
 }
-.sendtoshopify button {
+.sendtoshopify button, .migrate-products button {
   display: grid;
   align-content: center;
   border: none;
@@ -1959,6 +1959,7 @@ svg {
   color: #ffffff;
   width: 100%;
   max-width: 224px;
+  min-width: 130px;
   box-sizing: border-box;
   border-radius: 10px;
   cursor: pointer;
@@ -1966,12 +1967,21 @@ svg {
   display: flex;
   justify-content: center;
 }
-.sendtoshopify .btn-import-list-send-all {
+.sendtoshopify .btn-import-list-send-all, .migrate-products .migration, .migrate-products .allconfirmbutton, .migrate-products .confirmbutton {
   background-color: #44b955;
 }
-.sendtoshopify .btn-import-list-delete-all {
+.migrate-products .profit {
+  background-color: #44b955;
+  margin-left: 10px;
+}
+.sendtoshopify .btn-import-list-delete-all, .migrate-products .alldeletebutton {
   background-color: #f39ca2;
   margin-left: 10px;
+}
+.migrate-products #check-all-mp {
+    width: 20px;
+    height: 20px;
+    margin: 10px;
 }
 .sendtoshopify button  img {
   display: inline-block;

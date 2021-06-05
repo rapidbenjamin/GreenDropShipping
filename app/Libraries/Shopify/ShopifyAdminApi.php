@@ -309,7 +309,13 @@ class ShopifyAdminApi
                             "id" => $myProduct->id_variant_shpoify,
                             "cost" => $cost,
                             "price" => $price,
-                            "inventory_quantity" => $inventory_quantity
+                            "inventory_quantity" => $inventory_quantity,
+                            "sku" => $myProduct->sku,
+                            "inventory_policy" => 'deny',
+                            'inventory_item_id' => $myProduct->inventory_item_id_shopify,
+                            'fulfillment_service' => 'greendropship',
+                            'inventory_management' => 'greendropship',
+                            'taxable' => true,
                         )
                     )
                 )
@@ -543,4 +549,11 @@ class ShopifyAdminApi
 
     }
 
+    public static function getProducts($user) {
+        return ShopifyAdminApi::request(
+            $user,
+            'GET',
+            '/admin/api/2021-04/products.json'
+        );
+    }
 }

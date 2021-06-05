@@ -156,7 +156,7 @@
             <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
         </li>
 
-        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span></li>
+        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1/{{ceil($total_count/10)}}</span></li>
 
         <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
             <span class="page-link" aria-hidden="true">›</span>
@@ -213,7 +213,7 @@
         });
         var user_id = "{{Auth::user() ? Auth::user()->id : 0}}";
 
-        function publishProductsAjax() {
+        function deleteProductsAjax() {
             let product_ids = [];
             $("input.checkbox:checked").each(function(index, ele) {
                 let product_id = $(ele).attr('id').split('-')[1];
@@ -240,8 +240,8 @@
                     });
             }
         }
-        publishProductsAjax();
-        setInterval(publishProductsAjax, 15000);
+        deleteProductsAjax();
+        setInterval(deleteProductsAjax, 15000);
     });
     $('#product_data').on('click', '.btn-mp-delete', function() {
         if (confirm('Are you sure to delete this product from shopify?')) {

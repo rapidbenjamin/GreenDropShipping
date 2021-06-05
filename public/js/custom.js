@@ -246,6 +246,9 @@ $(document).ready(function () {
     if (window.location.pathname == '/import-list') {
         action = 'delete-import-list';
     }
+    if (window.location.pathname == '/migrate-products') {
+        action = 'migrate-products';
+    }
     $('#page_size').change(function (event) {
         var parameters = {
             action: action,
@@ -256,8 +259,10 @@ $(document).ready(function () {
             pagination(res);
             if (res.improds) {
                 showImportProducts(res.improds);
-            } else {
+            } else if(res.prods) {
                 showMyProducts(res.prods);
+            } else if(res.mig_products) {
+                showMigrateProducts(res.mig_products);
             }
         })
     })
@@ -265,7 +270,7 @@ $(document).ready(function () {
     $('#next').click(function () {
         var total_count = $('#total_count').text();
         var page_size = $('#page_size').val();
-        var page_number = $('#page_number').text();
+        var page_number = $('#page_number').text().split('/')[0];
         var parameters = {
             action: action,
             page_size: page_size,
@@ -276,8 +281,10 @@ $(document).ready(function () {
                 pagination(res);
                 if (res.improds) {
                     showImportProducts(res.improds);
-                } else {
+                } else if(res.prods) {
                     showMyProducts(res.prods);
+                } else if(res.mig_products) {
+                    showMigrateProducts(res.mig_products);
                 }
             })
         }
@@ -287,15 +294,17 @@ $(document).ready(function () {
         var parameters = {
             action: action,
             page_size: $('#page_size').val(),
-            page_number: $('#page_number').text() * 1 - 1
+            page_number: $('#page_number').text().split('/')[0] - 1
         }
-        if ($('#page_number').text() > 1) {
+        if ($('#page_number').text().split('/')[0] > 1) {
             $.getJSON(ajax_link, parameters, function (res) {
                 pagination(res);
                 if (res.improds) {
                     showImportProducts(res.improds);
-                } else {
+                } else if(res.prods) {
                     showMyProducts(res.prods);
+                } else if(res.mig_products) {
+                    showMigrateProducts(res.mig_products);
                 }
             })
         }
@@ -313,7 +322,7 @@ $(document).ready(function () {
             $('#next').prop('disabled', false);
         }
         $('#total_count').text(data.total_count);
-        $('#page_number').text(data.page_number);
+        $('#page_number').text(`${data.page_number}/${Math.ceil(data.total_count / data.page_size)}`);
     }
 
     function showMyProducts (products) {
@@ -578,5 +587,136 @@ $(document).ready(function () {
             });
         </script>`
         $('#import-products').html(str);
+    }
+
+    $('.migration').click(function () {
+        var parameters = {
+            action: 'migration',
+        };
+        $.getJSON(ajax_link, parameters, function (res) {
+            for (var i=0; i<res.products; i++) {
+                $.getJSON(ajax_link, {
+                    action: 'migrating-products',
+                    index: i,
+                    location_id: res.location_id
+                }, function (data) {
+                    console.log(data);
+                    $('#migrating-progress').val((data.index * 1 + 1)/(res.products)*100);
+                    $('#percentage').text(`${parseInt((data.index * 1 + 1)/(res.products)*100)}%`);
+                    if (data.index == res.products-1) {
+                        pagination(data);
+                        showMigrationPage(data.mig_products);
+                    }
+                })
+            }
+        })
+    })
+
+    function showMigrationPage (data) {
+        $('.migration').remove();
+        var str = `<div style="display: flex;">
+                    <input type="checkbox" id="check-all-mp" value="" data-mark="false">
+                    <button class="btn-confirm-products allconfirmbutton">Confirm</button>
+                    <button class="btn-delete-products alldeletebutton">Delete</button>
+                    <button class="btn-set-profit profit">Set Profit</button>
+                </div>
+                <div class="pagesize">
+                    <select name="PageSize" id="page_size" class="page_size">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <table class="greentable" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>
+                            </th>
+                            <th>
+                                Image
+                            </th>
+                            <th>
+                                Product Name
+                            </th>
+                            <th>
+                                Cost
+                            </th>
+                            <th>
+                                Profit
+                            </th>
+                            <th>
+                                Price
+                            </th>
+                            <th>
+                                SKU
+                            </th>
+                            <th>
+
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="product_data">`;
+        str += migrateProducts(data);
+        str += `</tbody></table>`;
+        $('.migrate-products').html(str);
+
+    }
+
+    function showMigrateProducts (data) {
+        $('.productdatarow').remove();
+        var str = migrateProducts(data);
+        $('#product_data').html(str);
+    }
+
+    function migrateProducts (data) {
+        var str = '';
+        data.products.forEach(product => {
+            var payload = JSON.parse(product.payload);
+            var button_str = '', cost_str = '', profit_str = '';
+            if (product.type == 'migration'){
+                button_str = `<button class="btn-confirm-product confirmbutton" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
+                                <button class="confirmbutton" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
+                                <button class="confirmbutton" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>`;
+                var cost_str = `<span id="cost-${product.id_shopify}">${parseFloat(payload.cost).toFixed(2)}</span>`;
+                var profit_str = `<div style="display:flex; justify-content: center;">
+                    <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
+                    %</div>`;
+            } else {
+                button_str = `<button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
+                                <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                                <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+            }
+
+            str += `<tr class="productdatarow">
+                <td class="check">
+                    <input type="checkbox" id="check-${ product.id_shopify }" data-id="${ product.id_shopify }" value="" class="checkbox">
+                </td>
+                <td class="pimage">
+                    <div class="productphoto">
+                        <img src="${payload.image_url}">
+                    </div>
+                </td>
+                <td data-label="PRODUCT NAME">
+                    ${ payload.name }
+                </td>
+                <td data-label="COST GDS">
+                    ${cost_str}
+                </td>
+                <td data-label="PROFIT">
+                    ${profit_str}
+                </td>
+                <td data-label="RETAIL PRICE">
+                    <span id="price-${product.id_shopify}">${parseFloat(product.price).toFixed(2)}</span>
+                </td>
+                <td data-label="SKU">
+                    ${product.sku}
+                </td>
+                <td>
+                    ${button_str}
+                </td>
+            </tr>`;
+        });
+        return str;
     }
 })

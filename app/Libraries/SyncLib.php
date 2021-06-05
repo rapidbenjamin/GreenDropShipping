@@ -50,15 +50,6 @@ class SyncLib
             $rows[] = implode(',', $row);
         }
         Storage::disk('local')->put('magento_stock.csv', implode("\n", $rows));
-        DB::statement(
-            "CREATE TABLE IF NOT EXISTS `temp_mg_product` (
-            `product_id` int(10) NOT NULL,
-            `quantity` decimal(14,0) DEFAULT NULL,
-            `sku` varchar(192) COLLATE utf8_unicode_ci DEFAULT NULL,
-            PRIMARY KEY (`product_id`),
-            UNIQUE KEY `SKU` (`sku`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
-        );
         DB::statement("TRUNCATE TABLE temp_mg_product");
         $path = str_replace("\\", "/", base_path());
         DB::connection()->getpdo()->exec(
@@ -104,6 +95,7 @@ class SyncLib
                 }
                 $mp->cron = 0;
                 $mp->save();
+                $mp->sku = $product->sku;
 
                 //UPDATE STOCK & COST & PRICE IN SHOPIFY STORES
                 ShopifyAdminApi::updateCostPriceStock($merchant, $mp, $price, $product->price);
@@ -264,25 +256,6 @@ class SyncLib
         $continue = true;
         $page = 1;
         $Mtotal_count = $total_count = 0;
-        DB::statement(
-            "CREATE TABLE IF NOT EXISTS `temp_products` (
-                `id` bigint(20) NOT NULL,
-                `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-                `price` double(8,2) NOT NULL,
-                `weight` float DEFAULT NULL,
-                `type_id` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `status` tinyint(1) DEFAULT NULL,
-                `visibility` tinyint(1) DEFAULT NULL,
-                `categories` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `images` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `attributes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `stock_info` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `upc` varchar(70) COLLATE utf8mb4_unicode_ci NOT NULL,
-                UNIQUE KEY `sku` (`sku`) USING HASH,
-                KEY `id` (`id`)
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-        );
         DB::statement("TRUNCATE TABLE temp_products");
         Storage::disk('local')->delete('magento_products.csv');
         while ($continue) {

@@ -242,7 +242,7 @@
             <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
         </li>
 
-        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span></li>
+        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1/{{ceil($total_count/10)}}</span></li>
 
         <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
             <span class="page-link" aria-hidden="true">›</span>
