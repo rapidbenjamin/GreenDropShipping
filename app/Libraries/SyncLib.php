@@ -67,17 +67,22 @@ class SyncLib
             FIELDS TERMINATED BY ','"
         );
 
-        DB::statement(
-            "UPDATE products
-            INNER JOIN temp_mg_product ON products.sku = temp_mg_product.sku
-            SET products.stock = temp_mg_product.quantity
-            WHERE products.stock != temp_mg_product.quantity"
-        );
-        DB::statement(
-            "UPDATE my_products
-            INNER JOIN temp_mg_product ON my_products.id_product = temp_mg_product.product_id
-            SET my_products.cron = 1, my_products.stock = temp_mg_product.quantity
-            WHERE my_products.stock != temp_mg_product.quantity"
+        DB::statement('UPDATE products P
+            INNER JOIN temp_mg_product T
+                ON T.sku = P.sku 
+            SET P.stock = T.quantity
+            WHERE P.stock != T.quantity
+        ');
+
+        DB::statement('UPDATE products P
+            INNER JOIN my_products MP
+                ON MP.id_product = P.id
+            INNER JOIN temp_mg_product T
+                ON T.sku = P.sku 
+            SET
+                MP.cron = 1,
+                MP.stock = T.quantity
+            WHERE MP.stock != T.quantity'
         );
 
         echo 'End: ' . gmdate('h:i:s', time());
