@@ -2,7 +2,6 @@
 
 namespace App\Console;
 
-
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Libraries\SyncLib;
@@ -81,15 +80,6 @@ class Kernel extends ConsoleKernel
             SyncLib::syncCategories();
 
         })->everyFiveMinutes();
-
-
-        //Magento Products
-        $schedule->call(function(){
-
-            SyncLib::syncProducts();
-
-        })->everyFiveMinutes();
-
     }//Close schedule
 
 
