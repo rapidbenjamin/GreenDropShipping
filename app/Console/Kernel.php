@@ -35,13 +35,6 @@ class Kernel extends ConsoleKernel
 
         })->everyMinute();
 
-        //STOCK
-        $schedule->call(function(){
-            //UPDATE STOCK FROM MAGENTO TO MIDDLEWARE (this is a View with quantity and saleable setting for each sku)
-            SyncLib::syncStock();
-
-        })->everyFiveMinutes();
-
         //ShopifySTOCK
         $schedule->call(function(){
             //UPDATE STOCK IN SHOPIFY STORES
