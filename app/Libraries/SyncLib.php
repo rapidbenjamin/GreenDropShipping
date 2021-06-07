@@ -85,6 +85,8 @@ class SyncLib
         foreach ($myProducts as $mp) {
             try {
                 $product = json_decode(Products::find($mp->id_product));
+                $attribute_upc_index = array_search('upc', array_column(json_decode($product->attributes), 'attribute_code'));
+                $attribute = json_decode($product->attributes);
                 $price = $product->price * (100 + $mp->profit) / 100;
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
@@ -96,6 +98,7 @@ class SyncLib
                 $mp->cron = 0;
                 $mp->save();
                 $mp->sku = $product->sku;
+                $mp->barcode = $attribute[$attribute_upc_index]->value;
 
                 //UPDATE STOCK & COST & PRICE IN SHOPIFY STORES
                 ShopifyAdminApi::updateCostPriceStock($merchant, $mp, $price, $product->price);
