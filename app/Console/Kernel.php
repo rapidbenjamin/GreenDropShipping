@@ -2,30 +2,8 @@
 
 namespace App\Console;
 
-
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use App\Libraries\Magento\MProduct;
-use App\Libraries\Magento\MCategory;
-use App\Category;
-use App\Products;
-use App\MyProducts;
-use App\ImportList;
-use App\ShopifyWebhook;
-use App\Libraries\Magento\MOrder;
-use App\Libraries\Shopify\ShopifyAdminApi;
-use Exception;
-use Illuminate\Support\Facades\DB;
-use App\Order;
-use App\OrderDetails;
-use App\OrderShippingAddress;
-use App\User;
-use App\Token;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use App\ProductsToSend;
-use App\Settings;
-use App\Jobs\ShopifyBulkPublish;
 use App\Libraries\SyncLib;
 
 class Kernel extends ConsoleKernel
@@ -56,13 +34,6 @@ class Kernel extends ConsoleKernel
             SyncLib::shopifyUpgraded();
 
         })->everyMinute();
-
-        //STOCK
-        $schedule->call(function(){
-            //UPDATE STOCK FROM MAGENTO TO MIDDLEWARE (this is a View with quantity and saleable setting for each sku)
-            SyncLib::syncStock();
-
-        })->everyFiveMinutes();
 
         //ShopifySTOCK
         $schedule->call(function(){
@@ -102,15 +73,6 @@ class Kernel extends ConsoleKernel
             SyncLib::syncCategories();
 
         })->everyFiveMinutes();
-
-
-        //Magento Products
-        $schedule->call(function(){
-
-            SyncLib::syncProducts();
-
-        })->everyFiveMinutes();
-
     }//Close schedule
 
 
