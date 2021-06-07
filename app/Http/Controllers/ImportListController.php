@@ -45,13 +45,13 @@ class ImportListController extends Controller
 
             ->join('import_list', 'import_list.id_product', '=', 'products.id')
 
-            //->join('my_products', 'my_products.id_imp_product', '=', 'import_list.id')
-
             ->whereNotIn('import_list.id', MyProducts::where('id_customer', Auth::User()->id)->pluck('id_imp_product'))
 
-            ->where('import_list.id_customer', Auth::user()->id)->orderBy('import_list.updated_at', 'desc')->paginate(50);
+            ->where('import_list.id_customer', Auth::user()->id)->orderBy('import_list.updated_at', 'desc');
 
+        $total_count = $prods->count();
 
+        $prods = $prods->paginate(10);
 
         foreach ($prods as $product) {
 
@@ -87,11 +87,13 @@ class ImportListController extends Controller
 
         }
 
-        return view('import-list', array(
+        return view('import-list_v2', array(
 
             'array_products' => $prods,
 
-            'profit' => $settings->set8
+            'profit' => $settings->set8,
+
+            'total_count' => $total_count
 
         ));
 
@@ -154,7 +156,8 @@ class ImportListController extends Controller
                 'id' => $product['id'],
                 'sku' => $product['sku'],
                 'payload' => json_encode($product),
-                'user_id' => $user_id
+                'user_id' => $user_id,
+                'action' => 'publish'
             ];
         }
 
@@ -162,6 +165,7 @@ class ImportListController extends Controller
 
         $temp_publish_products = DB::table('temp_publish_products')
             ->where('user_id', $user_id)
+            ->where('action', 'publish')
             ->pluck('payload');
 
         if (ShopifyBulkPublish::dispatch(Auth::User(), json_decode($temp_publish_products), $published)) {

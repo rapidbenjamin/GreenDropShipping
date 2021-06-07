@@ -25,10 +25,16 @@
     <link href="{{ asset('css/admin.css') }}" rel="stylesheet">
     <!--link href="{{ asset('css/custom.css') }}" rel="stylesheet"-->
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://app.greendropship.com/js/slideout.min.js"></script>
-     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
     <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+    <script data-require="angular.js@1.6.3" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.3/angular.min.js"></script>
+    <script data-require="angular-route.js@1.6.2" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.2/angular-route.min.js"></script>
+    <link href="{{ asset('css/CelStyles.css') }}" rel="stylesheet" type="text/css">
+    <script src="{{ asset('js/CelScripts.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/angularjs-slider/7.0.0/rzslider.min.css" />
+
     <script src="{{ asset('js/functions.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/tipped.min.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/tipped.css') }}">

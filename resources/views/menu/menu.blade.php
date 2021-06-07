@@ -2,7 +2,7 @@
 
 <div class="leftmenu fixedpos">
 
-           
+
 
            <div class="topel row-menu">
 
@@ -12,7 +12,7 @@
 
                         <img src="{{ asset('img/user_avatar.png') }}">
 
-                    </div>               
+                    </div>
 
                     <div>
 
@@ -62,7 +62,7 @@
 
                         </a>
 
-                        
+
 
                         <ul>
 
@@ -112,6 +112,20 @@
 
                             @endcan
 
+                            @if(Auth::User()->migration == 0)
+
+                            <li data-name="MIGRATION">
+
+                                <a href="{{ url('/migrate-products') }}">
+
+                                    Migration
+
+                                </a>
+
+                            </li>
+
+                            @endif
+
                         </ul>
 
                     </li>
@@ -154,15 +168,15 @@
 
                     @endif
 
-                </ul> 
+                </ul>
 
            </div>
 
-            
 
-            
 
-            
+
+
+
 
             <ul class="mainmenu footermenu">
 
@@ -176,7 +190,7 @@
 
                         <p>Settings</p>
 
-                        
+
 
                     </a>
 
@@ -192,7 +206,7 @@
 
                         <p>Your Plan</p>
 
-                        
+
 
                     </a>
 
@@ -208,7 +222,7 @@
 
                         <p>Help</p>
 
-                        
+
 
                     </a>
 

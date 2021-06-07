@@ -57,9 +57,7 @@ class SyncLib
         }
 
         Storage::disk('local')->put('magento_stock.csv', implode("\n", $rows));
-
-        DB::statement('TRUNCATE TABLE temp_mg_product');
-
+        DB::statement("TRUNCATE TABLE temp_mg_product");
         $path = str_replace("\\", "/", base_path());
 
         DB::connection()->getpdo()->exec(
@@ -69,7 +67,7 @@ class SyncLib
 
         DB::statement('UPDATE products P
             INNER JOIN temp_mg_product T
-                ON T.sku = P.sku 
+                ON T.sku = P.sku
             SET P.stock = T.quantity
             WHERE P.stock != T.quantity
         ');
@@ -78,7 +76,7 @@ class SyncLib
             INNER JOIN my_products MP
                 ON MP.id_product = P.id
             INNER JOIN temp_mg_product T
-                ON T.sku = P.sku 
+                ON T.sku = P.sku
             SET
                 MP.cron = 1,
                 MP.stock = T.quantity
@@ -100,7 +98,9 @@ class SyncLib
         foreach ($myProducts as $mp) {
             try {
                 $product = json_decode(Products::find($mp->id_product));
-                $price = $product->price / (1 - $mp->profit / 100);
+                $attribute_upc_index = array_search('upc', array_column(json_decode($product->attributes), 'attribute_code'));
+                $attribute = json_decode($product->attributes);
+                $price = $product->price * (100 + $mp->profit) / 100;
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
                 if (!($mp->location_id_shopify > 0)) {
@@ -110,6 +110,8 @@ class SyncLib
                 }
                 $mp->cron = 0;
                 $mp->save();
+                $mp->sku = $product->sku;
+                $mp->barcode = $attribute[$attribute_upc_index]->value;
 
                 //UPDATE STOCK & COST & PRICE IN SHOPIFY STORES
                 ShopifyAdminApi::updateCostPriceStock($merchant, $mp, $price, $product->price);
@@ -270,25 +272,6 @@ class SyncLib
         $continue = true;
         $page = 1;
         $Mtotal_count = $total_count = 0;
-        DB::statement(
-            "CREATE TABLE IF NOT EXISTS `temp_products` (
-                `id` bigint(20) NOT NULL,
-                `sku` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-                `price` double(8,2) NOT NULL,
-                `weight` float DEFAULT NULL,
-                `type_id` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `status` tinyint(1) DEFAULT NULL,
-                `visibility` tinyint(1) DEFAULT NULL,
-                `categories` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `images` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `attributes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `stock_info` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                `upc` varchar(70) COLLATE utf8mb4_unicode_ci NOT NULL,
-                UNIQUE KEY `sku` (`sku`) USING HASH,
-                KEY `id` (`id`)
-            ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-        );
         DB::statement("TRUNCATE TABLE temp_products");
         Storage::disk('local')->delete('magento_products.csv');
         while ($continue) {

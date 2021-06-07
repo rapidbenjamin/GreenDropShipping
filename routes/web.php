@@ -38,7 +38,14 @@ Route::get('/search-products', 'SearchController@index');
 Route::get('/search-products/{products}', 'SearchController@show');
 Route::get('/import-list', 'ImportListController@index');
 Route::get('/my-products', 'MyProductsController@index');
-Route::post('/delete-shopify-product/{product}', 'MyProductsController@deleteProduct');
+Route::post('/delete-shopify-product', 'MyProductsController@deleteProduct');
+Route::post('/delete-all-shopify-product', 'MyProductsController@deleteAllProduct');
+Route::post('/check-delete-shopify-products', 'MyProductsController@checkDeleteProducts');
+Route::get('/migrate-products', 'MigrateProductsController@index');
+Route::post('/delete-migrate-product', 'MigrateProductsController@deleteMigrateProduct');
+Route::post('/delete-migrate-products', 'MigrateProductsController@deleteMigrateProducts');
+Route::post('/check-delete-migrate', 'MigrateProductsController@checkDeleteMigrateProducts');
+Route::post('/confirm-migrate-products', 'MigrateProductsController@confirmMigrateProducts');
 
 /*Orders*/
 Route::get('orders/exports', 'OrdersController@exportCSV');
