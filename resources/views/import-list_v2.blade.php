@@ -50,6 +50,7 @@
                 <button class='btn-import-list-delete-all'>Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
             </div>
             <div class="pagesize">
+                <span>Show</span>
                 <select name="PageSize" id="page_size">
                     <option value="10">10</option>
                     <option value="20">20</option>
@@ -390,6 +391,8 @@
 
         $('.btn-import-list-send-' + productId).hide();
         $('.btn-import-list-send3-' + productId).show();
+        $('#delete-' + productId).prop('disabled', true);
+        $('#check-' + productId).prop('disabled', true);
 
         let btn = $(this);
         btn.attr('disabled', true);
@@ -420,6 +423,8 @@
             $('.btn-import-list-send3-' + productId).hide();
             $('.btn-import-list-send2-' + productId).show();
             $('.btn-import-list-send2-' + productId).attr('data-shopifyid', data.id_shopify);
+            $('#delete-' + productId).prop('disabled', false);
+            $('#check-' + productId).prop('disabled', false);
         }).fail(function(data) {
             if (data.status == 403)
                 $('#upgrade-plans-modal').modal('show')

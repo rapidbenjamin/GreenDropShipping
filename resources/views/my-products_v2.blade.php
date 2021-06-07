@@ -30,6 +30,15 @@
                 <div>
                     <button class="btn-mp-delete-all alldeletebutton">Delete</button>
                 </div>
+                <div class="pagesize">
+                    <span>Show</span>
+                    <select name="PageSize" id="page_size">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
             </div>
             @endcan
             <table class="greentable" cellspacing="0">
@@ -134,14 +143,6 @@
 
                 </tbody>
             </table>
-            <div class="pagesize">
-                <select name="PageSize" id="page_size">
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-            </div>
 
         </div>
     </div>
