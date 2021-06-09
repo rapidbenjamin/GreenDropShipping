@@ -91,13 +91,15 @@ class SyncLib
     public static function syncShopifyStock($request)
     {
         $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify');
-        if (isset($request) && $request->filled('user_id') && $request->user_id > 0)
-            $myProducts = $myProducts->where('id_customer', $request->user_id)->take(50);
+        if (\Auth::User())
+            $myProducts = $myProducts->where('id_customer', \Auth::User()->id)->take(30);
+        else
+            $myProducts = $myProducts->take(100);
         $myProducts = $myProducts->where('cron', '1')->get();
         $updatedCount = 0;
         foreach ($myProducts as $mp) {
             try {
-                $product = json_decode(Products::find($mp->id_product));
+                $product = Products::find($mp->id_product);
                 $price = $product->price * (100 + $mp->profit) / 100;
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
@@ -110,6 +112,7 @@ class SyncLib
                 $mp->save();
                 $mp->sku = $product->sku;
                 $mp->barcode = $product->upc;
+                $mp->weight = $product->weight;
 
                 //UPDATE STOCK & COST & PRICE IN SHOPIFY STORES
                 ShopifyAdminApi::updateCostPriceStock($merchant, $mp, $price, $product->price);
@@ -255,9 +258,7 @@ class SyncLib
 
     public static function syncProducts()
     {
-
-        $t = time();
-        echo ('Start: ' . date("h:i:s", $t));
+        echo 'Start: ' . gmdate('h:i:s', time());
 
         DB::statement("TRUNCATE TABLE temp_products");
         Storage::disk('local')->delete('magento_products.csv');
@@ -346,8 +347,7 @@ class SyncLib
             SET stock = 0
             WHERE T.sku IS NULL"
         );
-        $t = time();
-        echo ('End: ' . date("h:i:s", $t));
+        echo 'End: ' . gmdate('h:i:s', time());
         return 'Success';
     }
 
@@ -365,11 +365,9 @@ class SyncLib
                 }
                 $category->parent_id = $Mcategory->parent_id;
                 $category->name = $Mcategory->name;
-                //$category->is_active = $Mcategory->is_active;
                 $category->level = $Mcategory->level;
                 $category->position = $Mcategory->position;
                 $category->save();
-                //echo 'Id: '. $category->id . '<br>';
                 if (count($Mcategory->children_data)) {
                     $this->getRecursiveCategories($Mcategory->children_data, $categoriesIds);
                 }

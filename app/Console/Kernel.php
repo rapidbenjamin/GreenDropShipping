@@ -38,7 +38,7 @@ class Kernel extends ConsoleKernel
         //ShopifySTOCK
         $schedule->call(function(){
             //UPDATE STOCK IN SHOPIFY STORES
-            SyncLib::syncShopifyStock('cron');
+            SyncLib::syncShopifyStock([]);
 
         })->everyFiveMinutes();
 

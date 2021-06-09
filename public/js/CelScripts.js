@@ -292,7 +292,8 @@ angular
 
             var promise = $http.get(wcfServer + "Search", { params: data, timeout: canceller.promise })
                 .then(function (response) {
-                    return response.data;
+                    var result = filterCategories(response.data);
+                    return result;
                 });
 
             return {
@@ -329,7 +330,8 @@ angular
 
             var promise = $http.get(wcfServer + "DoSearch", { params: data, timeout: canceller.promise })
                 .then(function (response) {
-                    return response.data.DoSearchResult;
+                    var result = filterCategories(response.data.DoSearchResult);
+                    return result;
                 });
 
             return {
@@ -366,8 +368,10 @@ angular
 
             return $http.get(wcfServer + "DoSearchParams", { params: data })
                 .then(function (response) {
+                    var result = filterCategories(response.data.DoSearchParams);
                     console.log(response)
-                    return response.data.DoSearchParams;
+
+                    return result;
                 });
         };
 
@@ -382,7 +386,8 @@ angular
 
             return $http.get(wcfServer + "DoChangeProductsPerPage", { params: data })
                 .then(function (response) {
-                    return response.data.DoChangeProductsPerPageResult;
+                    var result = filterCategories(response.data.DoChangeProductsPerPageResult);
+                    return result;
                 });
         };
 
@@ -396,7 +401,8 @@ angular
             }
             return $http.get(wcfServer + "DoAnswerQuestion", { params: data })
                 .then(function (response) {
-                    return response.data.DoAnswerQuestionResult;
+                    var result = filterCategories(response.data.DoAnswerQuestionResult);
+                    return result;
                 });
         };
 
@@ -410,7 +416,8 @@ angular
             }
             return $http.get(wcfServer + "DoRemoveAnswer", { params: data })
                 .then(function (response) {
-                    return response.data.DoRemoveAnswerResult;
+                    var result = filterCategories(response.data.DoRemoveAnswerResult);
+                    return result;
                 });
         };
 
@@ -424,7 +431,8 @@ angular
             }
             return $http.get(wcfServer + "DoMovePage", { params: data })
                 .then(function (response) {
-                    return response.data.DoMovePageResult;
+                    var result = filterCategories(response.data.DoMovePageResult);
+                    return result;
                 });
         };
 
@@ -438,7 +446,8 @@ angular
             }
             return $http.get(wcfServer + "DoSortByField", { params: data })
                 .then(function (response) {
-                    return response.data.DoSortByFieldResult;
+                    var result = filterCategories(response.data.DoSortByFieldResult);
+                    return result;
                 });
         };
 
@@ -452,7 +461,8 @@ angular
             }
             return $http.get(wcfServer + "DoSortByName", { params: data })
                 .then(function (response) {
-                    return response.data.DoSortByNameResult;
+                    var result = filterCategories(response.data.DoSortByNameResult);
+                    return result;
                 });
         };
 
@@ -466,7 +476,8 @@ angular
             }
             return $http.get(wcfServer + "DoSortByRank", { params: data })
                 .then(function (response) {
-                    return response.data.DoSortByRankResult;
+                    var result = filterCategories(response.data.DoSortByRankResult);
+                    return result;
                 });
         };
 
@@ -480,7 +491,8 @@ angular
             }
             return $http.get(wcfServer + "DoSortByPrice", { params: data })
                 .then(function (response) {
-                    return response.data.DoSortByPriceResult;
+                    var result = filterCategories(response.data.DoSortByPriceResult);
+                    return result;
                 });
         };
 
@@ -497,6 +509,27 @@ angular
                         return response.data;
                     });
             };
+        }
+
+        var filterCategories = function (data) {
+            var answers = [];
+            var products_count = 0;
+            data.Questions[0].Answers.forEach(question => {
+                if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                    answers.push(question);
+                    products_count += question.ProductCount;
+                }
+            });
+            data.Questions[0].ExtraAnswers.forEach(question => {
+                if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                    answers.push(question);
+                    products_count += question.ProductCount;
+                }
+            });
+            data.Questions[0].Answers = answers;
+            data.Questions[0].ExtraAnswers = [];
+            data.ProductsCount = products_count;
+            return data;
         }
 
         return {
@@ -709,7 +742,7 @@ angular
 
         /* Numeric Values + defaults */
         root.Settings.Control.CharCountThreshold = root.Settings.Control.CharCountThreshold !== undefined ? parseInt(root.Settings.Control.CharCountThreshold) : 2; /* Default to 2 */
-        root.Settings.Refinements.AnswerLimit = root.Settings.Refinements.AnswerLimit !== undefined ? parseInt(root.Settings.Refinements.AnswerLimit) : 5; /* Defaults to 5 */
+        root.Settings.Refinements.AnswerLimit = 6; /* Defaults to 5 */
         root.Settings.ProductResults.ProductRatingRatio = root.Settings.ProductResults.ProductRatingRatio !== undefined ? parseInt(root.Settings.ProductResults.ProductRatingRatio) : 10; /* Defaults to 10 */
 
         if (root.Settings.General.ParamsToIgnore === undefined) {
@@ -1232,15 +1265,13 @@ angular
             }
             var search_key = document.querySelector('#search-products').value;
             var wcfServer = celConfig.Settings.General.WcfAddress;
-            if (search_key.trim() != '') {
-                var data = {
-                    query: search_key,
-                    siteKey: celConfig.Settings.General.SiteKey,
-                    principles: true
-                }
-                if (flag) {
-                    celAPI.Search(data).promise.then(onResults, onError);
-                }
+            var data = {
+                query: search_key,
+                siteKey: celConfig.Settings.General.SiteKey,
+                principles: true
+            }
+            if (flag) {
+                celAPI.Search(data).promise.then(onResults, onError);
             }
         }
         /*

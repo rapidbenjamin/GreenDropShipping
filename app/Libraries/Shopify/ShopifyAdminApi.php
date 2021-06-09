@@ -316,7 +316,8 @@ class ShopifyAdminApi
                             'fulfillment_service' => 'greendropship',
                             'inventory_management' => 'greendropship',
                             'taxable' => true,
-                            'barcode' => $myProduct->barcode
+                            'barcode' => $myProduct->barcode,
+                            'weight' => $myProduct->weight
                         )
                     )
                 )
