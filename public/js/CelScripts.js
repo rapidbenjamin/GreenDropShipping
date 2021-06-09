@@ -369,8 +369,6 @@ angular
             return $http.get(wcfServer + "DoSearchParams", { params: data })
                 .then(function (response) {
                     var result = filterCategories(response.data.DoSearchParams);
-                    console.log(response)
-
                     return result;
                 });
         };
@@ -514,21 +512,23 @@ angular
         var filterCategories = function (data) {
             var answers = [];
             var products_count = 0;
-            data.Questions[0].Answers.forEach(question => {
-                if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
-                    answers.push(question);
-                    products_count += question.ProductCount;
-                }
-            });
-            data.Questions[0].ExtraAnswers.forEach(question => {
-                if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
-                    answers.push(question);
-                    products_count += question.ProductCount;
-                }
-            });
-            data.Questions[0].Answers = answers;
-            data.Questions[0].ExtraAnswers = [];
-            data.ProductsCount = products_count;
+            if (data.SearchPath[0].Answers.length == 0) {
+                data.Questions[0].Answers.forEach(question => {
+                    if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                        answers.push(question);
+                        products_count += question.ProductCount;
+                    }
+                });
+                data.Questions[0].ExtraAnswers.forEach(question => {
+                    if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                        answers.push(question);
+                        products_count += question.ProductCount;
+                    }
+                });
+                data.Questions[0].Answers = answers;
+                data.Questions[0].ExtraAnswers = [];
+                data.ProductsCount = products_count;
+            }
             return data;
         }
 
