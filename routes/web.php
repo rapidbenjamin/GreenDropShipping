@@ -78,7 +78,6 @@ Route::get('/sync-magento/arreglosku', 'SyncController@arregloSku');
 Route::get('/sync-magento/tracking-number', 'SyncController@setTrackingNumber');
 Route::get('/sync-magento/update-status-when-canceling', 'SyncController@updateStatusWhenCancelingMagento');
 Route::get('/sync-magento/products-to-send', 'SyncController@productsToSend');
-Route::get('/sync/log', 'SyncController@log');
 Route::get('/sync-magento/shopifyupgraded', 'SyncController@shopifyupgraded');
 
 /* Shopify*/
