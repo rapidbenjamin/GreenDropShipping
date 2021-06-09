@@ -257,94 +257,96 @@ class SyncLib
 
     public static function syncProducts()
     {
+        echo 'Start: ' . gmdate('h:i:s', time());
 
-        $filter = [
-            'searchCriteria[filterGroups][0][filters][0][field]' => 'attribute_set_id',
-            'searchCriteria[filterGroups][0][filters][0][value]' => 10,
-            'searchCriteria[filterGroups][0][filters][0][condition_type]' => "eq",
-            'searchCriteria[filterGroups][1][filters][0][field]' => 'status',
-            'searchCriteria[filterGroups][1][filters][0][value]' => 1,
-            'searchCriteria[filterGroups][1][filters][0][condition_type]' => "eq"
-        ];
-        $t = time();
-        echo ('Start: ' . date("h:i:s", $t));
-
-        $continue = true;
-        $page = 1;
-        $Mtotal_count = $total_count = 0;
         DB::statement("TRUNCATE TABLE temp_products");
         Storage::disk('local')->delete('magento_products.csv');
-        while ($continue) {
-            $Mproduct = json_decode(MProduct::get($filter, 255, $page));
-            $Mtotal_count = $Mproduct->total_count;
-            $Mitems = $Mproduct->items;
-            $rows = [];
-            foreach ($Mitems as $item) {
-                $attribute_upc_index = array_search('upc', array_column($item->custom_attributes, 'attribute_code'));
-                $row['id']  = $item->id;
-                $row['sku']  = $item->sku;
-                $row['name']  = $item->name;
-                $row['price']  = $item->price;
-                $row['weight']  = isset($item->weight) ? $item->weight : 0;
-                $row['type_id']  = $item->type_id;
-                $row['status']  = $item->status;
-                $row['visibility']  = $item->visibility;
-                $row['categories']  = json_encode(isset($item->extension_attributes->category_links) ? $item->extension_attributes->category_links : null);
-                $row['images']  = json_encode(isset($item->media_gallery_entries) ? $item->media_gallery_entries : null);
-                $row['attributes']  = json_encode(isset($item->custom_attributes) ? $item->custom_attributes : null);
-                $row['stock_info']  = json_encode(isset($item->extension_attributes->stock_item) ? $item->extension_attributes->stock_item : null);
-                $row['upc']  = $attribute_upc_index ? $item->custom_attributes[$attribute_upc_index]->value : null;
-                $rows[] = implode('@', $row);
-                $total_count++;
-            }
-            Storage::disk('local')->append('magento_products.csv', implode("\n", $rows));
 
-            $page++;
-            echo 'Num: ' . $total_count . '<br>';
-            $continue = $total_count != $Mtotal_count;
-        }
+        $file = file_get_contents('https://members.greendropship.com/downloads/products.csv');
+        Storage::disk('local')->put('magento_products.csv', $file);
         $path = str_replace("\\", "/", base_path());
         DB::connection()->getpdo()->exec(
-            "LOAD DATA LOCAL INFILE '" . $path . "/storage/app/magento_products.csv' INTO TABLE temp_products
-            FIELDS TERMINATED BY '@'"
+            'LOAD DATA INFILE "' . $path . '/storage/app/magento_products.csv"
+            INTO TABLE temp_products
+            COLUMNS TERMINATED BY ","
+            OPTIONALLY ENCLOSED BY "\""
+            ESCAPED BY "<"
+            ESCAPED BY ">"
+            ESCAPED BY "\'"
+            IGNORE 1 LINES'
         );
 
         DB::statement(
-            "UPDATE products
-            INNER JOIN temp_products ON temp_products.sku = products.sku
-            INNER JOIN my_products ON my_products.id_product = products.id
-            SET my_products.cron = 1
-            WHERE temp_products.price != products.price"
+            "UPDATE products P
+            INNER JOIN temp_products T ON T.sku = P.sku
+            INNER JOIN my_products M ON M.id_product = P.id
+            SET M.cron = 1
+            WHERE T.price != P.price"
         );
 
         DB::statement(
-            "UPDATE products
-            INNER JOIN temp_products ON products.sku = temp_products.sku
-            SET products.name = temp_products.name,
-                products.price = temp_products.price,
-                products.weight = temp_products.weight,
-                products.type_id = temp_products.type_id,
-                products.status = temp_products.status,
-                products.visibility = temp_products.visibility,
-                products.images = temp_products.images,
-                products.attributes = temp_products.attributes,
-                products.stock_info = temp_products.stock_info,
-                products.upc = temp_products.upc"
+            "UPDATE products P
+            INNER JOIN temp_products T ON P.sku = T.sku
+            SET P.name = T.name,
+                P.price = T.price,
+                P.stock = T.qty,
+                P.weight = T.weight,
+                P.type_id = 'simple',
+                P.status = 1,
+                P.image_url = T.images_1,
+                P.images = JSON_ARRAY(
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 60)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 60)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 60)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 60))
+                ),
+                P.attributes = JSON_ARRAY(
+                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 60)),
+                    JSON_OBJECT('attribute_code', 'description', 'value', T.description),
+                    JSON_OBJECT('attribute_code', 'ship_width', 'value', T.width),
+                    JSON_OBJECT('attribute_code', 'ship_length', 'value', T.length),
+                    JSON_OBJECT('attribute_code', 'ship_height', 'value', T.height),
+                    JSON_OBJECT('attribute_code', 'brand', 'value', T.brand),
+                    JSON_OBJECT('attribute_code', 'upc', 'value', T.upc),
+                    JSON_OBJECT('attribute_code', 'cube', 'value', T.cubic),
+                    JSON_OBJECT('attribute_code', 'size', 'value', T.size),
+                    JSON_OBJECT('attribute_code', 'size_uom', 'value', T.size_uom),
+                    JSON_OBJECT('attribute_code', 'storage', 'value', '')
+                ),
+                P.stock_info = T.storage,
+                P.upc = T.upc"
+        );
+
+        DB::statement(
+            "INSERT INTO `products`(`sku`,`name`,`price`,`stock`,`brand`,`image_url`,`weight`,`type_id`,`status`,`images`,`attributes`,`stock_info`,`upc`)
+            SELECT T.sku,T.name,T.price, T.qty, T.brand, SUBSTR(T.images_1, 60),T.weight,'simple',1,JSON_ARRAY(
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 60)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 60)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 60)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 60))
+                ),JSON_ARRAY(
+                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 60)),
+                    JSON_OBJECT('attribute_code', 'description', 'value', T.description),
+                    JSON_OBJECT('attribute_code', 'ship_width', 'value', T.width),
+                    JSON_OBJECT('attribute_code', 'ship_length', 'value', T.length),
+                    JSON_OBJECT('attribute_code', 'ship_height', 'value', T.height),
+                    JSON_OBJECT('attribute_code', 'brand', 'value', T.brand),
+                    JSON_OBJECT('attribute_code', 'upc', 'value', T.upc),
+                    JSON_OBJECT('attribute_code', 'cube', 'value', T.cubic),
+                    JSON_OBJECT('attribute_code', 'size', 'value', T.size),
+                    JSON_OBJECT('attribute_code', 'size_uom', 'value', T.size_uom),
+                    JSON_OBJECT('attribute_code', 'storage', 'value', '')
+                ),T.storage, T.upc
+            FROM temp_products T LEFT JOIN products P ON T.sku = P.sku
+            WHERE P.sku IS NULL"
         );
         DB::statement(
-            "INSERT INTO `products`(`id`,`sku`,`name`,`price`,`stock`,`brand`,`image_url`,`weight`,`type_id`,`status`,`visibility`,`categories`,`images`,`attributes`,`stock_info`,`upc`)
-            SELECT temp_products.id, temp_products.sku,temp_products.name,temp_products.price, 0, '', '',temp_products.weight,temp_products.type_id,temp_products.status,temp_products.visibility,temp_products.categories,temp_products.images,temp_products.attributes,temp_products.stock_info, temp_products.upc
-            FROM temp_products LEFT JOIN products ON temp_products.sku = products.sku
-            WHERE products.sku IS NULL"
-        );
-        DB::statement(
-            "UPDATE products
-            LEFT JOIN temp_products ON temp_products.sku = products.sku
+            "UPDATE products P
+            LEFT JOIN temp_products T ON T.sku = P.sku
             SET stock = 0
-            WHERE temp_products.sku IS NULL"
+            WHERE T.sku IS NULL"
         );
-        $t = time();
-        echo ('End: ' . date("h:i:s", $t));
+        echo 'End: ' . gmdate('h:i:s', time());
         return 'Success';
     }
 
