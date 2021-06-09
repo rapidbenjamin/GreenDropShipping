@@ -1248,6 +1248,21 @@
        text-align: right;
   }
 
+  #celUITDiv #search{
+       text-align: center;
+  }
+
+  #celUITDiv #search input{
+      font-size: 18px;
+  }
+
+  #celUITDiv #search span{
+    background: green;
+    border: solid 7px green;
+    border-radius: 7px;
+    margin-left: 5px;
+  }
+
   #celUITDiv #messages span{
       color:#fff;
   }
