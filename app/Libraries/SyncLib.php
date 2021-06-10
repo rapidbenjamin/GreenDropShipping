@@ -170,22 +170,32 @@ class SyncLib
             ');
 
         //2. Clean Middeware token table
-        Token::where('id', '>', 0)->delete();
+        DB::statement("TRUNCATE TABLE temp_tokens");
+        DB::statement("TRUNCATE TABLE token");
 
-        //3. Update table
-        foreach ($tokens as $key => $tk) {
+        $rows = [];
+        foreach ($tokens as $tk) {
             if ($tk->enddate != '0000-00-00 00:00:00') {
-                $token = new Token;
-                $token->token = $tk->token;
-                $token->status = $tk->status;
-                $token->id_order = $tk->id_order;
-                $token->user_id = $tk->user_id;
-                $token->enddate = $tk->enddate;
-                $token->display_name = $tk->display_name;
-                $token->user_email = $tk->user_email;
-                $token->save();
+                $rows[] = [
+                    'token' => $tk->token,
+                    'status' => $tk->status,
+                    'id_order' => $tk->id_order,
+                    'user_id' => $tk->user_id,
+                    'enddate' => $tk->enddate,
+                    'display_name' => $tk->display_name,
+                    'user_email' => $tk->user_email
+                ];
             }
         }
+        DB::table('temp_tokens')->insert($rows);
+
+        //3. Update table
+        DB::statement(
+            "INSERT INTO `token`(`token`,`status`,`id_order`,`user_id`,`enddate`,`display_name`,`user_email`)
+            SELECT T.token, T.status,T.id_order,T.user_id, T.enddate,T.display_name,T.user_email
+            FROM temp_tokens T LEFT JOIN token ON T.token = token.token
+            WHERE T.enddate != '0000-00-00 00:00:00'"
+        );
         return 'Success';
     }
 
