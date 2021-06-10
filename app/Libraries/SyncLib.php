@@ -92,7 +92,7 @@ class SyncLib
     {
         $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify');
         if (\Auth::User())
-            $myProducts = $myProducts->where('id_customer', \Auth::User()->id)->take(30);
+            $myProducts = $myProducts->where('id_customer', \Auth::User()->id)->take(20);
         else
             $myProducts = $myProducts->take(100);
         $myProducts = $myProducts->where('cron', '1')->get();
@@ -100,7 +100,6 @@ class SyncLib
         foreach ($myProducts as $mp) {
             try {
                 $product = Products::find($mp->id_product);
-                $price = $product->price * (100 + $mp->profit) / 100;
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
                 if (!($mp->location_id_shopify > 0)) {
@@ -110,13 +109,11 @@ class SyncLib
                 }
                 $mp->cron = 0;
                 $mp->save();
-                $mp->sku = $product->sku;
-                $mp->barcode = $product->upc;
-                $mp->weight = $product->weight;
 
                 //UPDATE STOCK & COST & PRICE IN SHOPIFY STORES
-                ShopifyAdminApi::updateCostPriceStock($merchant, $mp, $price, $product->price);
+                ShopifyAdminApi::updateStock($merchant, $mp);
                 sleep(1);
+                ShopifyAdminApi::updateCostPrice($merchant, $mp, $product->price);
                 $updatedCount++;
             } catch (Exception $ex) {
                 echo $ex->getMessage();

@@ -280,14 +280,8 @@
 
             //Get all checked products
             let products = [];
-
-            let nProd = $("input.checkbox:checked").length;
-
-            if (nProd > 0) {
-                $(this).attr('disabled', true);
-                $('.alert-publish-all').show();
-                $('.alert-publish-all-ready').hide();
-            }
+            $(this).prop('disabled', true);
+            $('.btn-import-list-delete-all').prop('disabled', true);
 
             $("input.checkbox:checked").each(function(index, ele) {
                 let productId = $(ele).attr('id').split('-')[1];
@@ -296,7 +290,8 @@
 
                     $('.btn-import-list-send-' + productId).hide();
                     $('.btn-import-list-send3-' + productId).show();
-                    $('.btn-import-list-send-' + productId).attr('disabled', true);
+                    $('.btn-import-list-send-' + productId).prop('disabled', true);
+                    $('.btn-import-list-delete').prop('disabled', true);
 
                     // data array of all checked products
                     $("input.chk-img" + productId + ":checked").each(function(index, ele) {
@@ -321,7 +316,6 @@
                 }
             });
 
-            $(this).attr('disabled', false);
 
 
             let btn = $(this);
@@ -338,7 +332,6 @@
                     if (data.status == 403)
                         $('#upgrade-plans-modal').modal('show')
                 });
-
             }
 
         }); //Close send all function
@@ -361,11 +354,15 @@
                             "_token": "{{ csrf_token() }}",
                         },
                     })
-                    .then(res => {
-                        res.id_shopify.forEach(productId => {
-                            $('.btn-import-list-send3-' + productId).hide();
-                            $('.btn-import-list-send2-' + productId).show();
-                        });
+                    .then(data => {
+                        if (data.result) {
+                            $('.btn-import-list-send-all').prop('disabled', false);
+                            $('.btn-import-list-delete-all').prop('disabled', false);
+                            data.id_shopify.forEach(productId => {
+                                $('.btn-import-list-send3-' + productId).hide();
+                                $('.btn-import-list-send2-' + productId).show();
+                            });
+                        }
                     });
             }
         }
@@ -395,7 +392,7 @@
         $('#check-' + productId).prop('disabled', true);
 
         let btn = $(this);
-        btn.attr('disabled', true);
+        btn.prop('disabled', true);
 
         let product = {
             id: productId,
@@ -418,7 +415,7 @@
             product: product
         }, function(data, status) {
 
-            btn.attr('disabled', false);
+            btn.prop('disabled', false);
             $('.alert-publish-single').show();
             $('.btn-import-list-send3-' + productId).hide();
             $('.btn-import-list-send2-' + productId).show();

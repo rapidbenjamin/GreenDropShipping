@@ -22,9 +22,10 @@ class ShopifyAdminApi
             $inventory_quantity = $productModel->stock;
         }
         $images = [];
-        foreach($product->images as $img){
-            $images[] = (object) ['src' => $img];
-        };
+        if (isset($product->images))
+            foreach($product->images as $img){
+                $images[] = (object) ['src' => $img];
+            };
         $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-07/products.json', json_encode(
             array(
                 'product' => array(
@@ -63,7 +64,7 @@ class ShopifyAdminApi
                 'variant_id' => $result['body']['product']['variants'][0]['id'],
                 'inventory_item_id' => $result['body']['product']['variants'][0]['inventory_item_id'],
                 'inventory_quantity' => $result['body']['product']['variants'][0]['inventory_quantity'],
-                'images' => $product->images
+                'images' => isset($product->images) ? $product->images : []
             );
         } else if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 429)) {
             return array(
@@ -291,7 +292,7 @@ class ShopifyAdminApi
         }
     }
 
-    public static function updateCostPriceStock($user, $myProduct, $price, $cost)
+    public static function updateStock($user, $myProduct)
     {
         $inventory_quantity = 0;
         if ($myProduct != null) {
@@ -299,26 +300,29 @@ class ShopifyAdminApi
         }
         ShopifyAdminApi::request(
             $user,
-            'PUT',
-            '/admin/api/2021-04/products/'.$myProduct->id_shopify.'.json',
+            'POST',
+            '/admin/api/2021-04/inventory_levels/set.json',
             json_encode(
                 array(
-                    "product" => array(
-                        "id" => $myProduct->id_shopify,
-                        'variant' => array(
-                            "id" => $myProduct->id_variant_shpoify,
-                            "cost" => $cost,
-                            "price" => $price,
-                            "inventory_quantity" => $inventory_quantity,
-                            "sku" => $myProduct->sku,
-                            "inventory_policy" => 'deny',
-                            'inventory_item_id' => $myProduct->inventory_item_id_shopify,
-                            'fulfillment_service' => 'greendropship',
-                            'inventory_management' => 'greendropship',
-                            'taxable' => true,
-                            'barcode' => $myProduct->barcode,
-                            'weight' => $myProduct->weight
-                        )
+                    "location_id" => $myProduct->location_id_shopify,
+                    "inventory_item_id" => $myProduct->inventory_item_id_shopify,
+                    "available" => $inventory_quantity,
+                )
+            )
+        );
+    }
+
+    public static function updateCostPrice($user, $myProduct, $cost)
+    {
+        ShopifyAdminApi::request(
+            $user,
+            'PUT',
+            '/admin/api/2021-04/inventory_items/'.$myProduct->inventory_item_id_shopify.'.json',
+            json_encode(
+                array(
+                    "inventory_item" => array(
+                        "id" => $myProduct->inventory_item_id_shopify,
+                        "cost" => $cost,
                     )
                 )
             )
@@ -337,8 +341,6 @@ class ShopifyAdminApi
             return array(
                 'result' => 1,
                 'inventory_levels' => $result['body']['inventory_levels'],
-                // 'location_id' => $result['body']['inventory_levels'][0]['location_id'],
-                // 'inventory_item_id' => $result['body']['inventory_levels'][0]['inventory_item_id'],
             );
         } else if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 429)) {
             return array(

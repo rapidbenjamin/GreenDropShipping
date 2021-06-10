@@ -129,47 +129,5 @@ Route::prefix('admin')->group(function () {
 //TEST
 Route::get('/test', function () {
 
-    $name = 'collection1,collection2,collection3,collection4';
-
-    $collections_split = explode(',', $name);
-    $collections = ShopifyAdminApi::getCollections(Auth::user());
-
-    foreach ($collections_split as $item) {
-        $filtered = $collections->first(function ($value) use ($item) {
-            return trim($item) != '' && $value['name'] == trim($item);
-        });
-
-        if ($filtered == null) { //no existe
-            $collectionId = ShopifyAdminApi::createCustomCollection(Auth::user(), $item);
-            if ($collectionId != 0) {
-                $result = ShopifyAdminApi::addProductToCustomCollection(Auth::user(),'5848129798306',$collectionId);
-            }
-        }
-    }
-
-
-    //$inventory =collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable',1);
-    dd($collections);
-    //return 0;
-    /*
-    foreach(Order::get() as $order){
-        $data = json_decode($order->data);
-        dd($data);
-    }
-    foreach (Products::get() as $product) {
-        $stock = MProduct::getStock($product->sku);
-        $stock = json_decode($stock);
-        $stock_item = [
-            'stock_item' => [
-                'item_id' => $stock->item_id,
-                'qty' => 200,
-                'is_in_stock' => true,
-            ]
-        ];;
-        $api = MagentoApi::getInstance();
-        $stockid = $api->query('PUT', 'products/'. $product->sku . '/stockItems/' . $stock->item_id, [], json_encode($stock_item));
-        var_dump($stockid);
-        echo '<br>';
-    }*/
     return 'finished';
 });
