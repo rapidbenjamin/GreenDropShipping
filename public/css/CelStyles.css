@@ -1249,11 +1249,11 @@
   }
 
   #celUITDiv #search{
-       text-align: center;
+    text-align: center;
   }
 
   #celUITDiv #search input{
-      font-size: 18px;
+    font-size: 18px;
   }
 
   #celUITDiv #search span{
