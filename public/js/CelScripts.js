@@ -6,7 +6,7 @@ angular
     .config(["$routeProvider", "$locationProvider", "$sceDelegateProvider", function ($routeProvider, $locationProvider, $sceDelegateProvider) {
         $routeProvider
             .otherwise({
-                template: "<div id=\"profile-tabs\" ng-show=\"settings.General.ProfileTabs !== ''\" class=\"ng-cloak\">    <ul>        <li cel-profile ng-repeat=\"(name, tab) in settings.General.ProfileTabs\" profile=\"{{ tab.Profile }}\" display=\"{{ tab.Display }}\" ng-class=\"{ 'selected' : profile == tab.Profile }\" tabindex=\"0\">            <span>{{ tab.Alias !== undefined ? tab.Alias : name }}</span>        </li>    </ul></div><div id=\"loader\" ng-hide=\"loading == false\">    <div><i class=\"cel-icon-spin3 animate-spin\"></i></div></div>        <div id=\"filter-details\">            <div ng-show=\"searchPage === true\" id=\"filter-title\">{{ settings.Language.Search }} \"{{ results.OriginalQuery }}\" </div>            <div id=\"products-count\">{{ results.ProductsCount }} {{ settings.Language.Products }}</div>        </div><div cel-search-anlx cel-infinite-scroll=\"{{ settings.General.InfiniteScroll }}\" id=\"container\" class=\"flex-box-row {{ profile !== '' ? 'profile-' + profile : '' }}\" ng-hide=\"loading == true\">    <div id=\"filter-content\">        <div id=\"filter-breadcrumbs\" ng-show=\"results.SearchPath.Answers.length != 0\" class=\"ng-cloak\">            <div class=\"filter-by\">{{ settings.Language.FilterBy }}</div>            <ul class=\"breadcrumbs\">                <li cel-breadcrumb ng-repeat=\"breadcrumb in results.SearchPath.Answers\" id=\"{{ breadcrumb.ID }}\" class=\"breadcrumb\" answer-id=\"{{ breadcrumb.ID }}\" tabindex=\"0\">                    <!-- Template in breadcrumb.html -->                </li>            </ul>            <div id=\"clear-all\">                <button class=\"btn-default\" ng-click=\"clearAll()\">{{ settings.Language.ClearAll }}</button>            </div>        </div>        <div id=\"filters\">            <div id=\"questions-toggle\" class=\"hidden visible-sm visible-xs\">                <span cel-toggle=\"toggleQuestions\" tabindex=\"0\"><i ng-class=\"{ 'cel-icon-angle-down' : toggleQuestions == false, 'cel-icon-angle-up' : toggleQuestions == true }\"></i>{{ settings.Language.Filters }}</span>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Langauge.Apply }}</span>            </div>            <div id=\"questions-container\" ng-class=\"{ 'hidden-xs hidden-sm' : toggleQuestions == false }\">                <ul class=\"questions\">                    <li cel-question ng-repeat=\"question in results.Questions\" id=\"{{ question.SideText }}\">                        <!-- Template in question.html -->                    </li>                    <rzslider cel-price-slider ng-if=\"settings.Refinements.EnablePriceSlider == true\" ng-show=\"showSlider === true\" class=\"hidden-xs hidden-sm\"                                rz-slider-model=\"slider.minValue\"                                rz-slider-high=\"slider.maxValue\"                                rz-slider-options=\"slider.options\"></rzslider>                </ul>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Language.Apply }}</span>            </div>        </div>    </div>    <div id=\"main-content\">        <div cel-campaigns id=\"campaigns\"></div>        <div id=\"messages\" ng-show=\"results.RecommendedMessage != '' && results.RecommendedMessage !== undefined\" class=\"ng-cloak\">            <span ng-bind-html=\"results.RecommendedMessage | trust_html\"></span>        </div>        <div id=\"related-searches\" ng-if=\"results.RelatedSearches.length > 0\"><a ng-repeat=\"query in results.RelatedSearches\" href=\"?{{ settings.General.DoSearchUrlParameter }}={{ query }}\">{{ query }}</a></div>        <div class=\"toolbar flex-box-row col-xs-max-1 col-sm-max-3 col-md-max-3 col-max-2\">                      <div id=\"display\" class=\"hidden-sm\">                <ul class=\"flex-box-row\">                    <li cel-display=\"grid\" class=\"grid_list grid\" ng-class=\"{ selected : display == 'grid' }\" ng-attr-tabindex=\"{{display == 'grid' ? '': '0'}}\" title=\"{{ settings.Language.Grid }}\">                        <i class=\"cel-icon-grid\"></i>                    </li>                    <li cel-display=\"list\" class=\"grid_list list\" ng-class=\"{ selected : display == 'list' }\" ng-attr-tabindex=\"{{ display == 'list' ? '': '0' }}\" title=\"{{ settings.Language.List }}\">                        <i class=\"cel-icon-list\"></i>                    </li>                </ul>            </div>                         <div id=\"sorting\">            	<div class=\"select-wrapper cel-icon-angle-down\">Sort By 	            	<select cel-sort >	            		<option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-selected=\"currentSort.alias === sort.Alias\" t=\"{{ currentSort.alias }} {{ sort.Alias }}\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\">{{ settings.Language[name] !== undefined ? settings.Language[name] : sort.Alias }}</option>	            	</select>	                <!--<select ng-if=\"searchPage === false\" class=\"flex-box-row\" onChange=\"location = this.value\">	                    <option cel-sort-option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\" ng-value=\"sort.NavURL\" ng-selected=\"currentSort.alias === sort.Alias\">{{ sort.Alias }}</option>	                </select>-->                </div>            </div>                                             </div>        <ul class=\"products products-{{ display }} flex-box-row\" ng-class=\"{'col-xs-max-2 col-sm-max-3 col-md-max-3 col-lg-max-3 col-max-4' : display=='grid',  'col-max-1' : display == 'list' }\">            <li cel-product ng-repeat=\"product in results.Products\" id=\"{{ product.Id }}\" class=\"cuit_item product flex-box-column product-item\">                <!-- Template in product.html -->            </li>        </ul>        <div class=\"toolbar toolbar-bottom flex-box-row col-xs-max-1 col-sm-max-3 col-max-2\">            <div cel-pagination ng-hide=\"results.PagesCount == 1 || settings.ProductResults.InfiniteScroll == true\" id=\"pagination\" current-page=\"{{ results.CurrentPage }}\" pages-count=\"{{ results.PagesCount }}\">                <!-- Template in pagination.html -->            </div>            <div id=\"page-sizer\" class=\"hidden-xs hidden-sm hidden-md\">                <div class=\"select-wrapper cel-icon-angle-down\" ng-if=\"settings.Toolbar.PageSizes.Enabled == true && settings.ProductResults.InfiniteScroll == false\">                    <span>{{ settings.Language.ProductsPerPage }}</span>                    <select cel-page-sizer class=\"cel-icon-angle-down\">                        <option ng-repeat=\"size in settings.Toolbar.PageSizes.Option\" id=\"{{ size.Value }}\" ng-selected=\"{{ size.Value == pageSize }}\" ng-value=\"{{ size.Value }}\">{{ size.Value }}</option>                    </select>                </div>            </div>        </div>    </div></div><div cel-to-top ng-if=\"settings.ProductResults.InfiniteScroll == true && showToTop == true\" class=\"to-top cel-icon-angle-up\" ng-attr-tabindex=\"{{settings.ProductResults.InfiniteScroll == true ? '': '0'}}\"></div>",
+                template: "<div id=\"profile-tabs\" ng-show=\"settings.General.ProfileTabs !== ''\" class=\"ng-cloak\">    <ul>        <li cel-profile ng-repeat=\"(name, tab) in settings.General.ProfileTabs\" profile=\"{{ tab.Profile }}\" display=\"{{ tab.Display }}\" ng-class=\"{ 'selected' : profile == tab.Profile }\" tabindex=\"0\">            <span>{{ tab.Alias !== undefined ? tab.Alias : name }}</span>        </li>    </ul></div><div id=\"loader\" ng-hide=\"loading == false\">    <div><i class=\"cel-icon-spin3 animate-spin\"></i></div></div>        <div id=\"filter-details\">            <div ng-show=\"searchPage === true\" id=\"filter-title\">{{ settings.Language.Search }} \"{{ results.OriginalQuery }}\" </div>            <div id=\"products-count\">{{ results.ProductsCount }} {{ settings.Language.Products }}</div>        </div><div cel-search-anlx cel-infinite-scroll=\"{{ settings.General.InfiniteScroll }}\" id=\"container\" class=\"flex-box-row {{ profile !== '' ? 'profile-' + profile : '' }}\" ng-hide=\"loading == true\">    <div id=\"filter-content\">        <div id=\"filter-breadcrumbs\" ng-show=\"results.SearchPath.Answers.length != 0\" class=\"ng-cloak\">            <div class=\"filter-by\">{{ settings.Language.FilterBy }}</div>            <ul class=\"breadcrumbs\">                <li cel-breadcrumb ng-repeat=\"breadcrumb in results.SearchPath.Answers\" id=\"{{ breadcrumb.ID }}\" class=\"breadcrumb\" answer-id=\"{{ breadcrumb.ID }}\" tabindex=\"0\">                    <!-- Template in breadcrumb.html -->                </li>            </ul>            <div id=\"clear-all\">                <button class=\"btn-default\" ng-click=\"clearAll()\">{{ settings.Language.ClearAll }}</button>            </div>        </div>        <div id=\"filters\">            <div id=\"questions-toggle\" class=\"hidden visible-sm visible-xs\">                <span cel-toggle=\"toggleQuestions\" tabindex=\"0\"><i ng-class=\"{ 'cel-icon-angle-down' : toggleQuestions == false, 'cel-icon-angle-up' : toggleQuestions == true }\"></i>{{ settings.Language.Filters }}</span>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Langauge.Apply }}</span>            </div>            <div id=\"questions-container\" ng-class=\"{ 'hidden-xs hidden-sm' : toggleQuestions == false }\">                <ul class=\"questions\">                    <li cel-question ng-repeat=\"question in results.Questions\" id=\"{{ question.SideText }}\">                        <!-- Template in question.html -->                    </li>                    <rzslider cel-price-slider ng-if=\"settings.Refinements.EnablePriceSlider == true\" ng-show=\"showSlider === true\" class=\"hidden-xs hidden-sm\"                                rz-slider-model=\"slider.minValue\"                                rz-slider-high=\"slider.maxValue\"                                rz-slider-options=\"slider.options\"></rzslider>                </ul>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Language.Apply }}</span>            </div>        </div>    </div>    <div id=\"main-content\">        <div cel-campaigns id=\"campaigns\"></div>        <div id=\"messages\" ng-show=\"results.RecommendedMessage != '' && results.RecommendedMessage !== undefined\" class=\"ng-cloak\">            <span ng-bind-html=\"results.RecommendedMessage | trust_html\"></span>        </div>        <div id=\"related-searches\" ng-if=\"results.RelatedSearches.length > 0\"><a ng-repeat=\"query in results.RelatedSearches\" href=\"?{{ settings.General.DoSearchUrlParameter }}={{ query }}\">{{ query }}</a></div>        <div class=\"toolbar flex-box-row col-xs-max-1 col-sm-max-3 col-md-max-3 col-max-3\">                      <div id=\"display\" class=\"hidden-sm\">                <ul class=\"flex-box-row\">                    <li cel-display=\"grid\" class=\"grid_list grid\" ng-class=\"{ selected : display == 'grid' }\" ng-attr-tabindex=\"{{display == 'grid' ? '': '0'}}\" title=\"{{ settings.Language.Grid }}\">                        <i class=\"cel-icon-grid\"></i>                    </li>                    <li cel-display=\"list\" class=\"grid_list list\" ng-class=\"{ selected : display == 'list' }\" ng-attr-tabindex=\"{{ display == 'list' ? '': '0' }}\" title=\"{{ settings.Language.List }}\">                        <i class=\"cel-icon-list\"></i>                    </li>                </ul>            </div><div id=\"search\"><input type=\"text\" value=\"\" id=\"search-products\" placeholder=\"Search Key\" ng-keyup= \"searchProducts($event)\"><span ng-click= \"searchProducts()\" ><i class=\"cel-icon-search\"></i></span></div>                         <div id=\"sorting\">            	<div class=\"select-wrapper cel-icon-angle-down\">Sort By 	            	<select cel-sort >	            		<option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-selected=\"currentSort.alias === sort.Alias\" t=\"{{ currentSort.alias }} {{ sort.Alias }}\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\">{{ settings.Language[name] !== undefined ? settings.Language[name] : sort.Alias }}</option>	            	</select>	                <!--<select ng-if=\"searchPage === false\" class=\"flex-box-row\" onChange=\"location = this.value\">	                    <option cel-sort-option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\" ng-value=\"sort.NavURL\" ng-selected=\"currentSort.alias === sort.Alias\">{{ sort.Alias }}</option>	                </select>-->                </div>            </div>                                             </div>        <ul class=\"products products-{{ display }} flex-box-row\" ng-class=\"{'col-xs-max-2 col-sm-max-3 col-md-max-3 col-lg-max-3 col-max-4' : display=='grid',  'col-max-1' : display == 'list' }\">            <li cel-product ng-repeat=\"product in results.Products\" id=\"{{ product.Id }}\" class=\"cuit_item product flex-box-column product-item\">                <!-- Template in product.html -->            </li>        </ul>        <div class=\"toolbar toolbar-bottom flex-box-row col-xs-max-1 col-sm-max-3 col-max-2\">            <div cel-pagination ng-hide=\"results.PagesCount == 1 || settings.ProductResults.InfiniteScroll == true\" id=\"pagination\" current-page=\"{{ results.CurrentPage }}\" pages-count=\"{{ results.PagesCount }}\">                <!-- Template in pagination.html -->            </div></div>    </div></div><div cel-to-top ng-if=\"settings.ProductResults.InfiniteScroll == true && showToTop == true\" class=\"to-top cel-icon-angle-up\" ng-attr-tabindex=\"{{settings.ProductResults.InfiniteScroll == true ? '': '0'}}\"></div>",
                 controller: "CelController",
                 reloadOnSearch: false
             });
@@ -270,6 +270,7 @@ angular
          * */
         var apiParamMapping = {
             /* doSearch answerId is removed so when instant search is enabled, it won't retain any answer ids */
+            Search: ["query", "siteKey", "principles"],
             doSearch: ["siteId", "searchHandle", "query", /*"answerId",*/ "pageSize", "fieldName", "isAscending", "isNumericSort", "profile", "principles"],
             doSearchParams: ["siteId", "searchHandle", "query", "answerIds", "page", "pageSize", "fieldName", "isAscending", "isNumericSort", "profile", "priceField", "effectOnSearchPath", "principles"],
             doChangeProductsPerPage: ["siteId", "searchHandle", "pageSize", "principles"],
@@ -281,6 +282,25 @@ angular
             doSortByRank: ["siteId", "searchHandle", "principles"],
             doSortByPrice: ["siteId", "searchHandle", "isAscending", "principles"]
         };
+
+        var Search = function (data) {
+            var canceller = $q.defer();
+
+            var cancel = function (reason) {
+                canceller.resolve(reason);
+            };
+
+            var promise = $http.get(wcfServer + "Search", { params: data, timeout: canceller.promise })
+                .then(function (response) {
+                    var result = filterCategories(response.data);
+                    return result;
+                });
+
+            return {
+                promise: promise,
+                cancel: cancel
+            };
+        }
 
         var doSearch = function (data) {
             data = JSON.parse(JSON.stringify(data));
@@ -310,7 +330,8 @@ angular
 
             var promise = $http.get(wcfServer + "DoSearch", { params: data, timeout: canceller.promise })
                 .then(function (response) {
-                    return response.data.DoSearchResult;
+                    var result = filterCategories(response.data.DoSearchResult);
+                    return result;
                 });
 
             return {
@@ -347,7 +368,8 @@ angular
 
             return $http.get(wcfServer + "DoSearchParams", { params: data })
                 .then(function (response) {
-                    return response.data.DoSearchParams;
+                    var result = filterCategories(response.data.DoSearchParams);
+                    return result;
                 });
         };
 
@@ -362,7 +384,8 @@ angular
 
             return $http.get(wcfServer + "DoChangeProductsPerPage", { params: data })
                 .then(function (response) {
-                    return response.data.DoChangeProductsPerPageResult;
+                    var result = filterCategories(response.data.DoChangeProductsPerPageResult);
+                    return result;
                 });
         };
 
@@ -376,7 +399,8 @@ angular
             }
             return $http.get(wcfServer + "DoAnswerQuestion", { params: data })
                 .then(function (response) {
-                    return response.data.DoAnswerQuestionResult;
+                    var result = filterCategories(response.data.DoAnswerQuestionResult);
+                    return result;
                 });
         };
 
@@ -390,7 +414,8 @@ angular
             }
             return $http.get(wcfServer + "DoRemoveAnswer", { params: data })
                 .then(function (response) {
-                    return response.data.DoRemoveAnswerResult;
+                    var result = filterCategories(response.data.DoRemoveAnswerResult);
+                    return result;
                 });
         };
 
@@ -404,7 +429,8 @@ angular
             }
             return $http.get(wcfServer + "DoMovePage", { params: data })
                 .then(function (response) {
-                    return response.data.DoMovePageResult;
+                    var result = filterCategories(response.data.DoMovePageResult);
+                    return result;
                 });
         };
 
@@ -418,7 +444,8 @@ angular
             }
             return $http.get(wcfServer + "DoSortByField", { params: data })
                 .then(function (response) {
-                    return response.data.DoSortByFieldResult;
+                    var result = filterCategories(response.data.DoSortByFieldResult);
+                    return result;
                 });
         };
 
@@ -432,7 +459,8 @@ angular
             }
             return $http.get(wcfServer + "DoSortByName", { params: data })
                 .then(function (response) {
-                    return response.data.DoSortByNameResult;
+                    var result = filterCategories(response.data.DoSortByNameResult);
+                    return result;
                 });
         };
 
@@ -446,7 +474,8 @@ angular
             }
             return $http.get(wcfServer + "DoSortByRank", { params: data })
                 .then(function (response) {
-                    return response.data.DoSortByRankResult;
+                    var result = filterCategories(response.data.DoSortByRankResult);
+                    return result;
                 });
         };
 
@@ -460,7 +489,8 @@ angular
             }
             return $http.get(wcfServer + "DoSortByPrice", { params: data })
                 .then(function (response) {
-                    return response.data.DoSortByPriceResult;
+                    var result = filterCategories(response.data.DoSortByPriceResult);
+                    return result;
                 });
         };
 
@@ -479,7 +509,31 @@ angular
             };
         }
 
+        var filterCategories = function (data) {
+            var answers = [];
+            var products_count = 0;
+            if (data.SearchPath[0].Answers.length == 0) {
+                data.Questions[0].Answers.forEach(question => {
+                    if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                        answers.push(question);
+                        products_count += question.ProductCount;
+                    }
+                });
+                data.Questions[0].ExtraAnswers.forEach(question => {
+                    if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                        answers.push(question);
+                        products_count += question.ProductCount;
+                    }
+                });
+                data.Questions[0].Answers = answers;
+                data.Questions[0].ExtraAnswers = [];
+                data.ProductsCount = products_count;
+            }
+            return data;
+        }
+
         return {
+            Search: Search,
             doSearch: doSearch,
             doSearchParams: doSearchParams,
             doChangeProductsPerPage: doChangeProductsPerPage,
@@ -688,7 +742,7 @@ angular
 
         /* Numeric Values + defaults */
         root.Settings.Control.CharCountThreshold = root.Settings.Control.CharCountThreshold !== undefined ? parseInt(root.Settings.Control.CharCountThreshold) : 2; /* Default to 2 */
-        root.Settings.Refinements.AnswerLimit = root.Settings.Refinements.AnswerLimit !== undefined ? parseInt(root.Settings.Refinements.AnswerLimit) : 5; /* Defaults to 5 */
+        root.Settings.Refinements.AnswerLimit = 6; /* Defaults to 5 */
         root.Settings.ProductResults.ProductRatingRatio = root.Settings.ProductResults.ProductRatingRatio !== undefined ? parseInt(root.Settings.ProductResults.ProductRatingRatio) : 10; /* Defaults to 10 */
 
         if (root.Settings.General.ParamsToIgnore === undefined) {
@@ -1201,6 +1255,24 @@ angular
         };
         $scope.editonimportlist = function (event) {
             window.location.href = "/import-list";
+        }
+        $scope.searchProducts = function (event) {
+            var flag = true;
+            if (event) {
+                if (event.keyCode != 13) {
+                    flag = false;
+                }
+            }
+            var search_key = document.querySelector('#search-products').value;
+            var wcfServer = celConfig.Settings.General.WcfAddress;
+            var data = {
+                query: search_key,
+                siteKey: celConfig.Settings.General.SiteKey,
+                principles: true
+            }
+            if (flag) {
+                celAPI.Search(data).promise.then(onResults, onError);
+            }
         }
         /*
          *
