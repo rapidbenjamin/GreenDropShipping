@@ -312,17 +312,18 @@ class ShopifyAdminApi
         );
     }
 
-    public static function updateCostPrice($user, $myProduct, $cost)
+    public static function updateCostPrice($user, $myProduct, $price, $cost)
     {
         ShopifyAdminApi::request(
             $user,
             'PUT',
-            '/admin/api/2021-04/inventory_items/'.$myProduct->inventory_item_id_shopify.'.json',
+            '/admin/api/2021-04/variants/'.$myProduct->id_variant_shopify.'.json',
             json_encode(
                 array(
-                    "inventory_item" => array(
-                        "id" => $myProduct->inventory_item_id_shopify,
+                    'variant' => array(
+                        "id" => $myProduct->id_variant_shopify,
                         "cost" => $cost,
+                        "price" => $price,
                     )
                 )
             )

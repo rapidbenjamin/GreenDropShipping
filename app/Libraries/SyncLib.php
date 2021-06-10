@@ -100,6 +100,7 @@ class SyncLib
         foreach ($myProducts as $mp) {
             try {
                 $product = Products::find($mp->id_product);
+                $price = $product->price * (100 + $mp->profit) / 100;
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
                 if (!($mp->location_id_shopify > 0)) {
@@ -113,7 +114,7 @@ class SyncLib
                 //UPDATE STOCK & COST & PRICE IN SHOPIFY STORES
                 ShopifyAdminApi::updateStock($merchant, $mp);
                 sleep(1);
-                ShopifyAdminApi::updateCostPrice($merchant, $mp, $product->price);
+                ShopifyAdminApi::updateCostPrice($merchant, $mp, $price, $product->price);
                 $updatedCount++;
             } catch (Exception $ex) {
                 echo $ex->getMessage();
