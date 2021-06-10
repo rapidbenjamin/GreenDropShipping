@@ -621,6 +621,7 @@ $(document).ready(function () {
                     <button class="btn-set-profit profit">Set Profit</button>
                 </div>
                 <div class="pagesize">
+                    <span>Show</span>
                     <select name="PageSize" id="page_size" class="page_size">
                         <option value="10">10</option>
                         <option value="20">20</option>

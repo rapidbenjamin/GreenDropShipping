@@ -33,6 +33,7 @@
                     <button class="btn-set-profit profit">Set Profit</button>
                 </div>
                 <div class="pagesize">
+                    <span>Size</span>
                     <select name="PageSize" id="page_size">
                         <option value="10">10</option>
                         <option value="20">20</option>
