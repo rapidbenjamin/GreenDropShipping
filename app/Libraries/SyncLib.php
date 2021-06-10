@@ -295,13 +295,13 @@ class SyncLib
                 P.status = 1,
                 P.image_url = T.images_1,
                 P.images = JSON_ARRAY(
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 60)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 60)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 60)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 60))
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 40)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 40)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 40)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 40))
                 ),
                 P.attributes = JSON_ARRAY(
-                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 60)),
+                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 40)),
                     JSON_OBJECT('attribute_code', 'description', 'value', T.description),
                     JSON_OBJECT('attribute_code', 'ship_width', 'value', T.width),
                     JSON_OBJECT('attribute_code', 'ship_length', 'value', T.length),
@@ -319,13 +319,13 @@ class SyncLib
 
         DB::statement(
             "INSERT INTO `products`(`sku`,`name`,`price`,`stock`,`brand`,`image_url`,`weight`,`type_id`,`status`,`images`,`attributes`,`stock_info`,`upc`)
-            SELECT T.sku,T.name,T.price, T.qty, T.brand, SUBSTR(T.images_1, 60),T.weight,'simple',1,JSON_ARRAY(
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 60)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 60)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 60)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 60))
+            SELECT T.sku,T.name,T.price, T.qty, T.brand, SUBSTR(T.images_1, 40),T.weight,'simple',1,JSON_ARRAY(
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 40)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 40)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 40)),
+                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 40))
                 ),JSON_ARRAY(
-                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 60)),
+                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 40)),
                     JSON_OBJECT('attribute_code', 'description', 'value', T.description),
                     JSON_OBJECT('attribute_code', 'ship_width', 'value', T.width),
                     JSON_OBJECT('attribute_code', 'ship_length', 'value', T.length),
