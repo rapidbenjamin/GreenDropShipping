@@ -170,31 +170,26 @@ class SyncLib
             ');
 
         //2. Clean Middeware token table
-        DB::statement("TRUNCATE TABLE temp_tokens");
-        DB::statement("TRUNCATE TABLE token");
-
         $rows = [];
-        foreach ($tokens as $tk) {
+        foreach ($tokens as $key => $tk) {
             if ($tk->enddate != '0000-00-00 00:00:00') {
-                $rows[] = [
-                    'token' => $tk->token,
-                    'status' => $tk->status,
-                    'id_order' => $tk->id_order,
-                    'user_id' => $tk->user_id,
-                    'enddate' => $tk->enddate,
-                    'display_name' => $tk->display_name,
-                    'user_email' => $tk->user_email
-                ];
+                $row['id'] = $key;
+                $row['token'] = $tk->token;
+                $row['status'] = $tk->status;
+                $row['id_order'] = $tk->id_order;
+                $row['user_id'] = $tk->user_id;
+                $row['enddate'] = $tk->enddate;
+                $row['display_name'] = $tk->display_name;
+                $row['user_email'] = $tk->user_email;
+                $rows[] = implode(',', $row);
             }
         }
-        DB::table('temp_tokens')->insert($rows);
-
-        //3. Update table
-        DB::statement(
-            "INSERT INTO `token`(`token`,`status`,`id_order`,`user_id`,`enddate`,`display_name`,`user_email`)
-            SELECT T.token, T.status,T.id_order,T.user_id, T.enddate,T.display_name,T.user_email
-            FROM temp_tokens T LEFT JOIN token ON T.token = token.token
-            WHERE T.enddate != '0000-00-00 00:00:00'"
+        Storage::disk('local')->put('magento_tokens.csv', implode("\n", $rows));
+        DB::statement("TRUNCATE TABLE token");
+        $path = str_replace("\\", "/", base_path());
+        DB::connection()->getpdo()->exec(
+            "LOAD DATA LOCAL INFILE '" . $path . "/storage/app/magento_tokens.csv' INTO TABLE token
+            FIELDS TERMINATED BY ','"
         );
         return 'Success';
     }

@@ -929,6 +929,7 @@ angular
             for (i = 0; i < results.Products.length; i++) {
                 var prod = results.Products[i];
                 var imported_ids = JSON.parse(window.localStorage.getItem('imported_ids'));
+                prod.ImageUrl = 'https://d2a7hynupgugqd.cloudfront.net/media/catalog/product/cache/6af2da79007bbde83ac425b5e09ddcd4' + prod.ImageUrl.substr(98);
                 var id = 0;
                 results.Products[i].AddtionalFields.forEach(field => {
                     if(field.Name == 'mag_id'){

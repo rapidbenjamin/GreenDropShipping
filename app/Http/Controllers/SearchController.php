@@ -35,11 +35,11 @@ class SearchController extends Controller
 		$products->mini_images = [];
 
 		if ($products->images != null && count(json_decode($products->images)) > 0) {
-			$products->image_url = env('URL_MAGENTO_IMAGES') . json_decode($products->images)[0]->file;
+			$products->image_url = env('URL_MAGENTO_IMAGES'). '/e793809b0880f758cc547e70c93ae203' .json_decode($products->images)[0]->file;
 			$images = [];
 
 			foreach (json_decode($products->images) as $image) {
-				$images[] = env('URL_MAGENTO_IMAGES') . $image->file;
+				$images[] = env('URL_MAGENTO_IMAGES'). '/dc09e1c71e492175f875827bcbf6a37c' .$image->file;
 			}
 
 			$products->mini_images = $images;

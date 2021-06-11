@@ -82,7 +82,7 @@
                         </td>
                         <td class="pimage">
                             <div class="productphoto">
-                                <img src="{{$pr->image_url}}">
+                                <img src="{{$pr->image_url_75}}">
                             </div>
                         </td>
                         <td data-label="PRODUCT NAME">
@@ -114,7 +114,7 @@
                         <td colspan="8">
                             <div class="productlisthow">
                                 <div class="productimage">
-                                    <img src="{{$pr->image_url}}">
+                                    <img src="{{$pr->image_url_285}}">
                                 </div>
                                 <div class="productdata">
                                     <h3>{{ $pr->name }}</h3>
