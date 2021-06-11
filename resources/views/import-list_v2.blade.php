@@ -217,7 +217,7 @@
                                 @for($i = 0; $i < count($ap->images); $i++)
                                     <div class="selectimage">
                                         <div class="imagewrap">
-                                            <img class="img{{$ap->id_import_list}}-{{$i}}" src="{{env('URL_MAGENTO_IMAGES').$ap->images[$i]->file}}">
+                                            <img class="img{{$ap->id_import_list}}-{{$i}}" src="{{env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37c'.$ap->images[$i]->file}}">
                                         </div>
                                         <div class="checkim">
                                             <input type="checkbox" class="chk-img{{$ap->id_import_list}}" data-index="{{$i}}" value="" checked="checked">

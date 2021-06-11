@@ -57,7 +57,7 @@ class ImportListController extends Controller
 
             if ($product['images'] != null && count(json_decode($product['images'])) > 0)
 
-                $product['image_url'] = env('URL_MAGENTO_IMAGES') . json_decode($product['images'])[0]->file;
+                $product['image_url'] = env('URL_MAGENTO_IMAGES'). '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
 
 
 
