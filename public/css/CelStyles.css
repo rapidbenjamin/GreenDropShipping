@@ -195,7 +195,7 @@
 
           #celUITDiv .select-wrapper:before {
               position: absolute;
-              top: 6px;
+              top: 13px;
               right: 6px;
               pointer-events: none;
           }
@@ -380,9 +380,9 @@
 
           #celUITDiv #filters .questions > li > input {
               display: block;
-              margin-top: 10px;
+              margin: 6px;
               width: 100%;
-              padding: 5px;
+              padding: 10px;
           }
 
       #celUITDiv #filters .answers {
@@ -1333,19 +1333,6 @@
   }
 
   /*left nav*/
-
-  #celUITDiv .cel-icon-plus:before{
-      content:none;
-  }
-
-  #celUITDiv .cel-icon-plus:after{
-      content:'\e622';
-      float:right;
-      -webkit-font-smoothing: antialiased;
-      color: inherit;
-      font-family: 'luma-icons';
-  }
-
   #celUITDiv #filter-content{
       min-width: 20.5% !important;
       margin-top: 0px;
@@ -1567,16 +1554,6 @@
   #celUITDiv #filters .answers > li:before{
           top: 5px;
   }
-  #celUITDiv .cel-icon-minus:before{
-      content:none;
-  }
-  #celUITDiv .cel-icon-minus:after{
-      content:'\e621';
-      float:right;
-      -webkit-font-smoothing: antialiased;
-      color: inherit;
-      font-family: 'luma-icons';
-  }
   #celUITDiv .ratings-container {
       display: block;
   }
@@ -1600,7 +1577,7 @@
       box-sizing: border-box;
       vertical-align: middle;
       text-decoration:none;
-      margin: 5px -5px;
+      margin: 10px -10px;
       padding-top: 15px;
       padding-bottom: 15px;
       border-radius: 4px;
@@ -1609,6 +1586,7 @@
 
    #celUITDiv .all-add-products{
     padding: 10px;
+    margin-left: 0px;
    }
    #celUITDiv .products > li .cuit_item_container .add-to-cart button:hover, .all-add-products:hover{
    background: #7ba439;
@@ -1627,7 +1605,7 @@
       box-sizing: border-box;
       vertical-align: middle;
       text-decoration:none;
-      margin: 5px -5px;
+      margin: 10px -10px;
       padding-top: 15px;
       padding-bottom: 15px;
       border-radius: 4px;

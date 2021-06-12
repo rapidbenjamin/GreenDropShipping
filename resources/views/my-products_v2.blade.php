@@ -90,7 +90,7 @@
                             </div>
                         </td>
                         <td data-label="PRODUCT NAME">
-                            <a href="search-products/{{$pr->id}}" target="_blank">{{ $pr->name }}</a>
+                            <a href="search-products/{{$pr->id}}?action=my-products" target="_blank">{{ $pr->name }}</a>
                         </td>
                         <td data-label="COST GDS">
                             ${{$pr->price}}

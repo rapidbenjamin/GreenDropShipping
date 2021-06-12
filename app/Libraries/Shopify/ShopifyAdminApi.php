@@ -18,8 +18,6 @@ class ShopifyAdminApi
         $images = [];
         if (isset($product->images))
             foreach($product->images as $img){
-                \Log::info($img);
-                \Log::info(substr($img, 98));
                 $images[] = (object) ['src' => env('URL_MAGENTO_IMAGES'). '/207e23213cf636ccdef205098cf3c8a3' .substr($img, 98)];
             };
         $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-07/products.json', json_encode(

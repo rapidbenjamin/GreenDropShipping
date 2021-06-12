@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Products;
 use App\Category;
 use App\ImportList;
+use App\MyProducts;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,8 +31,13 @@ class SearchController extends Controller
 		]);
 	}
 
-	public function show(Products $products)
+	public function show(Request $request, Products $products)
 	{
+        $action = 'search-products';
+        if (isset($request->action)) {
+            $action = 'my-products';
+            $products->id_shopify = MyProducts::where('id_customer', Auth::User()->id)->where('id_product', $products->id)->pluck('id_shopify')[0];
+        }
 		$products->mini_images = [];
 
 		if ($products->images != null && count(json_decode($products->images)) > 0) {
@@ -48,7 +54,7 @@ class SearchController extends Controller
 		$products->brand = $this->getAttributeByCode($products, 'brand');
 		$products->description = $this->getAttributeByCode($products, 'description');
 
-		return view('search_detail', ['product' => $products]);
+		return view('search_detail', ['product' => $products, 'action' => $action]);
 	}
 
 	public function getCategories($parent_id = 2)

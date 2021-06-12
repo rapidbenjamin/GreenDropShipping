@@ -1555,10 +1555,6 @@ svg {
   border: none;
   cursor: pointer;
 }
-.productbox .addtoimport.editimportlist {
-  color: #969393;
-  background-color: #e7e7e7;
-}
 @media (max-width: 1300px) {
   .productbox .addtoimport {
     width: 100%;

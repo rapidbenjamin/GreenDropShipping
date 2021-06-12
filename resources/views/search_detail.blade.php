@@ -21,9 +21,11 @@
                 @endif
 
                 <div class="productbox">
+                    @if($action == 'search-products')
                     <div class="comments">
                         <p>Note: To edit the product info you must add it to an import list first.</p>
                     </div>
+                    @endif
                     <div>
                         @php $k=0; @endphp
                        <ul class="thumbnails">
@@ -67,10 +69,12 @@
                                 {!! $product->description !!}
                             </p>
                         </div>
-
-            <button class="addtoimport btn_import_list_detail add-to-import-list-{{ $product->id }}" data-id="{{ $product->id }}">Add to Import List</button>
-            <button class="addtoimport editimportlist btn_import_list_detail edit-on-import-list-{{ $product->id }}" data-id="{{ $product->id }}" style="display:none">Edit on import list</button>
-
+                        @if($action == 'search-products')
+                            <button class="addtoimport btn_import_list_detail add-to-import-list-{{ $product->id }}" data-id="{{ $product->id }}">Add to Import List</button>
+                            <button class="addtoimport edit-on-import-list-{{ $product->id }}" data-id="{{ $product->id }}" style="display:none;">Edit on Import List</button>
+                        @elseif($action == 'my-products')
+                            <a href="http://{{Auth::user()->shopify_url}}/admin/products/{{$product->id_shopify}}" target="_blank"><button class="addtoimport btn_import_list_detail edit-on-shopify-{{ $product->id_shopify }}">Edit on Shopify</button></a>
+                        @endif
                     </div>
 
                 </div>
