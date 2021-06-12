@@ -17,11 +17,19 @@
             </div>
         </div>
         @endif
+        @if(count($array_products) > 0)
         <div class="alertan level2">
             <div class="agrid">
                 <p>You can edit product details before adding products to your store.</p>
             </div>
         </div>
+        @else
+        <div class="alertan level2">
+            <div class="agrid">
+                <p>When products are imported you can publish them to your Shopify store.</p>
+            </div>
+        </div>
+        @endif
         <div class="alertan level2 alert-publish-all" style="display: none;">
             <div class="agrid">
                 <p><strong>Publishing in Progress!</strong> We´re currently publishing your products into your store.</p>
