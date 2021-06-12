@@ -106,7 +106,8 @@ class AjaxController extends Controller
             foreach ($prods as $product) {
                 $product['brand'] = $search->getAttributeByCode($product, 'brand');
                 if ($product->images != null && count(json_decode($product->images)) > 0)
-                    $product->image_url = env('URL_MAGENTO_IMAGES') . json_decode($product->images)[0]->file;
+                    $product->image_url_75 = env('URL_MAGENTO_IMAGES'). '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product->images)[0]->file;
+                    $product->image_url_285 = env('URL_MAGENTO_IMAGES'). '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
             }
             return json_encode([
                 'prods' => $prods,
@@ -130,12 +131,12 @@ class AjaxController extends Controller
             $prods = $prods->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             foreach ($prods as $product) {
                 if ($product['images'] != null && count(json_decode($product['images'])) > 0)
-                    $product['image_url'] = env('URL_MAGENTO_IMAGES') . json_decode($product['images'])[0]->file;
+                    $product['image_url'] = env('URL_MAGENTO_IMAGES'). '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
 
                 $search = new SearchController;
                 $images = [];
                 foreach (json_decode($product['images']) as $image) {
-                    $images[] = env('URL_MAGENTO_IMAGES') . $image->file;
+                    $images[] = env('URL_MAGENTO_IMAGES'). '/3a98496dd7cb0c8b28c4c254a98f915a' . $image->file;
                 }
                 $product['description'] = $search->getAttributeByCode($product, 'description');
                 $product['size'] = $search->getAttributeByCode($product, 'size');
@@ -167,10 +168,13 @@ class AjaxController extends Controller
             $page_size = $parameters['page_size'];
             $page_number = $parameters['page_number'];
             $products = ShopifyAdminApi::getProducts(Auth::User());
-            $location_id = ShopifyAdminApi::getItemLocationId(Auth::User(), $products['body']['products'][0]['variants'][0]['inventory_item_id']);
+            $location_id = 0;
+            if (count($products['body']['products'])) {
+                $location_id = ShopifyAdminApi::getItemLocationId(Auth::User(), $products['body']['products'][0]['variants'][0]['inventory_item_id']);
+            }
             return json_encode([
                 'products' => count($products['body']['products']),
-                'location_id' => $location_id['body']['inventory_levels'][0]['location_id'],
+                'location_id' => $location_id,
             ]);
         }
 
@@ -257,6 +261,19 @@ class AjaxController extends Controller
                 'result' => true
             ]);
         }
+    }
+
+    public function import(Request $request)
+    {
+        $rows = [];
+        foreach ($request->product_ids as $product_id) {
+            $rows[] = [
+                'id_customer' => Auth::User()->id,
+                'id_product' => $product_id
+            ];
+        }
+        DB::table('import_list')->insert($rows);
+        return json_encode($request->product_ids);
     }
 
     public function saveSettings(Request $request)

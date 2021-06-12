@@ -318,6 +318,27 @@
 
   </div>
 </div>
+
+<div id="delete-product-modal" class="modal fade" role="dialog" data-backdrop="true">
+  <div class="modal-dialog modal-dialog-centered">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header" style="display:block">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Alert</h4>
+        </div>
+        <div class="modal-body" id="modal-body">
+        </div>
+        <div class="modal-footer" style="display:flex">
+            <button class="btn btn-success" id="confirm" data-dismiss="modal">Ok</button>
+            <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+    </div>
+
+  </div>
+</div>
+
 <script type="text/javascript">
   $(document).ready(function() {
     var usr_id = "{{Auth::user() ? Auth::user()->id : 0}}";

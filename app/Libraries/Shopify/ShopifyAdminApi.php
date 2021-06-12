@@ -2,15 +2,9 @@
 
 namespace App\Libraries\Shopify;
 
-use App\MyProducts;
 use App\Products;
-use App\Settings;
 use App\ShopifyWebhook;
-use DateTime;
 use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Stripe\Product;
 
 class ShopifyAdminApi
 {
@@ -24,7 +18,9 @@ class ShopifyAdminApi
         $images = [];
         if (isset($product->images))
             foreach($product->images as $img){
-                $images[] = (object) ['src' => $img];
+                \Log::info($img);
+                \Log::info(substr($img, 98));
+                $images[] = (object) ['src' => env('URL_MAGENTO_IMAGES'). '/207e23213cf636ccdef205098cf3c8a3' .substr($img, 98)];
             };
         $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-07/products.json', json_encode(
             array(
@@ -55,9 +51,6 @@ class ShopifyAdminApi
         ));
 
         if (isset($result['HTTP_CODE']) && $result['HTTP_CODE'] == 201) {
-
-
-
             return array(
                 'result' => 1,
                 'shopify_id' => $result['body']['product']['id'],

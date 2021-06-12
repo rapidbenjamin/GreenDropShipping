@@ -91,8 +91,8 @@ class AdminOrdersController extends Controller
                 ->where('order_details.id_order',$orders->id)->get();
 
         foreach($order_products as $pro){
-            $pro->image_url = env('URL_MAGENTO_IMAGES').json_decode($pro->images)[0]->file;
-        }       
+            $pro->image_url = env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37c'.json_decode($pro->images)[0]->file;
+        }
 
         $sessionPay = PaymentSession::where('id_orders','like',"%$orders->id%")
             ->whereDate('created_at','>=', $orders->created_at)->orderBy('id','desc')->first();
@@ -102,7 +102,7 @@ class AdminOrdersController extends Controller
 
         if($user_canceled!=null){
             $user_canceled_name = $user_canceled->name;
-        }    
+        }
 
         return view('admin_orders_detail',Array(
                 'order' => $orders,
@@ -137,7 +137,7 @@ class AdminOrdersController extends Controller
 		->join('products as p', 'p.sku', 'od.sku')
 		->join('status as st2', 'st2.id', 'orders.fulfillment_status')->get()->toArray();
 
-		
+
 
         $now = gmdate("D, d M Y H:i:s");
 

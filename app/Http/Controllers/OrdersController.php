@@ -131,7 +131,7 @@ class OrdersController extends Controller
             ->where('order_details.id_order', $orders->id)->get();
 
 		foreach ($order_products as $pro) {
-			$pro->image_url = env('URL_MAGENTO_IMAGES') . json_decode($pro->images)[0]->file;
+			$pro->image_url = env('URL_MAGENTO_IMAGES'). '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($pro->images)[0]->file;
 		}
 		$sessionPay = PaymentSession::where('id_orders', 'like', "%$orders->id%")
 			->whereDate('created_at', '>=', $orders->created_at)->orderBy('id', 'desc')->first();

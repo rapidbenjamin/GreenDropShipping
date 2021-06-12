@@ -28,8 +28,8 @@
                 @else
                 <div style="display: flex;">
                     <input type="checkbox" id="check-all-mp" value="" data-mark="false">
-                    <button class="btn-confirm-products allconfirmbutton">Confirm</button>
                     <button class="btn-delete-products alldeletebutton">Delete</button>
+                    <button class="btn-confirm-products allconfirmbutton">Confirm</button>
                     <button class="btn-set-profit profit">Set Profit</button>
                 </div>
                 <div class="pagesize">
@@ -170,11 +170,9 @@
         var user_id = "{{Auth::user() ? Auth::user()->id : 0}}";
         function deleteProductsAjax() {
             let product_ids = [];
-            $("input.checkbox:checked").each(function(index, ele) {
-                let product_id = $(ele).attr('id').split('-')[1];
-                if ($(`#deleting-${product_id}`).is(":visible")) {
-                    product_ids.push(product_id);
-                }
+            $("input[type='checkbox']").each(function(index, ele) {
+                if (ele.disabled && ele.checked)
+                    product_ids.push($(ele).attr('id').split('-')[1]);
             });
             if (user_id && product_ids.length) {
                 $.ajax({
@@ -190,6 +188,7 @@
                             $(`#delete-${id}`).hide();
                             $(`#deleting-${id}`).hide();
                             $(`#deleted-${id}`).show();
+                            $(`#check-${id}`).prop('checked', false);
                         });
                     });
             }
@@ -203,6 +202,7 @@
             $(`#delete-${$(this).data('migproductid')}`).hide();
             $(`#deleting-${$(this).data('migproductid')}`).show();
             $(`#deleted-${$(this).data('migproductid')}`).hide();
+            $(`#check-${$(this).data('migproductid')}`).removeClass();
             $.post('{{url("/delete-migrate-product")}}', {
                 "_token": "{{ csrf_token() }}",
                 product_ids: [$(this).data('migproductid')]
@@ -211,17 +211,23 @@
                     $(`#delete-${data.product_id}`).hide();
                     $(`#deleting-${data.product_id}`).hide();
                     $(`#deleted-${data.product_id}`).show();
+                    $(`#check-${data.product_id}`).prop('checked', false);
                 }
             });
         }
     });
     $('.migrate-products').on('click', '#check-all-mp', function() {
-        if (!$(this).data('mark')) {
+        // if (!$(this).data('mark')) {
+        //     $('.checkbox').prop('checked', true);
+        //     $(this).data('mark', true)
+        // } else {
+        //     $('.checkbox').prop('checked', false);
+        //     $(this).data('mark', false)
+        // }
+        if ($('#check-all-mp').is(':checked')) {
             $('.checkbox').prop('checked', true);
-            $(this).data('mark', true)
         } else {
             $('.checkbox').prop('checked', false);
-            $(this).data('mark', false)
         }
     })
     $('.migrate-products').on('click', '.btn-delete-products', function() {
@@ -239,6 +245,7 @@
                     $(`#delete-${product_id}`).hide();
                     $(`#deleting-${product_id}`).show();
                     $(`#deleted-${product_id}`).hide();
+                    $(`#check-${product_id}`).removeClass();
                 });
                 $.post('{{url("/delete-migrate-products")}}', {
                     "_token": "{{ csrf_token() }}",
@@ -269,6 +276,7 @@
         $(`#confirm-${$(this).data('id')}`).hide();
         $(`#confirming-${$(this).data('id')}`).show();
         $(`#confirmed-${$(this).data('id')}`).hide();
+        $(`#check-${$(this).data('id')}`).remove();
         $.post('{{url("/confirm-migrate-products")}}', {
             "_token": "{{ csrf_token() }}",
             products: [{
@@ -281,6 +289,7 @@
                     $(`#confirm-${product.id}`).hide();
                     $(`#confirming-${product.id}`).hide();
                     $(`#confirmed-${product.id}`).show();
+                    $(`#check-${product.id}`).prop('checked', false);
                 });
             }
         });
@@ -303,6 +312,7 @@
                 $(`#delete-${product.id}`).hide();
                 $(`#deleting-${product.id}`).show();
                 $(`#deleted-${product.id}`).hide();
+                $(`#check-${product.id}`).removeClass();
             });
             $.post('{{url("/confirm-migrate-products")}}', {
                 "_token": "{{ csrf_token() }}",
@@ -312,6 +322,7 @@
                     $(`#confirm-${product.id}`).hide();
                     $(`#confirming-${product.id}`).hide();
                     $(`#confirmed-${product.id}`).show();
+                    $(`#check-${product.id}`).prop('checked', false);
                 });
             });
         } else {

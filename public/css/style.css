@@ -1971,6 +1971,7 @@ svg {
 }
 .sendtoshopify .btn-import-list-send-all, .migrate-products .migration, .migrate-products .allconfirmbutton, .migrate-products .confirmbutton {
   background-color: #44b955;
+  margin-left: 10px;
 }
 .migrate-products .profit {
   background-color: #44b955;
@@ -1978,7 +1979,6 @@ svg {
 }
 .sendtoshopify .btn-import-list-delete-all, .migrate-products .alldeletebutton {
   background-color: #f39ca2;
-  margin-left: 10px;
 }
 .migrate-products #check-all-mp {
     width: 20px;

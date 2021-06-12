@@ -32,6 +32,7 @@ Route::group(['prefix' => 'products'], function () {
 });
 
 Route::get('/ajax', 'AjaxController@index');
+Route::post('/ajax', 'AjaxController@import');
 
 /*Products*/
 Route::get('/search-products', 'SearchController@index');

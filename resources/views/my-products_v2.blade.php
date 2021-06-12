@@ -19,7 +19,11 @@
 
             <div class="alertan level2 alert-publish-all">
                 <div class="agrid">
+                    @if(count($prods) > 0)
                     <p>You can view here all the products you have added to your Shopify store.</p>
+                    @else
+                    <p>When products are published to Shopify you'll see them here.</p>
+                    @endif
                 </div>
             </div>
             @can("plan_view-my-products")
@@ -28,7 +32,7 @@
                     <input type="checkbox" id="check-all-mp" value="" data-mark="false">
                 </div>
                 <div>
-                    <button class="btn-mp-delete-all alldeletebutton">Delete</button>
+                    <button class="btn-mp-delete-all alldeletebutton" data-toggle="modal" data-target="#delete-product-modal">Delete</button>
                 </div>
                 <div class="pagesize">
                     <span>Show</span>
@@ -86,7 +90,7 @@
                             </div>
                         </td>
                         <td data-label="PRODUCT NAME">
-                            {{ $pr->name }}
+                            <a href="search-products/{{$pr->id}}" target="_blank">{{ $pr->name }}</a>
                         </td>
                         <td data-label="COST GDS">
                             ${{$pr->price}}
@@ -101,10 +105,10 @@
                             {{$pr->sku}}
                         </td>
                         <td>
-                            <button class="btn-mp-view viewbutton vplist" data-id="{{ $pr->id }}" data-view="#product{{ $pr->id }}">View</button>
+                            <button class="btn-mp-view viewbutton vplist" data-id="{{ $pr->id }}" id="view-{{$pr->id_shopify}}" data-view="#product{{ $pr->id }}">View</button>
                         </td>
                         <td>
-                            <button class="btn-mp-delete deletebutton" id="delete-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}">Delete</button>
+                            <button class="btn-mp-delete deletebutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" data-name="{{ $pr->name }}" data-sku="{{ $pr->sku }}">Delete</button>
                             <button class="deletebutton" id="deleting-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" style="display: none;">Deleting...</button>
                             <button class="deletebutton" id="deleted-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id }}" style="display: none;">Deleted</button>
                         </td>
@@ -133,7 +137,7 @@
                                     </p>
 
                                     <div class="pbuttons">
-                                        <button class="edit edit-product" data-shopifyid="{{ $pr->id_shopify }}">Edit on Shopify</button>
+                                        <button class="edit edit-product" id="edit-{{$pr->id_shopify}}" data-shopifyid="{{ $pr->id_shopify }}">Edit on Shopify</button>
                                     </div>
                                 </div>
                             </div>
@@ -148,6 +152,7 @@
     </div>
 </div>
 
+<input type="text" id="product_id" value="" hidden>
 
 <!-- pagination -->
 <div class="pagination">
@@ -173,17 +178,59 @@
     $(document).ready(function() {
         $('#total_count').text("{{$total_count}}");
         $('#check-all-mp').click(function() {
-
-            if (!$(this).data('mark')) {
+            if ($('#check-all-mp').is(':checked')) {
                 $('.checkbox').prop('checked', true);
-                $(this).data('mark', true)
             } else {
                 $('.checkbox').prop('checked', false);
-                $(this).data('mark', false)
             }
         });
 
         $('.btn-mp-delete-all').click(function() {
+            let products = [];
+            $("input.checkbox:checked").each(function(index, ele) {
+                if ($(`#delete-${$(ele).attr('id').split('-')[1]}`).is(":visible")) {
+                    products.push($(ele).data('id'));
+                }
+            });
+            if (products.length) {
+                $('#modal-body').html(`<h5>Are you sure to delete these checked products from your Shopify Store?</h5>`);
+                $('#product_id').val('delete-products');
+            } else {
+                $('#modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
+                $('#product_id').val('cancel');
+            }
+
+        });
+
+        $('#confirm').click(function() {
+            if ($('#product_id').val() != 'cancel'){
+                if ($('#product_id').val() == 'delete-products') deleteProducts();
+                else deleteProduct($('#product_id').val());
+            }
+        });
+
+        function deleteProduct(id) {
+            $(`#check-${id}`).prop('disabled', true);
+            $(`#check-${id}`).removeClass();
+            $(`#check-${id}`).prop('checked', false);
+            $(`#delete-${id}`).hide();
+            $(`#deleting-${id}`).show();
+            $(`#deleted-${id}`).hide();
+            $(`#view-${id}`).hide();
+            $(`#edit-${id}`).hide();
+            $.post('{{url("/delete-shopify-product")}}', {
+                "_token": "{{ csrf_token() }}",
+                product_id: id
+            }, function(data, status) {
+                if (data.result) {
+                    $(`#delete-${data.product_id}`).hide();
+                    $(`#deleting-${data.product_id}`).hide();
+                    $(`#deleted-${data.product_id}`).show();
+                }
+            });
+        }
+
+        function deleteProducts() {
             let products = [];
             $("input.checkbox:checked").each(function(index, ele) {
                 let product_id = $(ele).attr('id').split('-')[1];
@@ -194,40 +241,38 @@
                     })
                 }
             });
-            if (products.length) {
-                if (confirm('Are you sure to delete these products from shopify?')) {
-                    products.forEach(product => {
-                        $(`#check-${product.product_shopify_id}`).prop('disabled', true);
-                        $(`#delete-${product.product_shopify_id}`).hide();
-                        $(`#deleting-${product.product_shopify_id}`).show();
-                        $(`#deleted-${product.product_shopify_id}`).hide();
-                    });
-                    $.post('{{url("/delete-all-shopify-product")}}', {
-                        "_token": "{{ csrf_token() }}",
-                        products: products,
-                    }, function(data, status) {});
-                }
-            } else {
-                alert('At least one checkbox must be selected');
-            }
-
-        });
+            products.forEach(product => {
+                $(`#check-${product.product_shopify_id}`).prop('disabled', true);
+                $(`#check-${product.product_shopify_id}`).removeClass();
+                $(`#delete-${product.product_shopify_id}`).hide();
+                $(`#deleting-${product.product_shopify_id}`).show();
+                $(`#deleted-${product.product_shopify_id}`).hide();
+                $(`#view-${product.product_shopify_id}`).hide();
+                $(`#edit-${product.product_shopify_id}`).hide();
+            });
+            $('#check-all-mp').prop('checked', false);
+            $('#check-all-mp').prop('disabled', true);
+            $.post('{{url("/delete-all-shopify-product")}}', {
+                "_token": "{{ csrf_token() }}",
+                products: products,
+            }, function(data, status) {});
+        }
         var user_id = "{{Auth::user() ? Auth::user()->id : 0}}";
 
         function deleteProductsAjax() {
             let product_ids = [];
-            $("input.checkbox:checked").each(function(index, ele) {
-                let product_id = $(ele).attr('id').split('-')[1];
-                if ($(`#deleting-${product_id}`).is(":visible")) {
+            $("input[type='checkbox']").each(function(index, ele) {
+                if (ele.disabled && ele.checked) {
+                    let product_id = $(ele).attr('id').split('-')[1];
                     product_ids.push(product_id);
                 }
+
             });
             if (user_id && product_ids.length) {
                 $.ajax({
                         type: 'POST',
                         url: '/check-delete-shopify-products',
                         data: {
-                            user_id: user_id,
                             product_shopify_ids: product_ids,
                             "_token": "{{ csrf_token() }}",
                         },
@@ -237,6 +282,8 @@
                             $(`#delete-${id}`).hide();
                             $(`#deleting-${id}`).hide();
                             $(`#deleted-${id}`).show();
+                            $(`#check-${id}`).prop('checked', false);
+                            $('#check-all-mp').prop('disabled', false);
                         });
                     });
             }
@@ -245,22 +292,8 @@
         setInterval(deleteProductsAjax, 15000);
     });
     $('#product_data').on('click', '.btn-mp-delete', function() {
-        if (confirm('Are you sure to delete this product from shopify?')) {
-            $(`#check-${$(this).data('myproductid')}`).prop('disabled', true);
-            $(`#delete-${$(this).data('myproductid')}`).hide();
-            $(`#deleting-${$(this).data('myproductid')}`).show();
-            $(`#deleted-${$(this).data('myproductid')}`).hide();
-            $.post('{{url("/delete-shopify-product")}}', {
-                "_token": "{{ csrf_token() }}",
-                product_id: $(this).data('myproductid')
-            }, function(data, status) {
-                if (data.result) {
-                    $(`#delete-${data.product_id}`).hide();
-                    $(`#deleting-${data.product_id}`).hide();
-                    $(`#deleted-${data.product_id}`).show();
-                }
-            });
-        }
+        $('#modal-body').html(`<h5 style='text-align:center'>${$(this).data('name')}(${$(this).data('sku')})</h5><h5>This product will remove it from your Shopify store. Do you really want to delete it?</h5>`);
+        $('#product_id').val($(this).data('myproductid'));
     })
     $('#product_data').on('click', '.edit-product', function() {
         window.open('http://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');

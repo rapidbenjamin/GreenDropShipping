@@ -185,7 +185,7 @@
   }
 
       #celUITDiv button {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
       }
 
       #celUITDiv .select-wrapper {
@@ -1254,11 +1254,12 @@
 
   #celUITDiv #search input{
     font-size: 18px;
+    padding-left: 10px;
   }
 
   #celUITDiv #search span{
-    background: green;
-    border: solid 7px green;
+    background: #7ba439;
+    border: solid 7px #7ba439;
     border-radius: 7px;
     margin-left: 5px;
   }
@@ -1445,6 +1446,12 @@
       margin: 0px;
       padding: 15px 0 15px 0;
       width:auto;
+      align-items: center;
+  }
+  #celUITDiv .check-product, .check-all-products{
+    width: 20px;
+    height: 20px;
+    margin: 10px;
   }
   #celUITDiv .products > li:nth-child(3n+1)  .cuit_item_container{
       margin-left: 0px;
@@ -1583,8 +1590,7 @@
       /* margin-right: 10px; */
       /* padding: 10px; */
   }
-  #celUITDiv .products > li .cuit_item_container .add-to-cart button {
-      width: 100%;
+  #celUITDiv .products > li .cuit_item_container .add-to-cart button, .all-add-products {
       background:#89b740;
       color: #fff;
       cursor: pointer;
@@ -1594,19 +1600,24 @@
       box-sizing: border-box;
       vertical-align: middle;
       text-decoration:none;
-      margin: 5px 0;
-      padding: 10px;
+      margin: 5px -5px;
+      padding-top: 15px;
+      padding-bottom: 15px;
       border-radius: 4px;
-   }
+    }
 
-   #celUITDiv .products > li .cuit_item_container .add-to-cart button:hover{
+
+   #celUITDiv .all-add-products{
+    padding: 10px;
+   }
+   #celUITDiv .products > li .cuit_item_container .add-to-cart button:hover, .all-add-products:hover{
    background: #7ba439;
       border: 1px solid #7ba439;
       color: #fff;
 
    }
   #celUITDiv .products > li .cuit_item_container .add-to-cart .edit {
-      width: 100%;
+      /* width: 100%; */
       background:#d4d4d4;
       color: #fff;
       cursor: pointer;
@@ -1616,8 +1627,9 @@
       box-sizing: border-box;
       vertical-align: middle;
       text-decoration:none;
-      margin: 5px 0;
-      padding: 10px;
+      margin: 5px -5px;
+      padding-top: 15px;
+      padding-bottom: 15px;
       border-radius: 4px;
    }
 
@@ -1733,20 +1745,6 @@
       padding: 8px;
       color: #7d7d7d;
       margin-left: 8px;
-  }
-
-  #celUITDiv .toolbar #pagination ul li .cel-icon-angle-right:before{
-      color: #7d7d7d;
-      font-size: 16px;
-      content: '\e608';
-      font-family: 'luma-icons';
-  }
-
-  #celUITDiv .toolbar #pagination ul li .cel-icon-angle-left:before{
-      color: #7d7d7d;
-      font-size: 16px;
-      content: '\e617';
-      font-family: 'luma-icons';
   }
 
   #celUITDiv .toolbar #pagination ul li{

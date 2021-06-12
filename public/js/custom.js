@@ -5,14 +5,8 @@ $(document).ready(function () {
     $('#pageName').html($('.indexContent').data('page_name'))
 
     //Left Menu
-    //$('.row-menu ul li a').removeClass('active');
     $('.row-menu ul li').removeClass('active')
-    //$('.row-menu ul li a[data-name="' + $('.indexContent').data('page_name') + '"]').addClass('active');
-    $(
-        '.row-menu ul li[data-name="' +
-            $('.indexContent').data('page_name') +
-            '"]'
-    ).addClass('active')
+    $('.row-menu ul li[data-name="' + $('.indexContent').data('page_name') + '"]').addClass('active')
 
     /* DASHBOARD */
     $('.checklist-item input').click(function () {
@@ -39,14 +33,7 @@ $(document).ready(function () {
             id_product: $(this).data('id')
         }
 
-        //This option has been disabled
-        /*
-		if (parseInt($(this).data('stock')) == 0) {
-			$('.id_' + $(this).data('id')).find('.lable-out-stock').css('display', 'block');
-			return;
-		}*/
         $.getJSON(ajax_link, parameters, function (data) {
-            //$('.id_' + JSON.parse(data)).hide();
             $('.id_' + JSON.parse(data) + ' button.add').hide()
             $('.id_' + JSON.parse(data) + ' button.edit').show()
         })
@@ -64,7 +51,6 @@ $(document).ready(function () {
         }
         let id = $(this).data('id')
         $.getJSON(ajax_link, parameters, function (data) {
-            //window.location.href = $('.pBack').data('url');
             $('.add-to-import-list-' + id).hide()
             $('.edit-on-import-list-' + id).show()
         })
@@ -93,38 +79,6 @@ $(document).ready(function () {
         $('#product' + id_product)
             .find('.import-' + tabName)
             .show()
-    })
-
-    $('.btn-import-list-delete-all').click(function () {
-        var product_ids = [];
-        $('input.checkbox:checked').each(function (index, ele) {
-            let product_id = $(ele).attr('id').split('-')[1];
-            product_ids.push(product_id);
-        });
-        if (product_ids.length) {
-            if (
-                confirm(
-                    'Deleting the products will remove it from your Shopify store. Do you really want to delete it?'
-                )
-            ) {
-                var parameters = {
-                    action: 'delete_import_list',
-                    id_import_list: product_ids
-                }
-                product_ids.forEach(product_id => {
-                    $(`#delete-${product_id}`).hide();
-                    $(`#deleting-${product_id}`).show();
-                });
-                $.getJSON(ajax_link, parameters, function (data) {
-                    location.reload()
-                }).fail(function (data) {
-                    console.log('error1', data.status)
-                    if (data.status == 403) $('#upgrade-plans-modal').modal('show')
-                })
-            }
-        } else {
-            alert('At least one checkbox must be selected')
-        }
     })
 
     /* MY PRODUCTS */
@@ -160,37 +114,6 @@ $(document).ready(function () {
             '/' +
             status
     })
-
-    /* PLANS */
-    /*
-	$('#btnSubmitToken').click(function () {
-		$.post('{{url("/plans/save-token")}', {
-			"_token": "{{ csrf_token()}",
-			"token": $('#txtToken').val()
-		}, function (data, status) {
-			//$('.token-error').hide();
-			//$('.token-success').show();
-			window.location.href = "{{url('/plans')}"
-		}).fail(function (data) {
-			$('.token-error').show();
-			//$('.token-success').hide();
-		});
-	});
-
-	$('.update').click(function () {
-		$.post('{{url("/plans/update")}', {
-			"_token": "{{ csrf_token()}",
-			'plan': $(this).data('plan')
-		}, function (data, status) {
-			$('.token-error').hide();
-			window.location.href = "{{url('/plans')}?update=true";
-		}).fail(function (data) {
-			$('.token-error').show();
-		});
-	});
-	$("div.alert button.close").click(function () {
-		window.location.href = "{{url('/plans')}"
-	});*/
 
     $('.buttonDisabled').mouseover(function () {
         $('.answerBD' + $(this).data('id')).show()
@@ -336,7 +259,7 @@ $(document).ready(function () {
                 </td>
                 <td class="pimage">
                     <div class="productphoto">
-                        <img src="${product.image_url}">
+                        <img src="${product.image_url_75}">
                     </div>
                 </td>
                 <td data-label="PRODUCT NAME">
@@ -355,10 +278,10 @@ $(document).ready(function () {
                     ${product.sku}
                 </td>
                 <td>
-                    <button class="btn-mp-view viewbutton vplist" data-id="${product.id}" data-view="#product${product.id}">View</button>
+                    <button class="btn-mp-view viewbutton vplist" data-id="${product.id}" id="view-${product.id_shopify}" data-view="#product${product.id}">View</button>
                 </td>
                 <td>
-                    <button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-myproductid="${product.id_shopify}">Delete</button>
+                    <button class="btn-mp-delete deletebutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-${product.id_shopify}" data-myproductid="${product.id_shopify}"  data-name="${product.name}" data-sku="${product.sku}">Delete</button>                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                     <button class="deletebutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                     <button class="deletebutton" id="deleted-${product.id_shopify}" data-myproductid="${product.id}" style="display: none;">Deleted</button>
                 </td>
@@ -368,7 +291,7 @@ $(document).ready(function () {
                 <td colspan="8">
                     <div class="productlisthow">
                         <div class="productimage">
-                            <img src="${product.image_url}">
+                            <img src="${product.image_url_285}">
                         </div>
                         <div class="productdata">
                             <h3>${product.name}</h3>
@@ -411,7 +334,7 @@ $(document).ready(function () {
                     <button class="sendto sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
                     <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-${product.id_import_list}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>`;
             } else {
-                button_str += `<button class='delete btn-import-list-delete' id="delete-${product.id_import_list}" data-id="${product.id_import_list}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                button_str += `<button class='delete btn-import-list-delete' data-toggle="modal" data-target="#delete-product-modal" id="delete-${product.id_import_list}" data-id="${product.id_import_list}"  data-name="${product.name}" data-sku="${product.sku}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class='delete' id="deleting-${product.id_import_list}" style="display: none;" data-id="${product.id_import_list}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class='sendto btn-import-list-send btn-import-list-send-${product.id_import_list}' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
                     <button class="sendto sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
@@ -594,20 +517,23 @@ $(document).ready(function () {
             action: 'migration',
         };
         $.getJSON(ajax_link, parameters, function (res) {
-            for (var i=0; i<res.products; i++) {
-                $.getJSON(ajax_link, {
-                    action: 'migrating-products',
-                    index: i,
-                    location_id: res.location_id
-                }, function (data) {
-                    console.log(data);
-                    $('#migrating-progress').val((data.index * 1 + 1)/(res.products)*100);
-                    $('#percentage').text(`${parseInt((data.index * 1 + 1)/(res.products)*100)}%`);
-                    if (data.index == res.products-1) {
-                        pagination(data);
-                        showMigrationPage(data.mig_products);
-                    }
-                })
+            if (res.products == 0) {
+                $('#percentage').text('There is no products to migrate in your Shopify');
+            } else {
+                for (var i=0; i<res.products; i++) {
+                    $.getJSON(ajax_link, {
+                        action: 'migrating-products',
+                        index: i,
+                        location_id: res.location_id
+                    }, function (data) {
+                        $('#migrating-progress').val((data.index * 1 + 1)/(res.products)*100);
+                        $('#percentage').text(`${parseInt((data.index * 1 + 1)/(res.products)*100)}%`);
+                        if (data.index == res.products-1) {
+                            pagination(data);
+                            showMigrationPage(data.mig_products);
+                        }
+                    })
+                }
             }
         })
     })
@@ -616,8 +542,8 @@ $(document).ready(function () {
         $('.migration').remove();
         var str = `<div style="display: flex;">
                     <input type="checkbox" id="check-all-mp" value="" data-mark="false">
-                    <button class="btn-confirm-products allconfirmbutton">Confirm</button>
                     <button class="btn-delete-products alldeletebutton">Delete</button>
+                    <button class="btn-confirm-products allconfirmbutton">Confirm</button>
                     <button class="btn-set-profit profit">Set Profit</button>
                 </div>
                 <div class="pagesize">

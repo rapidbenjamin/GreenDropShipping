@@ -6,16 +6,10 @@ angular
     .config(["$routeProvider", "$locationProvider", "$sceDelegateProvider", function ($routeProvider, $locationProvider, $sceDelegateProvider) {
         $routeProvider
             .otherwise({
-                template: "<div id=\"profile-tabs\" ng-show=\"settings.General.ProfileTabs !== ''\" class=\"ng-cloak\">    <ul>        <li cel-profile ng-repeat=\"(name, tab) in settings.General.ProfileTabs\" profile=\"{{ tab.Profile }}\" display=\"{{ tab.Display }}\" ng-class=\"{ 'selected' : profile == tab.Profile }\" tabindex=\"0\">            <span>{{ tab.Alias !== undefined ? tab.Alias : name }}</span>        </li>    </ul></div><div id=\"loader\" ng-hide=\"loading == false\">    <div><i class=\"cel-icon-spin3 animate-spin\"></i></div></div>        <div id=\"filter-details\">            <div ng-show=\"searchPage === true\" id=\"filter-title\">{{ settings.Language.Search }} \"{{ results.OriginalQuery }}\" </div>            <div id=\"products-count\">{{ results.ProductsCount }} {{ settings.Language.Products }}</div>        </div><div cel-search-anlx cel-infinite-scroll=\"{{ settings.General.InfiniteScroll }}\" id=\"container\" class=\"flex-box-row {{ profile !== '' ? 'profile-' + profile : '' }}\" ng-hide=\"loading == true\">    <div id=\"filter-content\">        <div id=\"filter-breadcrumbs\" ng-show=\"results.SearchPath.Answers.length != 0\" class=\"ng-cloak\">            <div class=\"filter-by\">{{ settings.Language.FilterBy }}</div>            <ul class=\"breadcrumbs\">                <li cel-breadcrumb ng-repeat=\"breadcrumb in results.SearchPath.Answers\" id=\"{{ breadcrumb.ID }}\" class=\"breadcrumb\" answer-id=\"{{ breadcrumb.ID }}\" tabindex=\"0\">                    <!-- Template in breadcrumb.html -->                </li>            </ul>            <div id=\"clear-all\">                <button class=\"btn-default\" ng-click=\"clearAll()\">{{ settings.Language.ClearAll }}</button>            </div>        </div>        <div id=\"filters\">            <div id=\"questions-toggle\" class=\"hidden visible-sm visible-xs\">                <span cel-toggle=\"toggleQuestions\" tabindex=\"0\"><i ng-class=\"{ 'cel-icon-angle-down' : toggleQuestions == false, 'cel-icon-angle-up' : toggleQuestions == true }\"></i>{{ settings.Language.Filters }}</span>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Langauge.Apply }}</span>            </div>            <div id=\"questions-container\" ng-class=\"{ 'hidden-xs hidden-sm' : toggleQuestions == false }\">                <ul class=\"questions\">                    <li cel-question ng-repeat=\"question in results.Questions\" id=\"{{ question.SideText }}\">                        <!-- Template in question.html -->                    </li>                    <rzslider cel-price-slider ng-if=\"settings.Refinements.EnablePriceSlider == true\" ng-show=\"showSlider === true\" class=\"hidden-xs hidden-sm\"                                rz-slider-model=\"slider.minValue\"                                rz-slider-high=\"slider.maxValue\"                                rz-slider-options=\"slider.options\"></rzslider>                </ul>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Language.Apply }}</span>            </div>        </div>    </div>    <div id=\"main-content\">        <div cel-campaigns id=\"campaigns\"></div>        <div id=\"messages\" ng-show=\"results.RecommendedMessage != '' && results.RecommendedMessage !== undefined\" class=\"ng-cloak\">            <span ng-bind-html=\"results.RecommendedMessage | trust_html\"></span>        </div>        <div id=\"related-searches\" ng-if=\"results.RelatedSearches.length > 0\"><a ng-repeat=\"query in results.RelatedSearches\" href=\"?{{ settings.General.DoSearchUrlParameter }}={{ query }}\">{{ query }}</a></div>        <div class=\"toolbar flex-box-row col-xs-max-1 col-sm-max-3 col-md-max-3 col-max-3\">                      <div id=\"display\" class=\"hidden-sm\">                <ul class=\"flex-box-row\">                    <li cel-display=\"grid\" class=\"grid_list grid\" ng-class=\"{ selected : display == 'grid' }\" ng-attr-tabindex=\"{{display == 'grid' ? '': '0'}}\" title=\"{{ settings.Language.Grid }}\">                        <i class=\"cel-icon-grid\"></i>                    </li>                    <li cel-display=\"list\" class=\"grid_list list\" ng-class=\"{ selected : display == 'list' }\" ng-attr-tabindex=\"{{ display == 'list' ? '': '0' }}\" title=\"{{ settings.Language.List }}\">                        <i class=\"cel-icon-list\"></i>                    </li>                </ul>            </div><div id=\"search\"><input type=\"text\" value=\"\" id=\"search-products\" placeholder=\"Search Key\" ng-keyup= \"searchProducts($event)\"><span ng-click= \"searchProducts()\" ><i class=\"cel-icon-search\"></i></span></div>                         <div id=\"sorting\">            	<div class=\"select-wrapper cel-icon-angle-down\">Sort By 	            	<select cel-sort >	            		<option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-selected=\"currentSort.alias === sort.Alias\" t=\"{{ currentSort.alias }} {{ sort.Alias }}\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\">{{ settings.Language[name] !== undefined ? settings.Language[name] : sort.Alias }}</option>	            	</select>	                <!--<select ng-if=\"searchPage === false\" class=\"flex-box-row\" onChange=\"location = this.value\">	                    <option cel-sort-option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\" ng-value=\"sort.NavURL\" ng-selected=\"currentSort.alias === sort.Alias\">{{ sort.Alias }}</option>	                </select>-->                </div>            </div>                                             </div>        <ul class=\"products products-{{ display }} flex-box-row\" ng-class=\"{'col-xs-max-2 col-sm-max-3 col-md-max-3 col-lg-max-3 col-max-4' : display=='grid',  'col-max-1' : display == 'list' }\">            <li cel-product ng-repeat=\"product in results.Products\" id=\"{{ product.Id }}\" class=\"cuit_item product flex-box-column product-item\">                <!-- Template in product.html -->            </li>        </ul>        <div class=\"toolbar toolbar-bottom flex-box-row col-xs-max-1 col-sm-max-3 col-max-2\">            <div cel-pagination ng-hide=\"results.PagesCount == 1 || settings.ProductResults.InfiniteScroll == true\" id=\"pagination\" current-page=\"{{ results.CurrentPage }}\" pages-count=\"{{ results.PagesCount }}\">                <!-- Template in pagination.html -->            </div></div>    </div></div><div cel-to-top ng-if=\"settings.ProductResults.InfiniteScroll == true && showToTop == true\" class=\"to-top cel-icon-angle-up\" ng-attr-tabindex=\"{{settings.ProductResults.InfiniteScroll == true ? '': '0'}}\"></div>",
+                template: "<div id=\"profile-tabs\" ng-show=\"settings.General.ProfileTabs !== ''\" class=\"ng-cloak\">    <ul>        <li cel-profile ng-repeat=\"(name, tab) in settings.General.ProfileTabs\" profile=\"{{ tab.Profile }}\" display=\"{{ tab.Display }}\" ng-class=\"{ 'selected' : profile == tab.Profile }\" tabindex=\"0\">            <span>{{ tab.Alias !== undefined ? tab.Alias : name }}</span>        </li>    </ul></div><div id=\"loader\" ng-hide=\"loading == false\">    <div><i class=\"cel-icon-spin3 animate-spin\"></i></div></div>        <div id=\"filter-details\">            <div ng-show=\"searchPage === true\" id=\"filter-title\">{{ settings.Language.Search }} \"{{ results.OriginalQuery }}\" </div>            <div id=\"products-count\">{{ results.ProductsCount }} {{ settings.Language.Products }}</div>        </div><div cel-search-anlx cel-infinite-scroll=\"{{ settings.General.InfiniteScroll }}\" id=\"container\" class=\"flex-box-row {{ profile !== '' ? 'profile-' + profile : '' }}\" ng-hide=\"loading == true\">    <div id=\"filter-content\">        <div id=\"filter-breadcrumbs\" ng-show=\"results.SearchPath.Answers.length != 0\" class=\"ng-cloak\">            <div class=\"filter-by\">{{ settings.Language.FilterBy }}</div>            <ul class=\"breadcrumbs\">                <li cel-breadcrumb ng-repeat=\"breadcrumb in results.SearchPath.Answers\" id=\"{{ breadcrumb.ID }}\" class=\"breadcrumb\" answer-id=\"{{ breadcrumb.ID }}\" tabindex=\"0\">                    <!-- Template in breadcrumb.html -->                </li>            </ul>            <div id=\"clear-all\">                <button class=\"btn-default\" ng-click=\"clearAll()\">{{ settings.Language.ClearAll }}</button>            </div>        </div>        <div id=\"filters\">            <div id=\"questions-toggle\" class=\"hidden visible-sm visible-xs\">                <span cel-toggle=\"toggleQuestions\" tabindex=\"0\"><i ng-class=\"{ 'cel-icon-angle-down' : toggleQuestions == false, 'cel-icon-angle-up' : toggleQuestions == true }\"></i>{{ settings.Language.Filters }}</span>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Langauge.Apply }}</span>            </div>            <div id=\"questions-container\" ng-class=\"{ 'hidden-xs hidden-sm' : toggleQuestions == false }\">                <ul class=\"questions\">                    <li cel-question ng-repeat=\"question in results.Questions\" id=\"{{ question.SideText }}\">                        <!-- Template in question.html -->                    </li>                    <rzslider cel-price-slider ng-if=\"settings.Refinements.EnablePriceSlider == true\" ng-show=\"showSlider === true\" class=\"hidden-xs hidden-sm\"                                rz-slider-model=\"slider.minValue\"                                rz-slider-high=\"slider.maxValue\"                                rz-slider-options=\"slider.options\"></rzslider>                </ul>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Language.Apply }}</span>            </div>        </div>    </div>    <div id=\"main-content\">        <div cel-campaigns id=\"campaigns\"></div>        <div id=\"messages\" ng-show=\"results.RecommendedMessage != '' && results.RecommendedMessage !== undefined\" class=\"ng-cloak\">            <span ng-bind-html=\"results.RecommendedMessage | trust_html\"></span>        </div>        <div id=\"related-searches\" ng-if=\"results.RelatedSearches.length > 0\"><a ng-repeat=\"query in results.RelatedSearches\" href=\"?{{ settings.General.DoSearchUrlParameter }}={{ query }}\">{{ query }}</a></div>        <div class=\"toolbar flex-box-row col-xs-max-1 col-sm-max-3 col-md-max-3 col-max-3\">                      <div id=\"display\" class=\"hidden-sm\">                <ul class=\"flex-box-row\">                    <li cel-display=\"grid\" class=\"grid_list grid\" ng-class=\"{ selected : display == 'grid' }\" ng-attr-tabindex=\"{{display == 'grid' ? '': '0'}}\" title=\"{{ settings.Language.Grid }}\">                        <i class=\"cel-icon-grid\"></i>                    </li>                    <li cel-display=\"list\" class=\"grid_list list\" ng-class=\"{ selected : display == 'list' }\" ng-attr-tabindex=\"{{ display == 'list' ? '': '0' }}\" title=\"{{ settings.Language.List }}\">                        <i class=\"cel-icon-list\"></i>                    </li>                </ul>            </div><div id=\"search\"><input type=\"text\" value=\"\" id=\"search-products\" placeholder=\"Search Key\" ng-keyup= \"searchProducts($event)\"><span ng-click= \"searchProducts()\" ><i class=\"cel-icon-search\"></i></span></div>                         <div id=\"sorting\">            	<div class=\"select-wrapper cel-icon-angle-down\">Sort By 	            	<select cel-sort >	            		<option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-selected=\"currentSort.alias === sort.Alias\" t=\"{{ currentSort.alias }} {{ sort.Alias }}\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\">{{ settings.Language[name] !== undefined ? settings.Language[name] : sort.Alias }}</option>	            	</select>	                <!--<select ng-if=\"searchPage === false\" class=\"flex-box-row\" onChange=\"location = this.value\">	                    <option cel-sort-option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\" ng-value=\"sort.NavURL\" ng-selected=\"currentSort.alias === sort.Alias\">{{ sort.Alias }}</option>	                </select>-->                </div>            </div>                                             </div><div style=\"display:flex; align-items: center;\"><input type=\"checkbox\" ng-click=\"checkAll($event)\" class=\"check-all-products\"><button ng-click=\"allAddToImportList($event)\" type=\"submit\" title=\"{{ settings.Language.AddToImportList }}\" class=\"all-add-products\">{{ settings.Language.AddToImportList }}</button></div>        <ul class=\"products products-{{ display }} flex-box-row\" ng-class=\"{'col-xs-max-2 col-sm-max-3 col-md-max-3 col-lg-max-3 col-max-4' : display=='grid',  'col-max-1' : display == 'list' }\">            <li cel-product ng-repeat=\"product in results.Products\" id=\"{{ product.Id }}\" class=\"cuit_item product flex-box-column product-item\">                <!-- Template in product.html -->            </li>        </ul>        <div class=\"toolbar toolbar-bottom flex-box-row col-xs-max-1 col-sm-max-3 col-max-2\">            <div cel-pagination ng-hide=\"results.PagesCount == 1 || settings.ProductResults.InfiniteScroll == true\" id=\"pagination\" current-page=\"{{ results.CurrentPage }}\" pages-count=\"{{ results.PagesCount }}\">                <!-- Template in pagination.html -->            </div><div id=\"page-sizer\" class=\"hidden-xs hidden-sm hidden-md\">                <div class=\"select-wrapper cel-icon-angle-down\" ng-if=\"settings.Toolbar.PageSizes.Enabled == true && settings.ProductResults.InfiniteScroll == false\">                    <span>{{ settings.Language.ProductsPerPage }}</span>                    <select cel-page-sizer class=\"cel-icon-angle-down\">                        <option ng-repeat=\"size in settings.Toolbar.PageSizes.Option\" id=\"{{ size.Value }}\" ng-selected=\"{{ size.Value == pageSize }}\" ng-value=\"{{ size.Value }}\">{{ size.Value }}</option>                    </select>                </div>            </div></div>    </div></div><div cel-to-top ng-if=\"settings.ProductResults.InfiniteScroll == true && showToTop == true\" class=\"to-top cel-icon-angle-up\" ng-attr-tabindex=\"{{settings.ProductResults.InfiniteScroll == true ? '': '0'}}\"></div>",
                 controller: "CelController",
                 reloadOnSearch: false
             });
-       /* $locationProvider.hashPrefix("");
-
-        $sceDelegateProvider.resourceUrlWhitelist([
-            "self",
-            "**.celebros.com**"
-        ]);*/
         $locationProvider.html5Mode({
             enabled: true
         }).hashPrefix('');
@@ -30,7 +24,7 @@ angular
                 .then(function (response) {
                     return response;
                 }, function (error) {
-                    /* console.log(error); */
+                    console.log(error);
                 });
         };
 
@@ -514,13 +508,13 @@ angular
             var products_count = 0;
             if (data.SearchPath[0].Answers.length == 0) {
                 data.Questions[0].Answers.forEach(question => {
-                    if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                    if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
                         answers.push(question);
                         products_count += question.ProductCount;
                     }
                 });
                 data.Questions[0].ExtraAnswers.forEach(question => {
-                    if (question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                    if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
                         answers.push(question);
                         products_count += question.ProductCount;
                     }
@@ -929,7 +923,7 @@ angular
             for (i = 0; i < results.Products.length; i++) {
                 var prod = results.Products[i];
                 var imported_ids = JSON.parse(window.localStorage.getItem('imported_ids'));
-                prod.ImageUrl = 'https://d2a7hynupgugqd.cloudfront.net/media/catalog/product/cache/6af2da79007bbde83ac425b5e09ddcd4' + prod.ImageUrl.substr(98);
+                prod.ImageUrl = 'https://m.gdss.us/media/catalog/product/cache/6af2da79007bbde83ac425b5e09ddcd4' + prod.ImageUrl.substr(98);
                 var id = 0;
                 results.Products[i].AddtionalFields.forEach(field => {
                     if(field.Name == 'mag_id'){
@@ -960,6 +954,7 @@ angular
 
             /* Reset showSlider to false */
             $scope.showSlider = false;
+            results.Questions.splice(2, 1);
             if (celConfig.Settings.Refinements.EnablePriceSlider) {
                 for (i = 0; i < results.Questions.length; i++) {
                     var question = results.Questions[i];
@@ -1236,11 +1231,12 @@ angular
             history.pushState($scope.data, null, $location.absUrl());
         };
 
-        $scope.addtoimportlist = function (event) {
+        $scope.addToImportList = function (event) {
             var data = {
                 'action': 'add_import_list',
                 'id_product': event.target.id.split('-')[1]
             }
+            document.getElementById(`check-${event.target.id.split('-')[1]}`).disabled = true;
             $http({
                 url: '/ajax',
                 method: 'GET',
@@ -1252,7 +1248,55 @@ angular
                 document.getElementById(`add-${JSON.parse(res.data)}`).hidden = true;
                 document.getElementById(`${JSON.parse(res.data)}`).href = 'import-list';
                 document.getElementById(`edit-${JSON.parse(res.data)}`).hidden = false;
+                document.getElementById(`check-${JSON.parse(res.data)}`).checked = false;
             })
+        };
+
+        $scope.checkAll = function (event) {
+            var checkboxes = document.querySelectorAll('.check-product');
+            checkboxes.forEach(checkbox => {
+                if (event.target.checked){
+                    if(!checkbox.disabled)
+                        checkbox.checked = true;
+                }
+                else checkbox.checked = false;
+            });
+        }
+
+        $scope.allAddToImportList = function (event) {
+            var product_ids = [];
+            var checkboxes = document.querySelectorAll('.check-product');
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked){
+                    product_ids.push(checkbox.id.split('-')[1]);
+                    checkbox.disabled = true;
+                }
+            });
+            console.log(product_ids);
+            var data = {
+                'product_ids': product_ids
+            }
+            if (product_ids.length) {
+                event.target.disabled = true;
+                $http.post('/ajax',{product_ids: product_ids})
+                    .then(res=> {
+                        event.target.disabled = false;
+                        var imported_ids = JSON.parse(window.localStorage.getItem('imported_ids'));
+                        var new_ids = [];
+                        new_ids = imported_ids.concat(res.data);
+                        window.localStorage.setItem('imported_ids', JSON.stringify(new_ids));
+                        res.data.forEach(id => {
+                            document.getElementById(`add-${JSON.parse(id)}`).hidden = true;
+                            document.getElementById(`${JSON.parse(id)}`).href = 'import-list';
+                            document.getElementById(`edit-${JSON.parse(id)}`).hidden = false;
+                            document.getElementById(`check-${JSON.parse(id)}`).checked = false;
+                    });
+                })
+
+            }
+            else {
+                alert('At least one checkbox must be selected');
+            }
         };
         $scope.editonimportlist = function (event) {
             window.location.href = "/import-list";
@@ -1867,11 +1911,13 @@ angular
 
         return {
             restrict: "A",
-            template: "<div class=\"cuit_item_container\" ng-class=\"{ 'flex-box-column' : display == 'grid', 'flex-box-row' : display == 'list' }\"><a cel-prod-anlx id=\"{{product.mag_id}}\" class=\"product-details\" href=\"{{ product.ProductPageUrl }}\" target=\"_self\">        <div class=\"product-image\"><img ng-src=\"{{product.ImageUrl}}\" on-error=\"{{ settings.ProductResults.NoImageUrl }}\" max-width=\"240px\" max-height=\"300px\" />        </div>               <div class=\"product-info\">            <div class=\"product-title\" ng-bind-html=\"product.Name | trust_html\"></div>            <div class=\"product-sku\">SKU #{{ product.Sku }}</div>             <div ng-if=\"product.is_in_stock==0\" class=\"product-stock\">{{ product.is_in_stock.replace('0','OUT OF STOCK') }}</div>                        <div ng-show=\"display == 'list'\" class=\"product-description hidden-sm\" ng-bind-html=\"product.Description | trust_html\">            </div>        </div>                 </a>    <div class=\"product-shop\" ng-if=\"product.Price !== '0'\">	    	 <div ng-if=\"settings.ProductResults.ShowRatings === true\" class=\"ratings-container\">	            <div class=\"ratings\">	                <span class=\"ratings-stars ratings-stars-off\">â˜…â˜…â˜…â˜…â˜…</span>	                <span class=\"ratings-stars ratings-stars-on\" ng-style=\"{ width: product.RatingStars + '%' }\">â˜…â˜…â˜…â˜…â˜…</span>	            </div>	        </div>    		 <div ng-show=\"product.Original_Price !== undefined && product.Original_Price !== product.Price && product.Original_Price !== '0.00'\" class=\"old-product-price\">{{ product.Original_Price | currency : \"$\" : 2  }}</div>	        <div ng-hide=\"settings.Magento.RealTimePrice === true && !priceLoaded\" class=\"product-price\">{{ product.Price | currency : \"$\" : 2 }}</div>	                 		</div> <!--End addtocard vtex -->		     <div class=\"add-to-cart\">		            <a ng-if=\"product.AddToCart === undefined\" cel-prod-anlx href=\"{{ product.ProductPageUrl }}\" target=\"_self\">{{ settings.Language.ViewDetails }}</a>		            <form ng-if=\"product.AddToCart !== undefined && formKey !== undefined\" data-role=\"tocart-form\">		                <input type=\"hidden\" name=\"product\" value=\"{{ product.mag_id }}\" />		                <input type=\"hidden\" name=\"uenc\" value=\"{{ uenc }}\" />		                <input type=\"hidden\" name=\"form_key\" value=\"{{ formKey }}\" />		                <div class=\"control\"><button cel-prod-anlx id=\"add-{{product.mag_id}}\" ng-click=\"addtoimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.AddToImportList }}\" class=\"btn-default\">{{ settings.Language.AddToImportList }}</button><button cel-prod-anlx id=\"edit-{{product.mag_id}}\" hidden ng-click=\"editonimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.EditOnImportList }}\" class=\"btn-default edit\">{{ settings.Language.EditOnImportList }}</button></div></form></div></div></div>",
+            template: "<div class=\"cuit_item_container\" ng-class=\"{ 'flex-box-column' : display == 'grid', 'flex-box-row' : display == 'list' }\"><input type=\"checkbox\" id=\"check-{{product.mag_id}}\" class=\"check-product\"><a cel-prod-anlx id=\"{{product.mag_id}}\" class=\"product-details\" href=\"{{ product.ProductPageUrl }}\" target=\"_blank\">        <div class=\"product-image\"><img ng-src=\"{{product.ImageUrl}}\" on-error=\"{{ settings.ProductResults.NoImageUrl }}\" max-width=\"240px\" max-height=\"300px\" />        </div>               <div class=\"product-info\">            <div class=\"product-title\" ng-bind-html=\"product.Name | trust_html\"></div>            <div class=\"product-sku\">SKU #{{ product.Sku }}</div>             <div ng-if=\"product.is_in_stock==0\" class=\"product-stock\">{{ product.is_in_stock.replace('0','OUT OF STOCK') }}</div>                        <div ng-show=\"display == 'list'\" class=\"product-description hidden-sm\" ng-bind-html=\"product.Description | trust_html\">            </div>        </div>                 </a>    <div class=\"product-shop\" ng-if=\"product.Price !== '0'\">	    	 <div ng-if=\"settings.ProductResults.ShowRatings === true\" class=\"ratings-container\">	            <div class=\"ratings\">	                <span class=\"ratings-stars ratings-stars-off\">â˜…â˜…â˜…â˜…â˜…</span>	                <span class=\"ratings-stars ratings-stars-on\" ng-style=\"{ width: product.RatingStars + '%' }\">â˜…â˜…â˜…â˜…â˜…</span>	            </div>	        </div>    		 <div ng-show=\"product.Original_Price !== undefined && product.Original_Price !== product.Price && product.Original_Price !== '0.00'\" class=\"old-product-price\">{{ product.Original_Price | currency : \"$\" : 2  }}</div>	        <div ng-hide=\"settings.Magento.RealTimePrice === true && !priceLoaded\" class=\"product-price\">{{ product.Price | currency : \"$\" : 2 }}</div>	                 		</div> <!--End addtocard vtex -->		     <div class=\"add-to-cart\">		            <a ng-if=\"product.AddToCart === undefined\" cel-prod-anlx href=\"{{ product.ProductPageUrl }}\" target=\"_self\">{{ settings.Language.ViewDetails }}</a>		            <form ng-if=\"product.AddToCart !== undefined && formKey !== undefined\" data-role=\"tocart-form\">		                <input type=\"hidden\" name=\"product\" value=\"{{ product.mag_id }}\" />		                <input type=\"hidden\" name=\"uenc\" value=\"{{ uenc }}\" />		                <input type=\"hidden\" name=\"form_key\" value=\"{{ formKey }}\" />		                </form><div class=\"control\"><button cel-prod-anlx id=\"add-{{product.mag_id}}\" ng-click=\"addToImportList($event)\" type=\"submit\" title=\"{{ settings.Language.AddToImportList }}\" class=\"btn-default\">{{ settings.Language.AddToImportList }}</button><button cel-prod-anlx id=\"edit-{{product.mag_id}}\" hidden ng-click=\"editonimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.EditOnImportList }}\" class=\"btn-default edit\">{{ settings.Language.EditOnImportList }}</button></div></div></div></div>",
             link: function (scope, elem, attr) {
                 imported_ids.forEach(imported_id => {
                     if(imported_id == scope.product.mag_id){
-                        elem[0].lastElementChild.lastElementChild.hidden = true;
+                        elem[0].children[0].children[2].children[0].children[0].hidden = true;
+                        elem[0].children[0].children[2].children[0].children[1].hidden = false;
+                        elem[0].children[0].children[0].disabled = true;
                     }
                 });
                 if (celConfig.Settings.ProductResults.ShowRatings) {
