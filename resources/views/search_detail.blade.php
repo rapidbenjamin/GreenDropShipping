@@ -73,7 +73,7 @@
                             <button class="addtoimport btn_import_list_detail add-to-import-list-{{ $product->id }}" data-id="{{ $product->id }}">Add to Import List</button>
                             <button class="addtoimport edit-on-import-list-{{ $product->id }}" data-id="{{ $product->id }}" style="display:none;">Edit on Import List</button>
                         @elseif($action == 'my-products')
-                            <a href="http://{{Auth::user()->shopify_url}}/admin/products/{{$product->id_shopify}}" target="_blank"><button class="addtoimport btn_import_list_detail edit-on-shopify-{{ $product->id_shopify }}">Edit on Shopify</button></a>
+                            <a href="http://{{Auth::user()->shopify_url}}/admin/products/{{$product->id_shopify}}" target="_blank"><button class="addtoimport btn_import_list_detail edit-on-shopify-{{ $product->id_shopify }}">Edit on Shopify<img class="button-icon" src="/img/edit.png" alt="Pencil in Square - Edit Icon"></button></a>
                         @endif
                     </div>
 

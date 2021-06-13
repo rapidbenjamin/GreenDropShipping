@@ -1255,6 +1255,7 @@
   #celUITDiv #search input{
     font-size: 18px;
     padding-left: 10px;
+    width: 70%;
   }
 
   #celUITDiv #search span{
@@ -1581,13 +1582,9 @@
       padding-top: 15px;
       padding-bottom: 15px;
       border-radius: 4px;
+      border: none;
     }
 
-
-   #celUITDiv .all-add-products{
-    padding: 10px;
-    margin-left: 0px;
-   }
    #celUITDiv .products > li .cuit_item_container .add-to-cart button:hover, .all-add-products:hover{
    background: #7ba439;
       border: 1px solid #7ba439;

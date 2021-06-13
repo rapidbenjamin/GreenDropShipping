@@ -111,7 +111,7 @@
            <div class="topel">
               <div class="currenuser">
                     <div class="avatar">
-                        <img src="img/user_avatar.png">
+                        <img src="/img/user_avatar.png">
                     </div>
                     <div>
                         <h3>{{Auth::user()->name}}</h3>

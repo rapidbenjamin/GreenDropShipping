@@ -87,7 +87,6 @@ class MigrateProductsController extends Controller
     public function confirmMigrateProducts(Request $request)
     {
         foreach ($request['products'] as $data) {
-            \Log::info($data);
             $mig_product = DB::table('temp_migrate_products')->where('id_shopify', $data['id'])->first();
             $product = Products::where('sku', $mig_product->sku)->first();
             $import_product = ImportList::where('id_product', $product->id)->where('id_customer', Auth::User()->id)->first();
