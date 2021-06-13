@@ -279,15 +279,25 @@ angular
 
         var Search = function (data) {
             var canceller = $q.defer();
-
             var cancel = function (reason) {
                 canceller.resolve(reason);
             };
 
-            var promise = $http.get(wcfServer + "Search", { params: data, timeout: canceller.promise })
+            var promise = $http.get(wcfServer + "DoSearch", { params: data, timeout: canceller.promise })
                 .then(function (response) {
-                    var result = filterCategories(response.data);
-                    return result;
+                    var result = filterCategories(response.data.DoSearchResult);
+                    if (data.query == '') {
+                        return result;
+                    } else {
+                        var params = {
+                            siteId: data.siteId,
+                            searchHandle: result.Handle,
+                            answerId: result.Questions[0].Answers[0].ID
+                        }
+                        return doAnswerQuestion(params).then(function (res) {
+                            return res;
+                        });
+                    }
                 });
 
             return {
@@ -298,7 +308,6 @@ angular
 
         var doSearch = function (data) {
             data = JSON.parse(JSON.stringify(data));
-            console.log(data);
 
             var canceller = $q.defer();
 
@@ -385,7 +394,6 @@ angular
 
         var doAnswerQuestion = function (data) {
             data = JSON.parse(JSON.stringify(data));
-
             for (var param in data) {
                 if (apiParamMapping.doAnswerQuestion.indexOf(param) < 0 || data[param] === null) {
                     delete data[param];
@@ -508,13 +516,13 @@ angular
             var products_count = 0;
             if (data.SearchPath[0].Answers.length == 0) {
                 data.Questions[0].Answers.forEach(question => {
-                    if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                    if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
                         answers.push(question);
                         products_count += question.ProductCount;
                     }
                 });
                 data.Questions[0].ExtraAnswers.forEach(question => {
-                    if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                    if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
                         answers.push(question);
                         products_count += question.ProductCount;
                     }
@@ -1058,8 +1066,6 @@ angular
         };
 
         var onError = function (reason) {
-            //$scope.error = "Could not fetch data. " + reason;
-            //console.log($scope.error);
             if (celConfig.Settings.EnableLoader) {
                 $scope.loading = false;
             }
@@ -1272,7 +1278,6 @@ angular
                     checkbox.disabled = true;
                 }
             });
-            console.log(product_ids);
             var data = {
                 'product_ids': product_ids
             }
@@ -1312,7 +1317,9 @@ angular
             var wcfServer = celConfig.Settings.General.WcfAddress;
             var data = {
                 query: search_key,
-                siteKey: celConfig.Settings.General.SiteKey,
+                siteId: celConfig.Settings.General.SiteKey,
+                searchHandle: $scope.data.searchHandle,
+                pageSize: $scope.pageSize,
                 principles: true
             }
             if (flag) {
@@ -1994,7 +2001,7 @@ angular
                 }
 
                 scope.question.showExtra = false;
-                scope.question.hasExtra = scope.question.ExtraAnswers.length > 0 ? true : false;
+                scope.question.hasExtra = scope.question.ExtraAnswers.length > 1 ? true : false;
                 scope.question.showMoreLess = celConfig.Settings.Refinements.ShowMoreLess;
                 scope.question.enabled = true;
                 scope.question.showApply = false;
@@ -2371,13 +2378,11 @@ angular
 
                 elem.bind("change", function (event) {
                     var value = event.target.value;
-                    //console.log(value);
                     if (scope.currentSort.alias === value) {
                         return;
                     }
                     var sortKey = "";
 		            for (key in celConfig.Settings.Toolbar.SortOptions) {
-						//var key = Object.keys(celConfig.Settings.Toolbar.SortOptions)[i];
 						if(celConfig.Settings.Toolbar.SortOptions[key].Alias === value) {
 					        sortKey = key;
 					    }
