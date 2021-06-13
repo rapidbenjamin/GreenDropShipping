@@ -86,6 +86,7 @@ class MigrateProductsController extends Controller
 
     public function confirmMigrateProducts(Request $request)
     {
+        $result = [];
         foreach ($request['products'] as $data) {
             $mig_product = DB::table('temp_migrate_products')->where('id_shopify', $data['id'])->first();
             $product = Products::where('sku', $mig_product->sku)->first();
@@ -100,15 +101,20 @@ class MigrateProductsController extends Controller
                 $import_product->save();
                 $flag = true;
                 $check_price = true;
+                $data['result'] = true;
             } else {
                 if ($my_product == null) {
                     $flag = true;
                     $check_price = true;
+                    $data['result'] = true;
                 } else {
                     if ($mig_product->location_id_shopify == Auth::User()->fulfillment_location_id) {
                         $check_price = true;
+                        $data['result'] = true;
                     } else {
                         DB::table('temp_migrate_products')->where('id_shopify', $data['id'])->update(['type' => 'delete']);
+                        DB::table('my_products')->where('id_shopify', $mig_product->id_shopify)->delete();
+                        $data['result'] = false;
                     }
                 }
             }
@@ -130,16 +136,14 @@ class MigrateProductsController extends Controller
                 if ($price != $mig_product->price) {
                     MyProducts::where('id_shopify', $mig_product->id_shopify)->update(['profit' => $data['profit'], 'cron' => 1]);
                     DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)->where('id_shopify', $data['id'])->delete();
-                    // $mig_product->price = $product->price * (100 + $data['profit']) / 100;
-                    // ShopifyAdminApi::updatePrice(Auth::User(), $mig_product);
                 } else {
                     DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)->where('id_shopify', $data['id'])->delete();
                 }
             }
+            $result[] = $data;
         }
         return response()->json([
-            'result' => $check_price,
-            'products' => $request['products']
+            'products' => $result
         ]);
     }
 

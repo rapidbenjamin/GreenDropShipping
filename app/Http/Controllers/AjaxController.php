@@ -56,12 +56,13 @@ class AjaxController extends Controller
         }
 
         if ($parameters['action'] == 'add_import_list') {
-
-            $row = new ImportList;
-            $row->id_customer = Auth::user()->id;
-            $row->id_product = $parameters['id_product'];
-            $row->save();
-
+            $product = ImportList::where('id_customer', Auth::User()->id)->where('id_product', $parameters['id_product'])->first();
+            if ($product == null) {
+                $row = new ImportList;
+                $row->id_customer = Auth::user()->id;
+                $row->id_product = $parameters['id_product'];
+                $row->save();
+            }
             return json_encode($parameters['id_product']);
         }
 
@@ -174,7 +175,7 @@ class AjaxController extends Controller
             }
             return json_encode([
                 'products' => count($products['body']['products']),
-                'location_id' => $location_id,
+                'location_id' => $location_id['body']['inventory_levels'][0]['location_id'],
             ]);
         }
 
@@ -267,10 +268,13 @@ class AjaxController extends Controller
     {
         $rows = [];
         foreach ($request->product_ids as $product_id) {
-            $rows[] = [
-                'id_customer' => Auth::User()->id,
-                'id_product' => $product_id
-            ];
+            $product = ImportList::where('id_customer', Auth::User()->id)->where('id_product', $product_id)->first();
+            if ($product == null) {
+                $rows[] = [
+                    'id_customer' => Auth::User()->id,
+                    'id_product' => $product_id
+                ];
+            }
         }
         DB::table('import_list')->insert($rows);
         return json_encode($request->product_ids);

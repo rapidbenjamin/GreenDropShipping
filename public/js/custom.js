@@ -600,19 +600,25 @@ $(document).ready(function () {
         var str = '';
         data.products.forEach(product => {
             var payload = JSON.parse(product.payload);
-            var button_str = '', cost_str = '', profit_str = '';
+            var button_str = '', profit_str = '';
+            var cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(payload.cost).toFixed(2)}</span>`;
             if (product.type == 'migration'){
-                button_str = `<button class="btn-confirm-product confirmbutton" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
-                                <button class="confirmbutton" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
-                                <button class="confirmbutton" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>`;
-                var cost_str = `<span id="cost-${product.id_shopify}">${parseFloat(payload.cost).toFixed(2)}</span>`;
-                var profit_str = `<div style="display:flex; justify-content: center;">
+                button_str = `<button class="btn-confirm-product confirmbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
+                                <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
+                                <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>
+                                <button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Delete</button>
+                                <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                                <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+                profit_str = `<div style="display:flex; justify-content: center;">
                     <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
                     %</div>`;
             } else {
                 button_str = `<button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
                                 <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                                 <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+                profit_str = `<div style="display:flex; justify-content: center;">
+                    <input type="text" style="width:50%; text-align:center; border:none; background:transparent;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
+                    %</div>`;
             }
 
             str += `<tr class="productdatarow">
@@ -634,7 +640,7 @@ $(document).ready(function () {
                     ${profit_str}
                 </td>
                 <td data-label="RETAIL PRICE">
-                    <span id="price-${product.id_shopify}">${parseFloat(product.price).toFixed(2)}</span>
+                    <span id="price-${product.id_shopify}">$${parseFloat(product.price).toFixed(2)}</span>
                 </td>
                 <td data-label="SKU">
                     ${product.sku}

@@ -519,7 +519,7 @@ angular
         var filterCategories = function (data) {
             var answers = [];
             var products_count = 0;
-            if (data.SearchPath[0].Answers.length == 0) {
+            if (data.Questions[0].Name == 'Category' && data.SearchPath[0].Answers.length == 0) {
                 data.Questions[0].Answers.forEach(question => {
                     if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
                         answers.push(question);

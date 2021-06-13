@@ -85,29 +85,35 @@
                             </td>
                             <td data-label="COST GDS">
                                 @if(isset(json_decode($product->payload)->cost))
-                                <span id="cost-{{$product->id_shopify}}">{{number_format(json_decode($product->payload)->cost,2,'.','')}}</span>
+                                <span id="cost-{{$product->id_shopify}}">${{number_format(json_decode($product->payload)->cost,2,'.','')}}</span>
                                 @endif
                             </td>
                             <td data-label="PROFIT">
                                 @if(isset(json_decode($product->payload)->profit))
                                 <div style="display:flex; justify-content: center;">
-                                <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" value="{{number_format(json_decode($product->payload)->profit, 2, '.', '')}}">
+                                    @if($product->type == 'migration')
+                                    <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" value="{{number_format(json_decode($product->payload)->profit, 2, '.', '')}}">
+                                    @elseif($product->type == 'delete')
+                                    <input type="text" style="width:50%; text-align:center; border:none; background:transparent;" class="box-profit" id="profit-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" value="{{number_format(json_decode($product->payload)->profit, 2, '.', '')}}" disabled>
+                                    @endif
                                 %</div>
                                 @endif
                             </td>
                             <td data-label="RETAIL PRICE">
-                                <span id="price-{{$product->id_shopify}}">{{number_format($product->price,2,'.','')}}</span>
+                                <span id="price-{{$product->id_shopify}}">${{number_format($product->price,2,'.','')}}</span>
                             </td>
                             <td data-label="SKU">
                                 {{$product->sku}}
                             </td>
                             <td>
                                 @if ($product->type == 'migration')
-                                <button class="btn-confirm-product confirmbutton" data-id="{{$product->id_shopify}}" id="confirm-{{$product->id_shopify}}">Confirm</button>
-                                <button class="confirmbutton" data-id="{{$product->id_shopify}}" id="confirming-{{$product->id_shopify}}" style="display: none;">Confirming...</button>
-                                <button class="confirmbutton" data-id="{{$product->id_shopify}}" id="confirmed-{{$product->id_shopify}}" style="display: none;">Confirmed</button>
-                                @endif
-                                @if ($product->type == 'delete')
+                                <button class="btn-confirm-product confirmbutton mx-0" data-id="{{$product->id_shopify}}" id="confirm-{{$product->id_shopify}}">Confirm</button>
+                                <button class="confirmbutton mx-0" data-id="{{$product->id_shopify}}" id="confirming-{{$product->id_shopify}}" style="display: none;">Confirming...</button>
+                                <button class="confirmbutton mx-0" data-id="{{$product->id_shopify}}" id="confirmed-{{$product->id_shopify}}" style="display: none;">Confirmed</button>
+                                <button class="btn-mp-delete deletebutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Delete</button>
+                                <button class="deletebutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
+                                <button class="deletebutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
+                                @elseif ($product->type == 'delete')
                                 <button class="btn-mp-delete deletebutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}">Delete</button>
                                 <button class="deletebutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
                                 <button class="deletebutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
@@ -203,6 +209,7 @@
             $(`#deleting-${$(this).data('migproductid')}`).show();
             $(`#deleted-${$(this).data('migproductid')}`).hide();
             $(`#check-${$(this).data('migproductid')}`).removeClass();
+            $(`#check-${$(this).data('migproductid')}`).prop('disabled', true);
             $.post('{{url("/delete-migrate-product")}}', {
                 "_token": "{{ csrf_token() }}",
                 product_ids: [$(this).data('migproductid')]
@@ -217,13 +224,6 @@
         }
     });
     $('.migrate-products').on('click', '#check-all-mp', function() {
-        // if (!$(this).data('mark')) {
-        //     $('.checkbox').prop('checked', true);
-        //     $(this).data('mark', true)
-        // } else {
-        //     $('.checkbox').prop('checked', false);
-        //     $(this).data('mark', false)
-        // }
         if ($('#check-all-mp').is(':checked')) {
             $('.checkbox').prop('checked', true);
         } else {
@@ -246,6 +246,7 @@
                     $(`#deleting-${product_id}`).show();
                     $(`#deleted-${product_id}`).hide();
                     $(`#check-${product_id}`).removeClass();
+                    $(`#check-${product_id}`).prop('disabled', true);
                 });
                 $.post('{{url("/delete-migrate-products")}}', {
                     "_token": "{{ csrf_token() }}",
@@ -266,7 +267,7 @@
                     $(ele).val($('#default_profit').val());
                     var cost = $(`#cost-${$(ele).data('id')}`).text();
                     var profit = $('#default_profit').val();
-                    $(`#price-${$(ele).data('id')}`).text(parseFloat(cost * (1 + profit / 100)).toFixed(2));
+                    $(`#price-${$(ele).data('id')}`).text(parseFloat(cost.substr(1) * (1 + profit / 100)).toFixed(2));
                 });
             })
         }
@@ -276,7 +277,8 @@
         $(`#confirm-${$(this).data('id')}`).hide();
         $(`#confirming-${$(this).data('id')}`).show();
         $(`#confirmed-${$(this).data('id')}`).hide();
-        $(`#check-${$(this).data('id')}`).remove();
+        $(`#check-${$(this).data('id')}`).removeClass();
+        $(`#check-${$(this).data('id')}`).prop('disabled', true);
         $.post('{{url("/confirm-migrate-products")}}', {
             "_token": "{{ csrf_token() }}",
             products: [{
@@ -284,14 +286,21 @@
                 profit: $(`#profit-${$(this).data('id')}`).val()
             }]
         }, function(data, status) {
-            if (data.result) {
-                data.products.forEach(product => {
-                    $(`#confirm-${product.id}`).hide();
-                    $(`#confirming-${product.id}`).hide();
+            data.products.forEach(product => {
+                $(`#confirm-${product.id}`).hide();
+                $(`#confirming-${product.id}`).hide();
+                $(`#check-${product.id}`).prop('checked', false);
+                if (product.result) {
                     $(`#confirmed-${product.id}`).show();
                     $(`#check-${product.id}`).prop('checked', false);
-                });
-            }
+                } else {
+                    $(`#delete-${product.id}`).show();
+                    $(`#check-${product.id}`).prop('disabled', false);
+                    $(`#check-${product.id}`).addClass('checkbox');
+                    $(`#profit-${product.id}`).prop('disabled', true);
+                    $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
+                }
+            });
         });
     });
     $('.migrate-products').on('click', '.btn-confirm-products', function() {
@@ -309,10 +318,10 @@
         if (products.length) {
             products.forEach(product => {
                 $(`#check-${product.id}`).prop('disabled', true);
-                $(`#delete-${product.id}`).hide();
-                $(`#deleting-${product.id}`).show();
-                $(`#deleted-${product.id}`).hide();
+                $(`#confirm-${product.id}`).hide();
+                $(`#confirming-${product.id}`).show();
                 $(`#check-${product.id}`).removeClass();
+                $(`#check-${product.id}`).prop('disabled', true);
             });
             $.post('{{url("/confirm-migrate-products")}}', {
                 "_token": "{{ csrf_token() }}",
@@ -321,8 +330,17 @@
                 data.products.forEach(product => {
                     $(`#confirm-${product.id}`).hide();
                     $(`#confirming-${product.id}`).hide();
-                    $(`#confirmed-${product.id}`).show();
                     $(`#check-${product.id}`).prop('checked', false);
+                    if (product.result) {
+                        $(`#confirmed-${product.id}`).show();
+                        $(`#check-${product.id}`).prop('checked', false);
+                    } else {
+                        $(`#delete-${product.id}`).show();
+                        $(`#check-${product.id}`).prop('disabled', false);
+                        $(`#check-${product.id}`).addClass('checkbox');
+                        $(`#profit-${product.id}`).prop('disabled', true);
+                        $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
+                    }
                 });
             });
         } else {
@@ -362,14 +380,26 @@
             var str = '';
             data.products.forEach(product => {
                 var payload = JSON.parse(product.payload);
-                if (product.type == 'migration')
-                    var button_str = `<button class="btn-confirm-product confirmbutton" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
-                                    <button class="confirmbutton" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
-                                    <button class="confirmbutton" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>`;
-                else
-                    var button_str = `<button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
+                var button_str = '', profit_str = '';
+                var cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(payload.cost).toFixed(2)}</span>`;
+                if (product.type == 'migration'){
+                    button_str = `<button class="btn-confirm-product confirmbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
+                                    <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
+                                    <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>
+                                    <button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Delete</button>
                                     <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                                     <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+                    profit_str = `<div style="display:flex; justify-content: center;">
+                        <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
+                        %</div>`;
+                } else {
+                    button_str = `<button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
+                                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                                    <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+                    profit_str = `<div style="display:flex; justify-content: center;">
+                        <input type="text" style="width:50%; text-align:center; border:none; background:transparent;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
+                        %</div>`;
+                }
 
                 str += `<tr class="productdatarow">
                     <td class="check">
@@ -384,15 +414,13 @@
                         ${ payload.name }
                     </td>
                     <td data-label="COST GDS">
-                        <span id="cost-${product.id_shopify}"> ${parseFloat(payload.cost).toFixed(2)}</span>
+                        ${cost_str}
                     </td>
                     <td data-label="PROFIT">
-                        <div style="display:flex; justify-content: center;">
-                        <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
-                        %</div>
+                        ${profit_str}
                     </td>
                     <td data-label="RETAIL PRICE">
-                        <span id="price-${product.id_shopify}"> ${parseFloat(product.price).toFixed(2)}</span>
+                        <span id="price-${product.id_shopify}">$${parseFloat(product.price).toFixed(2)}</span>
                     </td>
                     <td data-label="SKU">
                         ${product.sku}
@@ -409,11 +437,11 @@
         var id_product = $(this).data('id');
         var cost = $('#cost-' + id_product).text();
         var profit = $(this).val();
+        var value = cost.substr(1);
         if (profit > 0) {
-            var value = parseFloat((cost * (100 + profit * 1)) / 100).toFixed(2);
-        } else value = cost;
-
-        $('#price-' + id_product).text(value);
+            value = parseFloat((cost.substr(1) * (100 + profit * 1)) / 100).toFixed(2);
+        }
+        $('#price-' + id_product).text(`$${value}`);
     });
 </script>
 @endsection
