@@ -284,8 +284,32 @@ angular
             };
             var promise = $http.get(wcfServer + "DoSearch", { params: data, timeout: canceller.promise })
                 .then(function (response) {
-                    var result = filterCategories(response.data.DoSearchResult);
-                    return result;
+                    console.log(response)
+                    return filterCategories(response.data.DoSearchResult)
+                        .then(function (result) {
+                            if (data.query == '') {
+                                return result;
+                            } else {
+                                var ids = [];
+                                result.Questions[0].Answers.forEach(answer => {
+                                    ids.push(answer.ID);
+                                });
+                                result.Questions[0].ExtraAnswers.forEach(answer => {
+                                    ids.push(answer.ID);
+                                });
+                                return doSearchParams({
+                                    query: data.query,
+                                    siteId: data.siteId,
+                                    pageSize: data.pageSize,
+                                    answerIds: ids.join(','),
+                                    effectOnSearchPath: 1,
+                                    previousSearchHandle: result.Handle,
+                                    profile: 'SiteDefault'
+                                }).then((res) => {
+                                    return res;
+                                });
+                            }
+                        });
                 });
 
             return {
