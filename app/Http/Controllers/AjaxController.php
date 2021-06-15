@@ -291,6 +291,21 @@ class AjaxController extends Controller
             }
             return json_encode(['names' => $names]);
         }
+
+        if ($parameters['action'] == 'product_collection') {
+            $collections = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'C']])->pluck('value');
+            return json_encode(['collections' => $collections]);
+        }
+
+        if ($parameters['action'] == 'product_type') {
+            $types = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'X']])->pluck('value');
+            return json_encode(['types' => $types]);
+        }
+
+        if ($parameters['action'] == 'product_tag') {
+            $tags = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'T']])->pluck('value');
+            return json_encode(['tags' => $tags]);
+        }
     }
 
     public function import(Request $request)

@@ -7,6 +7,8 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Libraries\Shopify\ShopifyAdminApi;
 use App\MyProducts;
 use App\ImportList;
@@ -57,11 +59,44 @@ class ShopifyBulkPublish implements ShouldQueue
         foreach ($this->products as $product) {
             $attemps = 3;
             $i = 0;
+            if (json_decode($product)->tags != null) {
+                $tag = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'T'], ['value', json_decode($product)->tags]])->first();
+                if ($tag == null) {
+                    $tag = [
+                        'user_id' => Auth::User()->id,
+                        'type' => 'T',
+                        'value' => json_decode($product)->tags
+                    ];
+                    DB::table('user_collections_tags_types')->insert($tag);
+                }
+            }
+            if (json_decode($product)->collections != null) {
+                $collection = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'C'], ['value', json_decode($product)->collections]])->first();
+                if ($collection == null) {
+                    $collection = [
+                        'user_id' => Auth::User()->id,
+                        'type' => 'C',
+                        'value' => json_decode($product)->collections
+                    ];
+                    DB::table('user_collections_tags_types')->insert($collection);
+                }
+            }
+            if (json_decode($product)->product_type != null) {
+                $product_type = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'X'], ['value', json_decode($product)->product_type]])->first();
+                if ($product_type == null) {
+                    $product_type = [
+                        'user_id' => Auth::User()->id,
+                        'type' => 'X',
+                        'value' => json_decode($product)->product_type
+                    ];
+                    DB::table('user_collections_tags_types')->insert($product_type);
+                }
+            }
             $collections = ShopifyAdminApi::getCollections($this->user);
 
             do {
-                $product = MyProducts::where('id_customer', Auth::User()->id)->where('id_imp_product', json_decode($product)->id)->first();
-                if ($product == null) {
+                $prod = MyProducts::where('id_customer', Auth::User()->id)->where('id_imp_product', json_decode($product)->id)->first();
+                if ($prod == null) {
                     $response_product = ShopifyAdminApi::createProduct($this->user, json_decode($product),$this->published);
                     if ((int)$response_product['result'] == 1) {
 

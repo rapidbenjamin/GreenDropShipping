@@ -388,15 +388,26 @@ $(document).ready(function () {
                                         </div>
                                         <div class="full">
                                             <label for="">Collection <span class="simple-tooltip" title="You can assign the product to a Collection in your Shopify store.">?</span></label>
-                                            <input type="text" id="collections${product.id_import_list}">
+                                            <input type="text" list="collection${product.id_import_list}" id="collections${product.id_import_list}" class="collection" data-id="${product.id_import_list}">
+                                            <datalist id="collection${product.id_import_list}">
+                                                <div id="collection_data"></div>
+                                            </datalist>
+                                            <span id="collection_error${product.id_import_list}" style="color:red; display:none;">One product have only one type.</span>
                                         </div>
                                         <div>
                                             <label for="">Type <span class="simple-tooltip" title="You can give this product a classification that will be saved in the 'Product Type' field in Shopify.">?</span></label>
-                                            <input type="text" id="type${product.id_import_list}">
+                                            <input type="text" list="type${product.id_import_list}" id="types${product.id_import_list}" class="type" data-id="${product.id_import_list}">
+                                            <datalist id="type${product.id_import_list}">
+                                                <div id="type_data"></div>
+                                            </datalist>
+                                            <span id="type_error${product.id_import_list}" style="color:red; display:none;">One product have only one type.</span>
                                         </div>
                                         <div>
                                             <label for="">Tags <span class="simple-tooltip" title="You can create your own tags separated by commas.">?</span></label>
-                                            <input type="text" id="tags${product.id_import_list}">
+                                            <input type="text" list="tag${product.id_import_list}" id="tags${product.id_import_list}" class="tag" data-id="${product.id_import_list}">
+                                            <datalist id="tag${product.id_import_list}">
+                                                <div id="tag_data"></div>
+                                            </datalist>
                                         </div>
                                     </div>
                                 </div>

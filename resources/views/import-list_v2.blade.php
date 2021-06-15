@@ -55,7 +55,8 @@
             </div>
             <div style="display: flex;">
                 <button class="btn-import-list-delete-all" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                <button class="btn-import-list-send-all">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                <button class="btn-import-list-send-all" id="btn-import-list-send-all">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                <button class="btn-import-list-send-all" id="btn-import-list-sending" style="display: none;">Sending...<img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
             </div>
             <div class="pagesize">
                 <span>Show</span>
@@ -87,7 +88,7 @@
                         </div>
                         <div class="buttons import-actions">
                             {{--@can('plan_delete-product-import-list')--}}
-                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#delete-product-modal" @endcan class='delete @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}"  data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#delete-product-modal" @endcan class='delete @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                             <button class='delete' id="deleting-{{$ap->id_import_list}}" style="display: none;" data-id="{{$ap->id_import_list}}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                             {{--@endcan--}}
                             {{--@can('plan_publish-product-import-list')--}}
@@ -116,15 +117,26 @@
                                         </div>
                                         <div class="full">
                                             <label for="">Collection <span class="simple-tooltip" title="You can assign the product to a Collection in your Shopify store.">?</span></label>
-                                            <input type="text" id="collections{{$ap->id_import_list}}">
+                                            <input type="text" list="collection{{$ap->id_import_list}}" id="collections{{$ap->id_import_list}}" class="collection" data-id="{{$ap->id_import_list}}">
+                                            <datalist id="collection{{$ap->id_import_list}}">
+                                                <div id="collection_data"></div>
+                                            </datalist>
+                                            <span id="collection_error{{$ap->id_import_list}}" style="color:red; display:none;">One product can't exist in multiple colelctions.</span>
                                         </div>
                                         <div>
                                             <label for="">Type <span class="simple-tooltip" title="You can give this product a classification that will be saved in the 'Product Type' field in Shopify.">?</span></label>
-                                            <input type="text" id="type{{$ap->id_import_list}}">
+                                            <input type="text" list="type{{$ap->id_import_list}}" id="types{{$ap->id_import_list}}" class="type" data-id="{{$ap->id_import_list}}">
+                                            <datalist id="type{{$ap->id_import_list}}">
+                                                <div id="type_data"></div>
+                                            </datalist>
+                                            <span id="type_error{{$ap->id_import_list}}" style="color:red; display:none;">One product have only one type.</span>
                                         </div>
                                         <div>
                                             <label for="">Tags <span class="simple-tooltip" title="You can create your own tags separated by commas.">?</span></label>
-                                            <input type="text" id="tags{{$ap->id_import_list}}">
+                                            <input type="text" list="tag{{$ap->id_import_list}}" id="tags{{$ap->id_import_list}}" class="tag" data-id="{{$ap->id_import_list}}">
+                                            <datalist id="tag{{$ap->id_import_list}}">
+                                                <div id="tag_data"></div>
+                                            </datalist>
                                         </div>
                                     </div>
                                 </div>
@@ -285,55 +297,56 @@
         });
 
 
-        $('.btn-import-list-send-all').click(function() {
+        $('#btn-import-list-send-all').click(function() {
 
             //Get all checked products
             let products = [];
-            $(this).prop('disabled', true);
-            $('.btn-import-list-delete-all').prop('disabled', true);
 
             $("input.checkbox:checked").each(function(index, ele) {
                 let productId = $(ele).attr('id').split('-')[1];
                 let images = [];
                 if ($(`.btn-import-list-send-${productId}`).is(":visible")) {
+                    var permission = permission_collection_type(productId);
+                    if (permission) {
+                        $(`.btn-import-list-send-${productId}`).hide();
+                        $(`.btn-import-list-send3-${productId}`).show();
+                        $(`.btn-import-list-send-${productId}`).prop('disabled', true);
+                        $(ele).prop('disabled', true);
+                        $(ele).removeClass();
+                        $(`#delete-${productId}`).hide();
 
-                    $(`.btn-import-list-send-${productId}`).hide();
-                    $(`.btn-import-list-send3-${productId}`).show();
-                    $(`.btn-import-list-send-${productId}`).prop('disabled', true);
-                    $(ele).prop('disabled', true);
-                    $(ele).removeClass();
-                    $(`#delete-${productId}`).hide();
+                        // data array of all checked products
+                        $("input.chk-img" + productId + ":checked").each(function(index, ele) {
+                            images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
+                        });
 
-                    // data array of all checked products
-                    $("input.chk-img" + productId + ":checked").each(function(index, ele) {
-                        images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
-                    });
-
-                    products.push({
-                        id: productId,
-                        name: $(`#name${productId}`).val(),
-                        weight: $(`#weight${productId}`).text().trim(),
-                        price: $(`#price${productId}`).val(),
-                        cost: $(`#cost${productId}`).val(),
-                        description: CKEDITOR.instances[`description${productId}`].getData(),
-                        product_type: $(`#type${productId}`).val(),
-                        tags: $(`#tags${productId}`).val(),
-                        collections: $(`#collections${productId}`).val(),
-                        sku: $(`#sku${productId}`).val(),
-                        upc: $(`#upc${productId}`).val(),
-                        profit: $(`#profit${productId}`).val(),
-                        images: images
-                    });
+                        products.push({
+                            id: productId,
+                            name: $(`#name${productId}`).val(),
+                            weight: $(`#weight${productId}`).text().trim(),
+                            price: $(`#price${productId}`).val(),
+                            cost: $(`#cost${productId}`).val(),
+                            description: CKEDITOR.instances[`description${productId}`].getData(),
+                            product_type: $(`#types${productId}`).val(),
+                            tags: $(`#tags${productId}`).val().trim(),
+                            collections: $(`#collections${productId}`).val().trim(),
+                            sku: $(`#sku${productId}`).val().trim(),
+                            upc: $(`#upc${productId}`).val(),
+                            profit: $(`#profit${productId}`).val(),
+                            images: images
+                        });
+                    }
                 }
             });
 
 
 
-            let btn = $(this);
             if (products.length == 0) {
                 alert('At least one checkbox must be selected');
-                return;
             } else {
+                $(this).hide();
+                $('.btn-import-list-delete-all').prop('disabled', true);
+                $('#btn-import-list-sending').show();
                 $('#check-all').prop('disabled', true);
                 $('#check-all').prop('checked', false);
                 $.post('{{url("/publish-all-products")}}', {
@@ -349,9 +362,9 @@
 
         }); //Close send all function
 
-        $('.btn-import-list-delete-all').click(function () {
+        $('.btn-import-list-delete-all').click(function() {
             var product_ids = [];
-            $('input.checkbox:checked').each(function (index, ele) {
+            $('input.checkbox:checked').each(function(index, ele) {
                 product_ids.push($(ele).attr('id').split('-')[1]);
             });
             if (product_ids.length) {
@@ -364,7 +377,7 @@
         })
 
         $('#confirm').click(function() {
-            if ($('#product_id').val() != 'cancel'){
+            if ($('#product_id').val() != 'cancel') {
                 if ($('#product_id').val() == 'delete-products') deleteProducts();
                 else deleteProduct($('#product_id').val());
             }
@@ -378,16 +391,16 @@
             $(`#delete-${id}`).hide();
             $(`#deleting-${id}`).show();
             $(`.btn-import-list-send-${id}`).hide();
-            $.getJSON(ajax_link, parameters, function (data) {
+            $.getJSON(ajax_link, parameters, function(data) {
                 location.reload()
-            }).fail(function (data) {
+            }).fail(function(data) {
                 if (data.status == 403) $('#upgrade-plans-modal').modal('show')
             })
         }
 
         function deleteProducts() {
             var product_ids = [];
-            $('input.checkbox:checked').each(function (index, ele) {
+            $('input.checkbox:checked').each(function(index, ele) {
                 let product_id = $(ele).attr('id').split('-')[1];
                 product_ids.push(product_id);
             });
@@ -403,10 +416,10 @@
             });
             $('#check-all').prop('checked', false);
             $('#check-all').prop('disabled', true);
-            $.getJSON(ajax_link, parameters, function (data) {
+            $.getJSON(ajax_link, parameters, function(data) {
                 $('#check-all').prop('disabled', false);
                 location.reload();
-            }).fail(function (data) {
+            }).fail(function(data) {
                 console.log('error1', data.status)
                 if (data.status == 403) $('#upgrade-plans-modal').modal('show')
             })
@@ -436,6 +449,8 @@
                         if (data.result) {
                             $('.btn-import-list-send-all').prop('disabled', false);
                             $('.btn-import-list-delete-all').prop('disabled', false);
+                            $('#btn-import-list-sending').hide();
+                            $('#btn-import-list-send-all').show();
                             data.id_shopify.forEach(productId => {
                                 $(`.btn-import-list-send3-${productId}`).hide();
                                 $(`.btn-import-list-send2-${productId}`).show();
@@ -450,6 +465,26 @@
         setInterval(publishProductsAjax, 15000);
 
     }); //Close document ready
+    function permission_collection_type(id) {
+        var collection_flag = true;
+        var type_flag = true;
+        if ($(`#collections${id}`).val().indexOf(',') > -1) {
+            $(`#collection_error${id}`).show();
+            collection_flag = false;
+        } else {
+            $(`#collection_error${id}`).hide();
+            collection_flag = true;
+        }
+        if ($(`#types${id}`).val().indexOf(',') > -1) {
+            $(`#type_error${id}`).show();
+            type_flag = false;
+        } else {
+            $(`#type_error${id}`).hide();
+            type_flag = true;
+        }
+        if (collection_flag && type_flag) return true;
+        else return false;
+    }
 
     $('#import-products').on('click', '.producttabs .thetab', function(e) {
         e.preventDefault();
@@ -461,50 +496,52 @@
     })
     $('#import-products').on('click', '.btn-import-list-send', function() {
         let productId = $(this).data('id');
-        let images = [];
-        $("input.chk-img" + productId + ":checked").each(function(index, ele) {
-            images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
-        });
+        var permission = permission_collection_type(productId);
+        if (permission) {
+            let images = [];
+            $("input.chk-img" + productId + ":checked").each(function(index, ele) {
+                images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
+            });
 
-        $(`.btn-import-list-send-${productId}`).hide();
-        $(`.btn-import-list-send3-${productId}`).show();
-        $(`#delete-${productId}`).hide();
-        $(`#check-${productId}`).prop('disabled', true);
-        $(`#check-${productId}`).removeClass();
+            $(`.btn-import-list-send-${productId}`).hide();
+            $(`.btn-import-list-send3-${productId}`).show();
+            $(`#delete-${productId}`).hide();
+            $(`#check-${productId}`).prop('disabled', true);
+            $(`#check-${productId}`).removeClass();
 
-        let btn = $(this);
-        btn.prop('disabled', true);
+            let btn = $(this);
+            btn.prop('disabled', true);
 
-        let product = {
-            id: productId,
-            name: $(`#name${productId}`).val(),
-            weight: $(`#weight${productId}`).text().trim(),
-            price: $(`#price${productId}`).val(),
-            cost: $(`#cost${productId}`).val(),
-            description: CKEDITOR.instances[`description${productId}`].getData(),
-            product_type: $(`#type${productId}`).val(),
-            tags: $(`#tags${productId}`).val(),
-            collections: $(`#collections${productId}`).val(),
-            sku: $(`#sku${productId}`).val(),
-            upc: $(`#upc${productId}`).val(),
-            profit: $(`#profit${productId}`).val(),
-            images: images
-        };
-
-        $.post('{{url("/publish-product")}}', {
-            "_token": "{{ csrf_token() }}",
-            product: product
-        }, function(data, status) {
-            btn.prop('disabled', false);
-            $('.alert-publish-single').show();
-            $(`.btn-import-list-send3-${productId}`).hide();
-            $(`.btn-import-list-send2-${productId}`).show();
-            $(`.btn-import-list-send2-${productId}`).attr('data-shopifyid', data.id_shopify);
-            $(`#check-${productId}`).prop('checked', false);
-        }).fail(function(data) {
-            if (data.status == 403)
-                $('#upgrade-plans-modal').modal('show')
-        });
+            let product = {
+                id: productId,
+                name: $(`#name${productId}`).val(),
+                weight: $(`#weight${productId}`).text().trim(),
+                price: $(`#price${productId}`).val(),
+                cost: $(`#cost${productId}`).val(),
+                description: CKEDITOR.instances[`description${productId}`].getData(),
+                product_type: $(`#types${productId}`).val().trim(),
+                tags: $(`#tags${productId}`).val().trim(),
+                collections: $(`#collections${productId}`).val().trim(),
+                sku: $(`#sku${productId}`).val(),
+                upc: $(`#upc${productId}`).val(),
+                profit: $(`#profit${productId}`).val(),
+                images: images
+            };
+            $.post('{{url("/publish-product")}}', {
+                "_token": "{{ csrf_token() }}",
+                product: product
+            }, function(data, status) {
+                btn.prop('disabled', false);
+                $('.alert-publish-single').show();
+                $(`.btn-import-list-send3-${productId}`).hide();
+                $(`.btn-import-list-send2-${productId}`).show();
+                $(`.btn-import-list-send2-${productId}`).attr('data-shopifyid', data.id_shopify);
+                $(`#check-${productId}`).prop('checked', false);
+            }).fail(function(data) {
+                if (data.status == 403)
+                    $('#upgrade-plans-modal').modal('show')
+            });
+        }
     });
     $('#import-products').on('click', '.btn-import-list-delete', function() {
         $('#modal-body').html(`<h5 style='text-align:center'>${$(this).data('name')}(${$(this).data('sku')})</h5><h5>This product will remove it from Import List. Do you really want to delete it?</h5>`);
@@ -540,6 +577,66 @@
         e.preventDefault();
         $('#upgrade-plans-modal').modal('show');
     });
-
+    $('#import-products').on('change', '.collection', function(e) {
+        var id = $(this).data('id');
+        if ($(this).val().indexOf(',') > -1) {
+            $(`#collection_error${id}`).show();
+        } else {
+            $(`#collection_error${id}`).hide();
+        }
+        if ($(this).val().length > 2) {
+            var parameters = {
+                action: 'product_collection',
+            }
+            $.getJSON(ajax_link, parameters, function(data) {
+                var str = '<div id="collection_data">';
+                data.collections.forEach(collection => {
+                    str += `<option value="${collection}">`;
+                });
+                str += '</div>';
+                $('#collection_data').remove();
+                $(`#collection${id}`).html(str);
+            })
+        }
+    });
+    $('#import-products').on('change', '.type', function(e) {
+        var id = $(this).data('id');
+        if ($(this).val().indexOf(',') > -1) {
+            $(`#type_error${id}`).show();
+        } else {
+            $(`#type_error${id}`).hide();
+        }
+        if ($(this).val().length > 2) {
+            var parameters = {
+                action: 'product_type',
+            }
+            $.getJSON(ajax_link, parameters, function(data) {
+                var str = '<div id="type_data">';
+                data.types.forEach(type => {
+                    str += `<option value="${type}">`;
+                });
+                str += '</div>';
+                $('#type_data').remove();
+                $(`#type${id}`).html(str);
+            })
+        }
+    });
+    $('#import-products').on('change', '.tag', function(e) {
+        if ($(this).val().length > 2) {
+            var parameters = {
+                action: 'product_tag',
+            }
+            var id = $(this).data('id');
+            $.getJSON(ajax_link, parameters, function(data) {
+                var str = '<div id="tag_data">';
+                data.tags.forEach(tag => {
+                    str += `<option value="${tag}">`;
+                });
+                str += '</div>';
+                $('#tag_data').remove();
+                $(`#tag${id}`).html(str);
+            })
+        }
+    });
 </script>
 @endsection
