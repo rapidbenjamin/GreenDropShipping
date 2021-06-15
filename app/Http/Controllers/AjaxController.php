@@ -264,34 +264,6 @@ class AjaxController extends Controller
             ]);
         }
 
-        if ($parameters['action'] == 'categories') {
-            $data = [];
-            $level1 = Category::where('level', 2)->whereIn('position', [1,2,3,5,6,7])->pluck('id', 'name');
-            $data[] = $level1;
-            $level2 = Category::whereIn('parent_id', $level1)->pluck('id', 'name');
-            $data[] = $level2;
-            $level3 = Category::whereIn('parent_id', $level2)->pluck('id', 'name');
-            $data[] = $level3;
-            $level4 = Category::whereIn('parent_id', $level3)->pluck('id', 'name');
-            $data[] = $level4;
-            $level5 = Category::whereIn('parent_id', $level4)->pluck('id', 'name');
-            $data[] = $level5;
-            $level6 = Category::whereIn('parent_id', $level5)->pluck('id', 'name');
-            $data[] = $level6;
-            $level7 = Category::whereIn('parent_id', $level6)->pluck('id', 'name');
-            $data[] = $level7;
-            $level8 = Category::whereIn('parent_id', $level7)->pluck('id', 'name');
-            $data[] = $level8;
-
-            $names = [];
-            foreach ($data as $values) {
-                foreach ($values as $key => $value) {
-                    $names[] = $key;
-                }
-            }
-            return json_encode(['names' => $names]);
-        }
-
         if ($parameters['action'] == 'product_collection') {
             $collections = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'C']])->pluck('value');
             return json_encode(['collections' => $collections]);

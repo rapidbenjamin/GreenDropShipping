@@ -26,8 +26,33 @@ class SearchController extends Controller
 	{
 		$this->authorize('view-merchant-search');
 		$imported_ids = ImportList::where('id_customer', Auth::User()->id)->pluck('id_product');
+        $data = [];
+        $level1 = Category::where('level', 2)->whereIn('position', [1,2,3,5,6,7])->where('is_active', 1)->pluck('id', 'name');
+        $data[] = $level1;
+        $level2 = Category::whereIn('parent_id', $level1)->where('is_active', 1)->pluck('id', 'name');
+        $data[] = $level2;
+        $level3 = Category::whereIn('parent_id', $level2)->where('is_active', 1)->pluck('id', 'name');
+        $data[] = $level3;
+        $level4 = Category::whereIn('parent_id', $level3)->where('is_active', 1)->pluck('id', 'name');
+        $data[] = $level4;
+        $level5 = Category::whereIn('parent_id', $level4)->where('is_active', 1)->pluck('id', 'name');
+        $data[] = $level5;
+        $level6 = Category::whereIn('parent_id', $level5)->where('is_active', 1)->pluck('id', 'name');
+        $data[] = $level6;
+        $level7 = Category::whereIn('parent_id', $level6)->where('is_active', 1)->pluck('id', 'name');
+        $data[] = $level7;
+        $level8 = Category::whereIn('parent_id', $level7)->where('is_active', 1)->pluck('id', 'name');
+        $data[] = $level8;
+
+        $names = [];
+        foreach ($data as $values) {
+            foreach ($values as $key => $value) {
+                $names[] = $key;
+            }
+        }
 		return view('search', [
-			'imported_ids' => $imported_ids
+			'imported_ids' => $imported_ids,
+            'names' => json_encode($names)
 		]);
 	}
 

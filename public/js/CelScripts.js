@@ -283,35 +283,32 @@ angular
                 canceller.resolve(reason);
             };
             var promise = $http.get(wcfServer + "DoSearch", { params: data, timeout: canceller.promise })
-                .then(function (response) {
-                    console.log(response)
-                    return filterCategories(response.data.DoSearchResult)
-                        .then(function (result) {
-                            if (data.query == '') {
-                                return result;
-                            } else {
-                                var ids = [];
-                                result.Questions[0].Answers.forEach(answer => {
-                                    ids.push(answer.ID);
-                                });
-                                result.Questions[0].ExtraAnswers.forEach(answer => {
-                                    ids.push(answer.ID);
-                                });
-                                return doSearchParams({
-                                    query: data.query,
-                                    siteId: data.siteId,
-                                    pageSize: data.pageSize,
-                                    answerIds: ids.join(','),
-                                    effectOnSearchPath: 1,
-                                    previousSearchHandle: result.Handle,
-                                    profile: 'SiteDefault'
-                                }).then((res) => {
-                                    return res;
-                                });
-                            }
-                        });
-                });
-
+            .then(function (response) {
+                var result = filterCategories(response.data.DoSearchResult);
+                if (data.query == '') {
+                    return result;
+                } else {
+                    var ids = [];
+                    result.Questions[0].Answers.forEach(answer => {
+                        ids.push(answer.ID);
+                    });
+                    result.Questions[0].ExtraAnswers.forEach(answer => {
+                        ids.push(answer.ID);
+                    });
+                    return $http.get(wcfServer + "DoSearchParams", { params: {
+                        query: data.query,
+                        siteId: data.siteId,
+                        pageSize: data.pageSize,
+                        answerIds: ids.join(','),
+                        effectOnSearchPath: 1,
+                        previousSearchHandle: result.Handle,
+                        profile: 'SiteDefault'
+                    }}).then(function (response) {
+                        var res = filterCategories(response.data.DoSearchParams);
+                        return res;
+                    });
+                }
+            });
             return {
                 promise: promise,
                 cancel: cancel
@@ -521,55 +518,53 @@ angular
                     });
             };
         }
-
+        var names = JSON.parse(window.localStorage.getItem('names'));
         var filterCategories = function (data) {
             var answers = [];
             var extra_answers = [];
             var products_count = 0;
-            return $http.get('/ajax', {params: {action: 'categories'}}).then(res=>{
-                if (data.Questions[0].Name == 'Category') {
-                    data.Questions[0].Answers.forEach(question => {
-                        var flag = false;
-                        if (data.SearchPath[0].Answers.length == 0)
-                            if (data.Query == '') flag = true;
-                        if (flag) {
-                            if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
-                                answers.push(question);
-                                extra_answers.push(question);
-                                products_count += question.ProductCount;
-                            }
-                        } else {
-                            if (res.data.names.indexOf(question.Name) > -1) {
-                                answers.push(question);
-                                extra_answers.push(question);
-                                products_count += question.ProductCount;
-                            }
+            if (data.Questions[0].Name == 'Category') {
+                data.Questions[0].Answers.forEach(question => {
+                    var flag = false;
+                    if (data.SearchPath[0].Answers.length == 0)
+                        if (data.Query == '') flag = true;
+                    if (flag) {
+                        if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                            answers.push(question);
+                            extra_answers.push(question);
+                            products_count += question.ProductCount;
                         }
-                    });
-                    data.Questions[0].ExtraAnswers.forEach(question => {
-                        var flag = false;
-                        if (data.SearchPath[0].Answers.length == 0)
-                            if (data.Query == '') flag = true;
-                        if (flag) {
-                            if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
-                                answers.push(question);
-                                extra_answers.push(question);
-                                products_count += question.ProductCount;
-                            }
-                        } else {
-                            if (res.data.names.indexOf(question.Name) > -1) {
-                                answers.push(question);
-                                extra_answers.push(question);
-                                products_count += question.ProductCount;
-                            }
+                    } else {
+                        if (names.indexOf(question.Name) > -1) {
+                            answers.push(question);
+                            extra_answers.push(question);
+                            products_count += question.ProductCount;
                         }
-                    });
-                    data.Questions[0].Answers = answers.splice(0,6);
-                    data.Questions[0].ExtraAnswers = extra_answers.slice(6);
-                    data.ProductsCount = products_count;
-                }
-                return data;
-            })
+                    }
+                });
+                data.Questions[0].ExtraAnswers.forEach(question => {
+                    var flag = false;
+                    if (data.SearchPath[0].Answers.length == 0)
+                        if (data.Query == '') flag = true;
+                    if (flag) {
+                        if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
+                            answers.push(question);
+                            extra_answers.push(question);
+                            products_count += question.ProductCount;
+                        }
+                    } else {
+                        if (names.indexOf(question.Name) > -1) {
+                            answers.push(question);
+                            extra_answers.push(question);
+                            products_count += question.ProductCount;
+                        }
+                    }
+                });
+                data.Questions[0].Answers = answers.splice(0,6);
+                data.Questions[0].ExtraAnswers = extra_answers.slice(6);
+                data.ProductsCount = products_count;
+            }
+            return data;
         }
 
         return {
@@ -682,6 +677,7 @@ angular
                                 $location.search(questionText, null);
                             }
                         }
+                        scope.data.answerId = breadcrumb.id;
                         if (celConfig.Settings.Refinements.InstantAnswerMode) {
                             celAPI.doRemoveAnswer(scope.data).then(scope.onResults, scope.onError);
                             history.pushState(scope.data, null, $location.absUrl());

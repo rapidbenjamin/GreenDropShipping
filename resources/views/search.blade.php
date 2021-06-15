@@ -12,7 +12,11 @@
 <script type="text/javascript">
     $(document).ready(function() {
         var imported_ids = "{{ $imported_ids }}";
+        var names = "{{ $names }}";
+        names = names.replaceAll('&quot;', '"');
+        names = names.replaceAll('&amp;', '&');
         window.localStorage.setItem('imported_ids', imported_ids);
+        window.localStorage.setItem('names', names);
     });
 </script>
 @endsection
