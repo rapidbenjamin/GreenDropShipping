@@ -2484,9 +2484,11 @@ svg {
   }
   .headerorders .paymentstatus {
     grid-column: span 2;
-  }
-  .headerorders .orderstate {
+    display: flex;
+}
+.headerorders .orderstate {
     grid-column: span 2;
+    display: flex;
   }
 }
 @media (max-width: 1100px) {
@@ -2498,9 +2500,11 @@ svg {
   }
   .headerorders .paymentstatus {
     grid-column: span 3;
+    display: flex;
   }
   .headerorders .orderstate {
     grid-column: span 3;
+    display: flex;
   }
   .headerorders .searchbtn {
     grid-column: span 3;
@@ -2515,6 +2519,7 @@ svg {
   }
   .headerorders .paymentstatus {
     grid-column: span 1;
+    display: flex;
   }
   .headerorders .orderstate {
     grid-column: span 1;
@@ -2568,13 +2573,21 @@ svg {
   letter-spacing: 2px;
   padding-left: 22px;
 }
+.headerorders .paymentlabel, .headerorders .orderlabel {
+  font-size: 19px;
+  font-weight: 700;
+  color: #6a6c6f;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  padding-right: 10px;
+}
 @media (max-width: 1100px) {
   .headerorders .noorder {
     padding-left: 0;
   }
 }
 @media (max-width: 900px) {
-  .headerorders .noorder {
+  .headerorders .noorder, .headerorders .paymentlabel, .headerorders .orderlabel {
     display: none;
   }
 }

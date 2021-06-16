@@ -33,6 +33,9 @@
                     </datalist>
                 </div>
                 <div class="paymentstatus">
+                    <span class="paymentlabel">
+                        Payment Status
+                    </span>
                     <select id="paymentstatus">
                         <option value="0">Payment Status</option>
                         @foreach($status as $st)
@@ -43,6 +46,9 @@
                     </select>
                 </div>
                 <div class="orderstate">
+                    <span class="orderlabel">
+                        Order State
+                    </span>
                     <select id="orderstate">
                         <option value="0">Order State</option>
                         @foreach($status as $st)

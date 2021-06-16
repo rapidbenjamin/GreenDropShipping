@@ -44,7 +44,7 @@
                             </th>
                             <th>
                                 <select name="Plan" id="merchant_plan" class="merchant-search">
-                                    <option value="" style="color: transparent">Plan</option>
+                                    <option value="" style="color:gray">Plan</option>
                                     <option value="0">None</option>
                                     <option value="free">Free</option>
                                     <option value="basic">Basic</option>
@@ -53,7 +53,7 @@
                             </th>
                             <th>
                                 <select name="Active" id="merchant_active" class="merchant-search">
-                                    <option value="" style="color: transparent">Status</option>
+                                    <option value="" style="color: gray">Status</option>
                                     <option value="1">Active</option>
                                     <option value="0">Inactive</option>
                                 </select>
