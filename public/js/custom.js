@@ -100,21 +100,6 @@ $(document).ready(function () {
             '/admin/merchants/show/' + $(this).data('merchantid')
     })
 
-    $('input.change-status').click(function () {
-        let status = $(this).is(':checked') ? 1 : 0
-        let result = confirm(
-            'Are you sure you want to ' +
-                (status == 1 ? 'enable' : 'disable') +
-                ' this merchant?'
-        )
-        if (!result) result
-        window.location.href =
-            '/admin/merchants/changeStatus/' +
-            $(this).data('merchantid') +
-            '/' +
-            status
-    })
-
     $('.buttonDisabled').mouseover(function () {
         $('.answerBD' + $(this).data('id')).show()
     })
@@ -175,6 +160,9 @@ $(document).ready(function () {
     if (window.location.pathname == '/admin/orders') {
         action = 'admin-orders';
     }
+    if (window.location.pathname == '/admin/merchants') {
+        action = 'admin-merchants';
+    }
     $('#page_size').change(function (event) {
         var parameters = {
             action: action,
@@ -221,8 +209,15 @@ $(document).ready(function () {
                     order_state: $('#orderstate').val(),
                 });
         }
-        console.log(flag);
-        console.log(parameters);
+        if (action == 'admin-merchants') {
+            Object.assign(parameters, {
+                name: $('#merchant_name').val(),
+                email: $('#merchant_email').val(),
+                url: $('#merchant_url').val(),
+                plan: $('#merchant_plan').val(),
+                active: $('#merchant_active').val()
+            })
+        }
         if (flag)
             $.getJSON(ajax_link, parameters, function (res) {
                 pagination(res);
@@ -234,6 +229,8 @@ $(document).ready(function () {
                     showMigrateProducts(res.mig_products);
                 } else if(res.order_list) {
                     showAdminOrders(res.order_list);
+                } else if(res.merchants) {
+                    showMerchants(res.merchants);
                 }
             })
     }
@@ -741,6 +738,110 @@ $(document).ready(function () {
         });
         $('.orderrow').remove();
         $('#order_data').html(str);
+    }
+
+    function showMerchants (merchants) {
+        var str = '';
+        merchants.forEach(merchant => {
+            str += `<tr class="merchantrow">
+                <td data-label="MERCHANT NAME">
+                    ${merchant.name}
+                </td>
+                <td data-label="EMAIL">
+                    ${merchant.email}
+                </td>
+                <td data-label="SHOPIFY URL">
+                    ${merchant.shopify_url ? merchant.shopify_url : '' }
+                </td>
+                <td data-label="PLAN">
+                    ${merchant.plan ? merchant.plan : ''}
+                </td>
+                <td data-label="ACTIVE">
+                    <input type="checkbox" name="switch-button" id="switch-label${merchant.id}" data-merchantid="${merchant.id}" data-toggle="modal" data-target="#delete-product-modal" class="switch-button__checkbox change-status" ${merchant.active && 'checked'}>
+                </td>
+                <td class="btngroup">
+
+                    <button class="view detail-merchants" data-merchantid="${merchant.id}">View</button>
+                    <button class="payorder orders-customers" data-merchant="${merchant.name}">Orders</button>
+
+                </td>
+            </tr>`;
+        });
+        $('.merchantrow').remove();
+        $('#merchant_data').html(str);
+    }
+
+    $('#merchant_name').keypress(function(e) {
+        if ($('#merchant_name').val().length >= 2) {
+            $.getJSON(ajax_link, {
+                action: 'admin-merchant-name',
+                name: ''
+            }, function(res) {
+                var str = '<div id="name_data">';
+                res.names.forEach(name => {
+                    str += `<option value="${name}">`;
+                });
+                str += '</div>';
+                $('#name_data').remove();
+                $('#names').html(str);
+            })
+        } else $('#name_data').remove();
+    });
+    $('#merchant_email').keypress(function(e) {
+        if ($('#merchant_email').val().length >= 2) {
+            $.getJSON(ajax_link, {
+                action: 'admin-merchant-email',
+                email: ''
+            }, function(res) {
+                var str = '<div id="email_data">';
+                res.emails.forEach(email => {
+                    str += `<option value="${email}">`;
+                });
+                str += '</div>';
+                $('#email_data').remove();
+                $('#emails').html(str);
+            })
+        } else $('#email_data').remove();
+    });
+    $('#merchant_url').keypress(function(e) {
+        if ($('#merchant_url').val().length >= 2) {
+            $.getJSON(ajax_link, {
+                action: 'admin-merchant-url',
+                url: ''
+            }, function(res) {
+                var str = '<div id="url_data">';
+                res.urls.forEach(url => {
+                    str += `<option value="${url}">`;
+                });
+                str += '</div>';
+                $('#url_data').remove();
+                $('#urls').html(str);
+            })
+        } else $('#url_data').remove();
+    });
+    $('#merchant_name').change(function(e) {
+        getMerchantData();
+    })
+    $('#merchant_email').change(function(e) {
+        getMerchantData();
+    })
+    $('#merchant_url').change(function(e) {
+        getMerchantData();
+    })
+    $('#merchant_plan').change(function(e) {
+        getMerchantData();
+    })
+    $('#merchant_active').change(function(e) {
+        getMerchantData();
+    })
+
+    function getMerchantData() {
+        var parameters = {
+            action: action,
+            page_number: 1,
+            page_size: $('#page_size').val()
+        }
+        getData(parameters);
     }
 
 })

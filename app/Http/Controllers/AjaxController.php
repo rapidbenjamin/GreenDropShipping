@@ -99,7 +99,7 @@ class AjaxController extends Controller
         if ($parameters['action'] == 'my-products') {
             $page_number = $parameters['page_number'];
             $page_size = $parameters['page_size'];
-            $prods = Products::select('products.*', 'my_products.id_imp_product as id_my_product','my_products.id_shopify','my_products.id as id_my_products','my_products.profit')
+            $prods = Products::select('products.*', 'my_products.id_imp_product as id_my_product', 'my_products.id_shopify', 'my_products.id as id_my_products', 'my_products.profit')
                 ->join('import_list', 'import_list.id_product', '=', 'products.id')
                 ->join('my_products', 'my_products.id_imp_product', '=', 'import_list.id')
                 ->where('my_products.id_customer', Auth::user()->id)->whereNull('my_products.deleted_at')->orderBy('my_products.id', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
@@ -108,8 +108,8 @@ class AjaxController extends Controller
             foreach ($prods as $product) {
                 $product['brand'] = $search->getAttributeByCode($product, 'brand');
                 if ($product->images != null && count(json_decode($product->images)) > 0)
-                    $product->image_url_75 = env('URL_MAGENTO_IMAGES'). '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product->images)[0]->file;
-                    $product->image_url_285 = env('URL_MAGENTO_IMAGES'). '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
+                    $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product->images)[0]->file;
+                $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
             }
             return json_encode([
                 'prods' => $prods,
@@ -119,7 +119,7 @@ class AjaxController extends Controller
             ]);
         }
 
-        if($parameters['action'] == 'delete-import-list') {
+        if ($parameters['action'] == 'delete-import-list') {
             $this->authorize('plan_delete-product-import-list');
             $this->authorize('plan_view-my-products');
             $page_number = $parameters['page_number'];
@@ -133,12 +133,12 @@ class AjaxController extends Controller
             $prods = $prods->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             foreach ($prods as $product) {
                 if ($product['images'] != null && count(json_decode($product['images'])) > 0)
-                    $product['image_url'] = env('URL_MAGENTO_IMAGES'). '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
+                    $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
 
                 $search = new SearchController;
                 $images = [];
                 foreach (json_decode($product['images']) as $image) {
-                    $images[] = env('URL_MAGENTO_IMAGES'). '/3a98496dd7cb0c8b28c4c254a98f915a' . $image->file;
+                    $images[] = env('URL_MAGENTO_IMAGES') . '/3a98496dd7cb0c8b28c4c254a98f915a' . $image->file;
                 }
                 $product['description'] = $search->getAttributeByCode($product, 'description');
                 $product['size'] = $search->getAttributeByCode($product, 'size');
@@ -151,7 +151,6 @@ class AjaxController extends Controller
             if ($settings == null) {
                 $settings = new Settings();
                 $settings->set8 = 0;
-
             }
             return json_encode([
                 'improds' => [
@@ -180,12 +179,12 @@ class AjaxController extends Controller
             ]);
         }
 
-        if($parameters['action'] == 'migrating-products') {
+        if ($parameters['action'] == 'migrating-products') {
             $products = ShopifyAdminApi::getProducts(Auth::User());
             $index = $parameters['index'];
             $location_id = $parameters['location_id'];
             $product = $products['body']['products'][$index];
-            if(substr($product['variants'][0]['sku'], 0, 2) == 'KH') {
+            if (substr($product['variants'][0]['sku'], 0, 2) == 'KH') {
                 $row = [
                     'sku' => $product['variants'][0]['sku'],
                     'price' => $product['variants'][0]['price'],
@@ -214,7 +213,7 @@ class AjaxController extends Controller
                 }
                 DB::table('temp_migrate_products')->insert($row);
             }
-            if($parameters['index'] == count($products['body']['products']) -1){
+            if ($parameters['index'] == count($products['body']['products']) - 1) {
                 $mig_products = DB::table('temp_migrate_products')->where('user_id', Auth::User()->id);
                 $total_count = DB::table('temp_migrate_products')->count();
                 $mig_products = DB::table('temp_migrate_products')->skip(0)->take(10)->get();
@@ -227,8 +226,7 @@ class AjaxController extends Controller
                     'page_size' => 10,
                     'page_number' => 1
                 ]);
-            }
-            else{
+            } else {
                 return json_encode([
                     'index' => $parameters['index']
                 ]);
@@ -240,7 +238,7 @@ class AjaxController extends Controller
             $page_size = $parameters['page_size'];
             $mig_products = DB::table('temp_migrate_products')->where('user_id', Auth::User()->id);
             $total_count = $mig_products->count();
-            $mig_products = $mig_products->skip(($page_number -1) * $page_size)->take($page_size)->get();
+            $mig_products = $mig_products->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             return json_encode([
                 'mig_products' => [
                     'products' => $mig_products
@@ -293,41 +291,88 @@ class AjaxController extends Controller
             $page_number = $parameters['page_number'];
             $page_size = $parameters['page_size'];
             $order_list = Order::select('orders.*', 'st1.name as status1', 'st1.color as color1', 'st2.name as status2', 'st2.color as color2', 'us.name as merchant_name')
-            ->join('order_shipping_address as osa','orders.id','osa.id_order')
-            ->join('status as st1','st1.id','orders.financial_status')
-            ->join('status as st2','st2.id','orders.fulfillment_status')
-            ->join('users as us','us.id','orders.id_customer');
-            if($parameters['order_number']!=''){
-                $order_list = $order_list->where('order_number_shopify', '#'.$parameters['order_number']);
-            }
+                ->join('order_shipping_address as osa', 'orders.id', 'osa.id_order')
+                ->join('status as st1', 'st1.id', 'orders.financial_status')
+                ->join('status as st2', 'st2.id', 'orders.fulfillment_status')
+                ->join('users as us', 'us.id', 'orders.id_customer');
+            if ($parameters['order_number'] != '')
+                $order_list = $order_list->where('order_number_shopify', '#' . $parameters['order_number']);
 
-            if($parameters['from'] != ''){
-                $order_list = $order_list->whereDate('orders.created_at','>=',$parameters['from']);
-            }
+            if ($parameters['from'] != '')
+                $order_list = $order_list->whereDate('orders.created_at', '>=', $parameters['from']);
 
-            if($parameters['to'] != ''){
-                $order_list = $order_list->whereDate('orders.created_at','<=',$parameters['to']);
-            }
+            if ($parameters['to'] != '')
+                $order_list = $order_list->whereDate('orders.created_at', '<=', $parameters['to']);
 
-            if($parameters['payment_status'] > 0){
-                $order_list = $order_list->where('orders.financial_status',$parameters['payment_status']);
-            }
+            if ($parameters['payment_status'] > 0)
+                $order_list = $order_list->where('orders.financial_status', $parameters['payment_status']);
 
-            if($parameters['order_state'] > 0){
-                $order_list = $order_list->where('orders.fulfillment_status',$parameters['order_state']);
-            }
+            if ($parameters['order_state'] > 0)
+                $order_list = $order_list->where('orders.fulfillment_status', $parameters['order_state']);
 
-            if($parameters['merchant_name'] != ''){
-                $order_list = $order_list->where('us.name','like', '%'.$parameters['merchant_name'].'%');
-            }
+            if ($parameters['merchant_name'] != '')
+                $order_list = $order_list->where('us.name', 'like', '%' . $parameters['merchant_name'] . '%');
+
             $total_count = $order_list->count();
-            $order_list = $order_list->orderBy('orders.updated_at','desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
+            $order_list = $order_list->orderBy('orders.updated_at', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             return json_encode([
                 'order_list' => $order_list,
                 'page_number' => $page_number,
                 'page_size' => $page_size,
                 'total_count' => $total_count
             ]);
+        }
+
+        if ($parameters['action'] == 'change-user-status') {
+            DB::table('users')
+                ->where('id', $parameters['user_id'])
+                ->update(['active' => $parameters['active']]);
+            return json_encode(['result' => true]);
+        }
+
+        if ($parameters['action'] == 'admin-merchants') {
+            $page_number = $parameters['page_number'];
+            $page_size = $parameters['page_size'];
+            $merchants_list = User::select('users.*')->where('role', 'merchant');
+            if ($parameters['name'] != '')
+                $merchants_list = $merchants_list->where('name', 'like', '%' . $parameters['name'] . '%');
+
+            if ($parameters['email'] != '')
+                $merchants_list = $merchants_list->where('email', 'like', '%' . $parameters['email'] . '%');
+
+            if ($parameters['url'] != '')
+                $merchants_list = $merchants_list->where('shopify_url', 'like', '%' . $parameters['url'] . '%');
+
+            if ($parameters['plan'] != '') {
+                if ($parameters['plan'] == '0') $merchants_list = $merchants_list->whereNull('plan');
+                else $merchants_list = $merchants_list->where('plan', $parameters['plan']);
+            }
+
+            if ($parameters['active'] != '')
+                $merchants_list = $merchants_list->where('active', $parameters['active']);
+            $total_count = $merchants_list->count();
+            $merchants_list = $merchants_list->orderBy('users.id', 'asc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
+            return json_encode([
+                'merchants' => $merchants_list,
+                'page_number' => $page_number,
+                'page_size' => $page_size,
+                'total_count' => $total_count
+            ]);
+        }
+
+        if ($parameters['action'] == 'admin-merchant-name') {
+            $names = DB::table('users')->where('role', 'merchant')->orderBy('name')->pluck('name');
+            return json_encode(['names' => $names]);
+        }
+
+        if ($parameters['action'] == 'admin-merchant-email') {
+            $emails = DB::table('users')->where('role', 'merchant')->orderBy('email')->pluck('email');
+            return json_encode(['emails' => $emails]);
+        }
+
+        if ($parameters['action'] == 'admin-merchant-url') {
+            $urls = DB::table('users')->where('role', 'merchant')->orderBy('shopify_url')->pluck('shopify_url');
+            return json_encode(['urls' => $urls]);
         }
     }
 

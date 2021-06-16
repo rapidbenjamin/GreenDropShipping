@@ -184,10 +184,9 @@
 
         $('#idOrder').keypress(function(e) {
             if ($('#idOrder').val().length >= 2) {
-                var parameters = {
+                $.getJSON(ajax_link, {
                     action: 'admin-order-number'
-                }
-                $.getJSON(ajax_link, parameters, function(data) {
+                }, function(data) {
                     var str = '<div id="number_data">';
                     data.numbers.forEach(number => {
                         str += `<option value="${number.substr(1)}">`;
@@ -196,15 +195,14 @@
                     $('#number_data').remove();
                     $('#numbers').html(str);
                 })
-            }
+            } else $('#number_data').remove();
         })
 
         $('#merchant').keypress(function(e) {
             if ($('#merchant').val().length >= 2) {
-                var parameters = {
+                $.getJSON(ajax_link, {
                     action: 'admin-order-merchant'
-                }
-                $.getJSON(ajax_link, parameters, function(data) {
+                }, function(data) {
                     var str = '<div id="merchant_data">';
                     data.names.forEach(name => {
                         str += `<option value="${name}">`;
@@ -213,7 +211,7 @@
                     $('#merchant_data').remove();
                     $('#names').html(str);
                 })
-            }
+            } else $('#merchant_data').remove();
         })
 
         $('.exporsel').click(function() {
