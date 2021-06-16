@@ -57,11 +57,9 @@ class AdminOrdersController extends Controller
         }
 
         return view('admin_orders',Array(
-            'order_list' => $order_list->orderBy('orders.updated_at','desc')->paginate(50),
-            'from' => $request->from,
-            'to' => $request->to,
-            'order' => $request->order,
-            'status' => Status::get()
+            'order_list' => $order_list->orderBy('orders.updated_at','desc')->take(10)->get(),
+            'status' => Status::get(),
+            'total_count' => $order_list->count()
         ));
     }
 
@@ -156,10 +154,10 @@ class AdminOrdersController extends Controller
 
         ob_start();
         $df = fopen("php://output", 'w');
-        fwrite($df, implode(";", array_keys(reset($order_list)))."\n");
 
+        fputcsv($df, array_keys(reset($order_list)));
         foreach ($order_list as $merchant) {
-            fwrite($df, implode(";", $merchant)."\n");
+            fputcsv($df, $merchant);
         }
 
         fclose($df);

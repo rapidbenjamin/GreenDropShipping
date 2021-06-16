@@ -2,14 +2,14 @@
         <div class="currenuser">
                     <div class="avatar">
                         <img src="{{ asset('img/user_avatar.png') }}">
-                    </div>               
+                    </div>
                     <div>
                         <h3>{{Auth::user()->name}}</h3>
-                        
+
                     </div>
         </div>
-    
-        <ul class="mainmenu">
+
+        <ul class="mainmenu mt-5 pt-5">
             <li>
                 <a href="{{ url('/admin/dashboard') }}" class="colorBL bold" data-name="DASHBOARD">
                     <img src="{{ asset('img/admin_03.png') }}">
@@ -39,7 +39,13 @@
                     Logs
                 </a>
             </li>
+            <li>
+                <a class="colorBL bold" data-name="LOGS" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    <img src="">
+                    {{ __('Logout') }}
+                </a>
+            </li>
 
-        </ul>        
+        </ul>
 
 @endif

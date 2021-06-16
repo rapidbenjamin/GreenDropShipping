@@ -172,22 +172,16 @@ $(document).ready(function () {
     if (window.location.pathname == '/migrate-products') {
         action = 'migrate-products';
     }
+    if (window.location.pathname == '/admin/orders') {
+        action = 'admin-orders';
+    }
     $('#page_size').change(function (event) {
         var parameters = {
             action: action,
             page_size: event.target.value,
             page_number: 1
         }
-        $.getJSON(ajax_link, parameters, function (res) {
-            pagination(res);
-            if (res.improds) {
-                showImportProducts(res.improds);
-            } else if(res.prods) {
-                showMyProducts(res.prods);
-            } else if(res.mig_products) {
-                showMigrateProducts(res.mig_products);
-            }
-        })
+        getData(parameters);
     })
 
     $('#next').click(function () {
@@ -199,18 +193,8 @@ $(document).ready(function () {
             page_size: page_size,
             page_number: page_number * 1 + 1
         }
-        if (total_count > page_size * page_number) {
-            $.getJSON(ajax_link, parameters, function (res) {
-                pagination(res);
-                if (res.improds) {
-                    showImportProducts(res.improds);
-                } else if(res.prods) {
-                    showMyProducts(res.prods);
-                } else if(res.mig_products) {
-                    showMigrateProducts(res.mig_products);
-                }
-            })
-        }
+        if (total_count > page_size * page_number)
+            getData(parameters);
     })
 
     $('#prev').click(function () {
@@ -219,7 +203,27 @@ $(document).ready(function () {
             page_size: $('#page_size').val(),
             page_number: $('#page_number').text().split('/')[0] - 1
         }
-        if ($('#page_number').text().split('/')[0] > 1) {
+        if ($('#page_number').text().split('/')[0] > 1)
+            getData(parameters);
+    })
+
+    function getData(parameters) {
+        var flag = true;
+        if (action == 'admin-orders') {
+            flag = orderSearchPermission();
+            if (flag)
+                Object.assign(parameters, {
+                    from: $('#dateFrom').val(),
+                    to: $('#dateTo').val(),
+                    order_number: $('#idOrder').val().trim(),
+                    merchant_name: $('#merchant').val().trim(),
+                    payment_status: $('#paymentstatus').val(),
+                    order_state: $('#orderstate').val(),
+                });
+        }
+        console.log(flag);
+        console.log(parameters);
+        if (flag)
             $.getJSON(ajax_link, parameters, function (res) {
                 pagination(res);
                 if (res.improds) {
@@ -228,10 +232,11 @@ $(document).ready(function () {
                     showMyProducts(res.prods);
                 } else if(res.mig_products) {
                     showMigrateProducts(res.mig_products);
+                } else if(res.order_list) {
+                    showAdminOrders(res.order_list);
                 }
             })
-        }
-    })
+    }
 
     function pagination (data) {
         if (data.page_number == '1') {
@@ -663,4 +668,79 @@ $(document).ready(function () {
         });
         return str;
     }
+
+    $("#search").click(function(e) {
+        var flag = orderSearchPermission();
+        if (flag) {
+            var parameters = {
+                action: action,
+                page_size: $('#page_size').val(),
+                page_number: 1,
+                from: $('#dateFrom').val(),
+                to: $('#dateTo').val(),
+                order_number: $('#idOrder').val().trim(),
+                merchant_name: $('#merchant').val().trim(),
+                payment_status: $('#paymentstatus').val(),
+                order_state: $('#orderstate').val()
+            }
+            $.getJSON(ajax_link, parameters, function(res) {
+                pagination(res);
+                showAdminOrders(res.order_list);
+            });
+        }
+
+    });
+
+    function orderSearchPermission() {
+        var from = $('#dateFrom').val();
+        var to = $('#dateTo').val();
+        var order_number = $('#idOrder').val().trim();
+        var merchant_name = $('#merchant').val().trim();
+        var payment_status = $('#paymentstatus').val();
+        var order_state = $('#orderstate').val();
+        var flag = true;
+        if (from != '' && to != '')
+            if (moment(from).isAfter(moment(to).format('YYYY-MM-DD'))) {
+                flag = false;
+                alert('Invalid date range.');
+            }
+        return flag;
+    }
+
+    function showAdminOrders (orders) {
+        var str = '';
+        orders.forEach(order => {
+            str += `<tr class="orderrow">
+                <td class="check">
+                    <input type="checkbox">
+                </td>
+                <td data-label="ORDER #">
+                    ${order.order_number_shopify}
+                </td>
+                <td data-label="DATE">
+                    ${order.created_at}
+                </td>
+                <td data-label="TOTAL TO PAY">
+                    $${parseFloat(order.total).toFixed(2)}
+                </td>
+                <td data-label="MERCHANT">
+                    ${order.merchant_name}
+                </td>
+                <td>
+                    <div class="buttonge" style="background-color: ${order.color1}">${order.status1}</div>
+                </td>
+                <td>
+                    <div class="buttonge" style="background-color: ${order.color2}">${order.status2}</div>
+                </td>
+                <td>
+                    <a href="https://app.greendropship.com/admin/orders/${order.id}">
+                        <button class="view">View</button>
+                    </a>
+                </td>
+            </tr>`;
+        });
+        $('.orderrow').remove();
+        $('#order_data').html(str);
+    }
+
 })

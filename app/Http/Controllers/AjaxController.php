@@ -265,18 +265,69 @@ class AjaxController extends Controller
         }
 
         if ($parameters['action'] == 'product_collection') {
-            $collections = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'C']])->pluck('value');
+            $collections = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'C']])->orderBy('value')->pluck('value');
             return json_encode(['collections' => $collections]);
         }
 
         if ($parameters['action'] == 'product_type') {
-            $types = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'X']])->pluck('value');
+            $types = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'X']])->orderBy('value')->pluck('value');
             return json_encode(['types' => $types]);
         }
 
         if ($parameters['action'] == 'product_tag') {
-            $tags = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'T']])->pluck('value');
+            $tags = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'T']])->orderBy('value')->pluck('value');
             return json_encode(['tags' => $tags]);
+        }
+
+        if ($parameters['action'] == 'admin-order-number') {
+            $numbers = DB::table('orders')->distinct()->orderBy('order_number_shopify')->pluck('order_number_shopify');
+            return json_encode(['numbers' => $numbers]);
+        }
+
+        if ($parameters['action'] == 'admin-order-merchant') {
+            $names = DB::table('users')->orderBy('name')->pluck('name');
+            return json_encode(['names' => $names]);
+        }
+
+        if ($parameters['action'] == 'admin-orders') {
+            $page_number = $parameters['page_number'];
+            $page_size = $parameters['page_size'];
+            $order_list = Order::select('orders.*', 'st1.name as status1', 'st1.color as color1', 'st2.name as status2', 'st2.color as color2', 'us.name as merchant_name')
+            ->join('order_shipping_address as osa','orders.id','osa.id_order')
+            ->join('status as st1','st1.id','orders.financial_status')
+            ->join('status as st2','st2.id','orders.fulfillment_status')
+            ->join('users as us','us.id','orders.id_customer');
+            if($parameters['order_number']!=''){
+                $order_list = $order_list->where('order_number_shopify', '#'.$parameters['order_number']);
+            }
+
+            if($parameters['from'] != ''){
+                $order_list = $order_list->whereDate('orders.created_at','>=',$parameters['from']);
+            }
+
+            if($parameters['to'] != ''){
+                $order_list = $order_list->whereDate('orders.created_at','<=',$parameters['to']);
+            }
+
+            if($parameters['payment_status'] > 0){
+                $order_list = $order_list->where('orders.financial_status',$parameters['payment_status']);
+            }
+
+            if($parameters['order_state'] > 0){
+                $order_list = $order_list->where('orders.fulfillment_status',$parameters['order_state']);
+            }
+
+            if($parameters['merchant_name'] != ''){
+                $order_list = $order_list->where('us.name','like', '%'.$parameters['merchant_name'].'%');
+            }
+            $total_count = $order_list->count();
+            $order_list = $order_list->orderBy('orders.updated_at','desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
+            return json_encode([
+                'order_list' => $order_list,
+                'page_number' => $page_number,
+                'page_size' => $page_size,
+                'total_count' => $total_count
+            ]);
         }
     }
 
