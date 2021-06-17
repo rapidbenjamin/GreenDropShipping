@@ -152,7 +152,7 @@ $(document).ready(function () {
         action = 'my-products';
     }
     if (window.location.pathname == '/import-list') {
-        action = 'delete-import-list';
+        action = 'import-list';
     }
     if (window.location.pathname == '/migrate-products') {
         action = 'migrate-products';
@@ -266,6 +266,7 @@ $(document).ready(function () {
                 </td>
                 <td data-label="PRODUCT NAME">
                     ${product.name}
+                    <a href="search-products/${product.id}" target="_blank" id="name-${product.id_shopify}">${product.name }</a>
                 </td>
                 <td data-label="COST GDS">
                     ${parseFloat(product.price).toFixed(2)}
@@ -283,7 +284,7 @@ $(document).ready(function () {
                     <button class="btn-mp-view viewbutton vplist" data-id="${product.id}" id="view-${product.id_shopify}" data-view="#product${product.id}">View</button>
                 </td>
                 <td>
-                    <button class="btn-mp-delete deletebutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-${product.id_shopify}" data-myproductid="${product.id_shopify}"  data-name="${product.name}" data-sku="${product.sku}">Delete</button>                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                    <button class="btn-mp-delete deletebutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-${product.id_shopify}" data-myproductid="${product.id_shopify}"  data-name="${product.name}" data-sku="${product.sku}" data-img="${product.image_url_75}">Delete</button>                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                     <button class="deletebutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                     <button class="deletebutton" id="deleted-${product.id_shopify}" data-myproductid="${product.id}" style="display: none;">Deleted</button>
                 </td>
@@ -336,7 +337,7 @@ $(document).ready(function () {
                     <button class="sendto sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
                     <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-${product.id_import_list}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>`;
             } else {
-                button_str += `<button class='delete btn-import-list-delete' data-toggle="modal" data-target="#delete-product-modal" id="delete-${product.id_import_list}" data-id="${product.id_import_list}"  data-name="${product.name}" data-sku="${product.sku}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                button_str += `<button class='delete btn-import-list-delete' data-toggle="modal" data-target="#delete-product-modal" id="delete-${product.id_import_list}" data-id="${product.id_import_list}"  data-name="${product.name}" data-sku="${product.sku}" data-img="${product.delete_image_url}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class='delete' id="deleting-${product.id_import_list}" style="display: none;" data-id="${product.id_import_list}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class='sendto btn-import-list-send btn-import-list-send-${product.id_import_list}' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
                     <button class="sendto sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
@@ -352,7 +353,7 @@ $(document).ready(function () {
                     </div>
                 </div>`;
             });
-            str += `<div class="productboxelement import-product" id='product${product.id_import_list} data-id=' ${product.id_import_list}'>
+            str += `<div class="productboxelement import-product" id="product${product.id_import_list}" data-id="${product.id_import_list}">
                 <h2>${product.name}</h2>
                 <div class="producttabs">
                     <div class="headertabs">

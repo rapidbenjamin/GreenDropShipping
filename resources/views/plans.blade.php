@@ -20,13 +20,13 @@
 
                     <p>You have a free plan. <a href="/plans#planBottom">Click here to upgrade your plan.</a></p>
 
-               </div>                
+               </div>
 
             </div>
 
             @endif
 
-  
+
             @if(Auth::user()->api_status == 'pending')
 
             <div class="alertan">
@@ -41,12 +41,12 @@
 
                     <p>You have done an upgrade request to BASIC plan.  It will be in pending status while the current payment in shopify is approved!</a></p>
 
-               </div>                
+               </div>
 
             </div>
 
             @endif
-  
+
 
 
 
@@ -56,7 +56,7 @@
 
                     <p><strong>Error!</strong> Invalid token.</p>
 
-               </div>                
+               </div>
 
             </div>
 
@@ -70,11 +70,11 @@
 
                     <p><strong>Success!</strong> Token successfully saved.</p>
 
-               </div>                
+               </div>
 
             </div>
 
-@if(Auth::user()->membership_token == '')     
+@if(Auth::user()->membership_token == '')
 
             <div class="colsplan2">
               <div class="titlecol">
@@ -88,7 +88,7 @@
                 <h2 class="plantitle gray">Join GreenDropShip to get an invoice number. </h2>
                 <p><a class="buttonget" href="https://greendropship.com/membership-account/membership-checkout/?level=1" target="_blank">Join now</a></p>
                 <p><a href="#" class="tokenmshow" data-toggle="modal" data-target="#joinmodal">Why do I have to join GreenDropShip?</a></p>
-                
+
 
                 <!-- Modal -->
                 <div class="modal fade" id="invmodal" tabindex="-1" aria-hidden="true">
@@ -105,13 +105,13 @@
                               Your invoice number is emailed to you after you join GreenDropShip. <br>
                               Enter your invoice number to connect your GreenDropShip account to the app.
 
-                            </p>     
-                            
-                            
+                            </p>
+
+
 
                           </div>
                       </div>
-                      
+
                     </div>
                   </div>
                 </div>
@@ -133,11 +133,11 @@
                               <li>Your invoice number will be emailed to you.</li>
                               <li>Copy and paste your invoice number here to connect your GreenDropShip account to the app.</li>
                             </ol>
-                            
+
 
                           </div>
                       </div>
-                      
+
                     </div>
                   </div>
                 </div>
@@ -147,9 +147,9 @@
 
             </div>
 
-@else 
+@else
 
-                <h2 class="plantitle">Hello {{Auth::user()->name}} <br> <span style="color:black">Select the plan that you want to upgrade.
+                <h2 class="plantitle">Hello {{Auth::user()->name}} <br> @if(Auth::user()->plan == 'free') <span style="color:black">Select the plan that you want to upgrade.</span>@endif
 </span></h2>
 
 @endif
@@ -178,7 +178,7 @@
                            </ul>
                       </div>
 
-                 
+
 
                       <div class="buttonsp">
 
@@ -200,11 +200,11 @@
 
                       </div>
 
-                       
+
 
                     </div>
 
-                    
+
 
                     <div>
 
@@ -221,7 +221,7 @@
                            <ul>
 								<li><i class="fa fa-check" aria-hidden="true"></i> Browse GreenDropShip’s Complete Catalog of Products</li>
 								<li><i class="fa fa-check" aria-hidden="true"></i> Import Unlimited Products into your Shopify Store</li>
-								<li><i class="fa fa-check" aria-hidden="true"></i> Bulk Importing</li>
+								<!-- <li><i class="fa fa-check" aria-hidden="true"></i> Bulk Importing</li> -->
 								<li><i class="fa fa-check" aria-hidden="true"></i> Process Up to {{env('LIMIT_ORDERS')}} Orders a Month</li>
 								<li><i class="fa fa-check" aria-hidden="true"></i> Automated Inventory Syncing</li>
 								<li><i class="fa fa-check" aria-hidden="true"></i> Customer Support</li>
@@ -230,7 +230,7 @@
                            </ul>
                       </div>
 
-                      
+
 
                       <div class="buttonsp">
 
@@ -252,11 +252,11 @@
 
                       </div>
 
-                       
+
 
                     </div>
 
-                    
+
 
                     <div>
 
@@ -273,7 +273,7 @@
                           <ul>
                               <li><i class="fa fa-check" aria-hidden="true"></i> Browse GreenDropShip’s Complete Catalog of Products</li>
                               <li><i class="fa fa-check" aria-hidden="true"></i> Import Unlimited Products into your Shopify Store</li>
-                              <li><i class="fa fa-check" aria-hidden="true"></i> Bulk Importing</li>
+                              <!-- <li><i class="fa fa-check" aria-hidden="true"></i> Bulk Importing</li> -->
                               <li><i class="fa fa-check" aria-hidden="true"></i> Process Up to 50,000 Orders a Month</li>
                               <li><i class="fa fa-check" aria-hidden="true"></i> Automated Inventory Syncing</li>
                               <li><i class="fa fa-check" aria-hidden="true"></i> Customer Support</li>
@@ -282,7 +282,7 @@
                           </ul>
                       </div>
 
-                      
+
 
                       <div class="buttonsp">
 
@@ -290,7 +290,7 @@
 
                       </div>
 
-                       
+
 
                     </div>
 
@@ -300,15 +300,15 @@
 
             </div>
 
-            
+
 
         </div>
 
-    </div>  
+    </div>
 
 </div>
 
-   <a id='planBottom'></a>  
+   <a id='planBottom'></a>
 
 <script type="text/javascript">
 
@@ -353,8 +353,8 @@
       if(plan == 'basic'){
         window.location.href = "{{url('/plans/update-plan?p=basic')}}";
       }
-      
-*/      
+
+*/
       if(plan == 'free'){
         if(confirm('Do you really want to downgrade this app?')){
             $.post('{{url("/plans/update")}}', {
@@ -366,13 +366,13 @@
             }, function(data) {
 
               $('.token-error').hide();
-              //var resp = 
+              //var resp =
               if(plan == 'basic'){
                  var urldelsitio = "{{ Auth::user()->shopify_url }}";
                  var cadena = urldelsitio + "/admin/api/2020-10/recurring_application_charges.json<br>";
                  var tamanocadena = cadena.length;
                  var urldestino = data.substr(tamanocadena + 8);
-                 window.location.href = urldestino;         
+                 window.location.href = urldestino;
               }
 
               if(plan == 'free'){
@@ -397,13 +397,13 @@
             }, function(data) {
 
               $('.token-error').hide();
-              //var resp = 
+              //var resp =
               if(plan == 'basic'){
                  var urldelsitio = "{{ Auth::user()->shopify_url }}";
                  var cadena = urldelsitio + "/admin/api/2020-10/recurring_application_charges.json<br>";
                  var tamanocadena = cadena.length;
                  var urldestino = data.substr(tamanocadena + 8);
-                 window.location.href = urldestino;         
+                 window.location.href = urldestino;
               }
 
               if(plan == 'free'){
@@ -414,7 +414,7 @@
                window.location.href = "{{url('/plans/update-failure')}}";
             });
       }
- 
+
 
 
 		});
@@ -449,7 +449,7 @@
     });
 
 
-    
+
 
 
 	});

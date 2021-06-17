@@ -119,7 +119,7 @@ class AjaxController extends Controller
             ]);
         }
 
-        if ($parameters['action'] == 'delete-import-list') {
+        if ($parameters['action'] == 'import-list') {
             $this->authorize('plan_delete-product-import-list');
             $this->authorize('plan_view-my-products');
             $page_number = $parameters['page_number'];
@@ -132,8 +132,10 @@ class AjaxController extends Controller
             $total_count = $prods->count();
             $prods = $prods->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             foreach ($prods as $product) {
-                if ($product['images'] != null && count(json_decode($product['images'])) > 0)
+                if ($product['images'] != null && count(json_decode($product['images'])) > 0) {
                     $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
+                    $product['delete_image_url'] = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product['images'])[0]->file;
+                }
 
                 $search = new SearchController;
                 $images = [];

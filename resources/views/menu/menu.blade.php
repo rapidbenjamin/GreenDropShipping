@@ -112,6 +112,7 @@
 
                             @endcan
 
+                            @can('plan_view-my-products')
                             @if(Auth::User()->migration == 0)
 
                             <li data-name="MIGRATION">
@@ -123,8 +124,19 @@
                                 </a>
 
                             </li>
-
                             @endif
+                            @else
+                            <li data-toggle="modal" data-target="#upgrade-plans-modal" data-name="MY PRODUCTS">
+
+                                <a>
+
+                                    Migration
+
+                                </a>
+
+                            </li>
+
+                            @endcan
 
                         </ul>
 

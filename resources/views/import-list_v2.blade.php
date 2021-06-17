@@ -32,17 +32,17 @@
         @endif
         <div class="alertan level2 alert-publish-all" style="display: none;">
             <div class="agrid">
-                <p><strong>Publishing in Progress!</strong> We´re currently publishing your products into your store.</p>
+                <p><strong>Publishing in Progress!</strong> We're currently publishing your products into your store.</p>
             </div>
         </div>
         <div class="alertan level2 alert-publish-single" style="display: none;">
             <div class="agrid">
-                <p>The product has been published into your store successfully.</p>
+                <span>The product has been published to your store successfully.</span>
             </div>
         </div>
         <div class="alertan level2 alert-publish-all-ready" style="display: none;">
             <div class="agrid">
-                <p><strong>The products have been published into your store successfully!</strong></p>
+                <span><strong>The products have been published to your store successfully!</strong></span>
             </div>
         </div>
 
@@ -71,7 +71,7 @@
         @endcan
         <div id="import-products">
             @foreach ($array_products as $ap)
-            <div class="productboxelement import-product" id='product{{$ap->id_import_list}} data-id=' {{$ap->id_import_list}}'>
+            <div class="productboxelement import-product" id="product{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}">
                 <h2>{{$ap->name}}</h2>
                 <div class="producttabs">
                     <div class="headertabs">
@@ -88,7 +88,9 @@
                         </div>
                         <div class="buttons import-actions">
                             {{--@can('plan_delete-product-import-list')--}}
-                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#delete-product-modal" @endcan class='delete @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#delete-product-modal" @endcan class='delete @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}" data-img="{{env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37c'.$ap->images[0]->file}}">
+                                Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon">
+                            </button>
                             <button class='delete' id="deleting-{{$ap->id_import_list}}" style="display: none;" data-id="{{$ap->id_import_list}}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                             {{--@endcan--}}
                             {{--@can('plan_publish-product-import-list')--}}
@@ -301,7 +303,7 @@
 
             //Get all checked products
             let products = [];
-
+            let product_ids = [];
             $("input.checkbox:checked").each(function(index, ele) {
                 let productId = $(ele).attr('id').split('-')[1];
                 let images = [];
@@ -312,6 +314,7 @@
                         $(`.btn-import-list-send3-${productId}`).show();
                         $(`.btn-import-list-send-${productId}`).prop('disabled', true);
                         $(ele).prop('disabled', true);
+                        $(ele).prop('checked', false);
                         $(ele).removeClass();
                         $(`#delete-${productId}`).hide();
 
@@ -319,7 +322,9 @@
                         $("input.chk-img" + productId + ":checked").each(function(index, ele) {
                             images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
                         });
-
+                        product_ids.push(productId);
+                        window.localStorage.removeItem('send_product_ids');
+                        window.localStorage.setItem('send_product_ids', JSON.stringify(product_ids));
                         products.push({
                             id: productId,
                             name: $(`#name${productId}`).val(),
@@ -368,7 +373,7 @@
                 product_ids.push($(ele).attr('id').split('-')[1]);
             });
             if (product_ids.length) {
-                $('#modal-body').html(`<h5>Are you sure to delete these checked products from Import List?</h5>`);
+                $('#modal-body').html(`<h5>Are you sure to delete checked products from Import List?</h5>`);
                 $('#product_id').val('delete-products');
             } else {
                 $('#modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
@@ -391,8 +396,10 @@
             $(`#delete-${id}`).hide();
             $(`#deleting-${id}`).show();
             $(`.btn-import-list-send-${id}`).hide();
+            $(`#check-${id}`).prop('checked', false);
+            $(`#check-${id}`).prop('disabled', true);
             $.getJSON(ajax_link, parameters, function(data) {
-                location.reload()
+                $(`#product${id}`).remove();
             }).fail(function(data) {
                 if (data.status == 403) $('#upgrade-plans-modal').modal('show')
             })
@@ -413,40 +420,31 @@
                 $(`#deleting-${product_id}`).show();
                 $(`.btn-import-list-send-${product_id}`).hide();
                 $(`#check-${product_id}`).prop('disabled', true);
+                $(`#check-${product_id}`).prop('checked', false);
             });
             $('#check-all').prop('checked', false);
             $('#check-all').prop('disabled', true);
             $.getJSON(ajax_link, parameters, function(data) {
                 $('#check-all').prop('disabled', false);
-                location.reload();
+                product_ids.forEach(product_id => {
+                    $(`#product${product_id}`).remove();
+                });
             }).fail(function(data) {
                 console.log('error1', data.status)
                 if (data.status == 403) $('#upgrade-plans-modal').modal('show')
             })
         }
 
-        var usr_id = "{{Auth::user() ? Auth::user()->id : 0}}";
-
         function publishProductsAjax() {
-            let product_ids = [];
-            $("input[type='checkbox']").each(function(index, ele) {
-                if (ele.disabled && ele.checked) {
-                    product_ids.push($(ele).attr('id').split('-')[1]);
-                }
-
-            });
-            if (usr_id && product_ids.length) {
-                $.ajax({
-                        type: 'POST',
-                        url: '/check-publish-products',
-                        data: {
-                            user_id: usr_id,
-                            product_ids: product_ids,
-                            "_token": "{{ csrf_token() }}",
-                        },
-                    })
-                    .then(data => {
+            let product_ids = JSON.parse(window.localStorage.getItem('send_product_ids'));
+            if (product_ids) {
+                if (product_ids.length) {
+                    $.post('/check-publish-products', {
+                        product_ids: product_ids,
+                        "_token": "{{ csrf_token() }}",
+                    }).then(data => {
                         if (data.result) {
+                            window.localStorage.removeItem('send_product_ids');
                             $('.btn-import-list-send-all').prop('disabled', false);
                             $('.btn-import-list-delete-all').prop('disabled', false);
                             $('#btn-import-list-sending').hide();
@@ -459,6 +457,7 @@
                             });
                         }
                     });
+                }
             }
         }
         publishProductsAjax();
@@ -507,10 +506,10 @@
             $(`.btn-import-list-send3-${productId}`).show();
             $(`#delete-${productId}`).hide();
             $(`#check-${productId}`).prop('disabled', true);
+            $(`#check-${productId}`).prop('checked', false);
             $(`#check-${productId}`).removeClass();
 
-            let btn = $(this);
-            btn.prop('disabled', true);
+            $(this).prop('disabled', true);
 
             let product = {
                 id: productId,
@@ -531,7 +530,7 @@
                 "_token": "{{ csrf_token() }}",
                 product: product
             }, function(data, status) {
-                btn.prop('disabled', false);
+                $(this).prop('disabled', false);
                 $('.alert-publish-single').show();
                 $(`.btn-import-list-send3-${productId}`).hide();
                 $(`.btn-import-list-send2-${productId}`).show();
@@ -544,7 +543,14 @@
         }
     });
     $('#import-products').on('click', '.btn-import-list-delete', function() {
-        $('#modal-body').html(`<h5 style='text-align:center'>${$(this).data('name')}(${$(this).data('sku')})</h5><h5>This product will remove it from Import List. Do you really want to delete it?</h5>`);
+        $('#modal-body').html(`<div style="display:flex;">
+                <img src="${$(this).data('img')}"/>
+                <div>
+                    <h5>${$(this).data('name')}</h5>
+                    <h5 style="text-align:center" class="mt-3">${$(this).data('sku')}</h5>
+                </div>
+            </div>
+            <h5 class="mt-3">This product will be removed from Import List. Do you really want to delete it?</h5>`);
         $('#product_id').val($(this).data('id'));
     });
     $('#import-products').on('change', '.box-profit', function() {

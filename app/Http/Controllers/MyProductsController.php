@@ -37,8 +37,8 @@ class MyProductsController extends Controller
         foreach ($prods as $product) {
             $product['brand'] = $search->getAttributeByCode($product, 'brand');
             if ($product->images != null && count(json_decode($product->images)) > 0) {
-                $product->image_url_75 = env('URL_MAGENTO_IMAGES'). '/dc09e1c71e492175f875827bcbf6a37c' .json_decode($product->images)[0]->file;
-                $product->image_url_285 = env('URL_MAGENTO_IMAGES'). '/e793809b0880f758cc547e70c93ae203' .json_decode($product->images)[0]->file;
+                $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product->images)[0]->file;
+                $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
             }
         }
         return view('my-products_v2', ['prods' => $prods, 'total_count' => $total_count]);
@@ -49,9 +49,8 @@ class MyProductsController extends Controller
         $this->authorize('view-merchant-my-products');
         $this->authorize('plan_view-my-products');
         ShopifyBulkDelete::dispatchNow(Auth::User(), [$request->product_id], 'MyProducts');
-        $result = MyProducts::where('id_shopify', $request->product_id)->get();
         return response()->json([
-            'result' => count($result) == 0,
+            'result' => true,
             'product_id' => $request->product_id
         ]);
     }

@@ -18,21 +18,21 @@
                      srcset="img/infogray@2x.png 2x,
                          img/infogray@3x.png 3x">
                     <p>You have a free plan. <a href="/plans">Click here to upgrade your plan.</a></p>
-               </div>                
+               </div>
             </div>
             @endif
 
             <div class="alertan level2">
                <div class="agrid">
                     <p><strong> Orders are submitted to GreenDropShip for processing once the grand total for each transaction is paid, which includes the wholesale price + shipping.</strong></p>
-               </div>                
+               </div>
             </div>
 
              @if(Request()->payment=='success')
             <div class="alertan level2">
                <div class="agrid">
                     <p><strong>success!</strong> Payment successful.</p>
-               </div>                
+               </div>
             </div>
             @endif
 
@@ -40,11 +40,11 @@
             <div class="alertan level2">
                <div class="agrid">
                     <p><strong>Error!</strong> Transaction canceled.
-               </div>                
+               </div>
             </div>
             @endif
 
-              
+
                <div class="headerorders">
                    <div class="date">
                        Date
@@ -61,7 +61,7 @@
                        N<sup>o</sup> Order
                    </div>
                    <div class="search">
-                       <input type="text" id="txt-order-search" value="{{Request()->order}}" placeholder="Search Order">               
+                       <input type="text" id="txt-order-search" value="{{Request()->order}}" placeholder="Search Order">
                    </div>
                    <div class="paymentstatus">
 		                <select id="selectFS" name="selectFS">
@@ -88,8 +88,8 @@
                    	   		<i class="fa fa-search" aria-hidden="true"></i>
                    	   Search</button>
                    </div>
-               </div> 
-               
+               </div>
+
 
                @if(Auth::user()->plan == 'basic')
                <div class="results">
@@ -101,7 +101,7 @@
                    </div>
                </div>
 
-               
+
                <div class="actions">
 		            <button id="checkout-button" class="btn-order-pay-selected pays">Pay Selected Orders</button>
 		            <button class="btn-order-export-selected exporsel">Export Selected Orders</button>
@@ -174,8 +174,8 @@
 					                @if($ol->financial_status== App\Libraries\OrderStatus::Outstanding && ($ol->fulfillment_status != 9 && $ol->fulfillment_status != 12))
 					                <button class="payorder pay-button checkout-button checkout-button2"  data-id="{{$ol->id}}">PAY ORDER</button>
 					                @else
-					                <button class="payorder payorderoff disabled" data-id="{{$ol->id}}">PAY ORDER</button>
-					                @endif                               	
+					                <button class="payorder payorderoff disabled" data-id="{{$ol->id}}">PAID</button>
+					                @endif
                                </td>
                                <td>
                                    <a href="/orders/{{$ol->id}}"><button class="view">VIEW</button></a>
@@ -191,19 +191,19 @@
                 </div>
                <!-- /pagination -->
 
-                   
+
                </div>
-                
+
             </div>
-            
+
         </div>
-    </div>  
+    </div>
 </div>
 
 <script type="text/javascript">
     $(document).ready(function() {
         var order_id = 0;
-        
+
 
         $('.btn-order-search').click(function() {
             window.location.href = encodeURI('{{url("/orders")}}?from=' + $('#date-order-from').val() + '&to=' +
@@ -237,14 +237,14 @@
             window.location.href = encodeURI('{{url("/orders/")}}?notifications=true');
         });
 
-        
-        
+
+
         var checkoutButton = document.getElementById('checkout-button');
         checkoutButton.addEventListener('click', function() {
 
             var stripe = Stripe('{{env("STRIPE_API_KEY")}}');
             let orders = [$(this).attr('data-id')];
-            
+
             $("input.checkbox:checked").each(function(index, ele) {
                 orders.push($(ele).attr('data-id'));
             });
@@ -298,14 +298,14 @@
             var idx = $(this).data('id');
             $('.cb' + idx).attr('checked','checked');
 
-            //let arrayboxes = $(".checkbox").prop("checked");            
+            //let arrayboxes = $(".checkbox").prop("checked");
             var stripe = Stripe('{{env("STRIPE_API_KEY")}}');
             let res = $('input[name=s_method]:checked', '#shipping-methods').val();
             let orders = [$(this).attr('data-id')];
 
             $("input.checkbox:checked").each(function(index, ele) {
                 orders.push($(ele).attr('data-id'));
-            });            
+            });
 
             console.log('ordenes... ' + orders);
 

@@ -650,6 +650,9 @@ svg {
   font-size: 16px;
   font-weight: normal;
 }
+.wrapcontent .maincontent .alertan.level2 .agrid span {
+  color: #44b955;
+}
 @media (max-width: 800px) {
   .wrapcontent .maincontent .alertan {
     padding-left: 15px;

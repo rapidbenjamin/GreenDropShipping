@@ -57,13 +57,13 @@ class ShopifyBulkDelete implements ShouldQueue
             $i = 0;
             do {
                 $response_product = ShopifyAdminApi::deleteProduct($this->user, $product_id);
+                if ($this->action == 'MyProducts') {
+                    \DB::table('my_products')->where('id_customer', \Auth::User()->id)->where('id_shopify', $product_id)->delete();
+                    \DB::table('temp_publish_products')->where('user_id', \Auth::User()->id)->where('payload', $product_id)->delete();
+                } else if ($this->action == 'MigrateProducts') {
+                    \DB::table('temp_migrate_products')->where('user_id', \Auth::User()->id)->where('id_shopify', $product_id)->delete();
+                }
                 if ($response_product['HTTP_CODE'] == 200) {
-                    if($this->action == 'MyProducts'){
-                        \DB::table('my_products')->where('id_shopify', $product_id)->delete();
-                        \DB::table('temp_publish_products')->where('payload', $product_id)->delete();
-                    } else if ($this->action == 'MigrateProducts') {
-                        \DB::table('temp_migrate_products')->where('user_id', \Auth::User()->id)->where('id_shopify', $product_id)->delete();
-                    }
                     break;
                 } else {
                     Log::info($product_id . ' - retry-after: ' . (int)$response_product['retry-after']);

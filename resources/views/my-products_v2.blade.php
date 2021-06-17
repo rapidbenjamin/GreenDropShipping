@@ -90,7 +90,7 @@
                             </div>
                         </td>
                         <td data-label="PRODUCT NAME">
-                            <a href="search-products/{{$pr->id}}?action=my-products" target="_blank">{{ $pr->name }}</a>
+                            <a href="search-products/{{$pr->id}}" target="_blank" id="name-{{$pr->id_shopify}}">{{ $pr->name }}</a>
                         </td>
                         <td data-label="COST GDS">
                             ${{$pr->price}}
@@ -108,7 +108,7 @@
                             <button class="btn-mp-view viewbutton vplist" data-id="{{ $pr->id }}" id="view-{{$pr->id_shopify}}" data-view="#product{{ $pr->id }}">View</button>
                         </td>
                         <td>
-                            <button class="btn-mp-delete deletebutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" data-name="{{ $pr->name }}" data-sku="{{ $pr->sku }}">Delete</button>
+                            <button class="btn-mp-delete deletebutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" data-name="{{ $pr->name }}" data-sku="{{ $pr->sku }}" data-img="{{$pr->image_url_75}}">Delete</button>
                             <button class="deletebutton" id="deleting-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" style="display: none;">Deleting...</button>
                             <button class="deletebutton" id="deleted-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id }}" style="display: none;">Deleted</button>
                         </td>
@@ -193,7 +193,7 @@
                 }
             });
             if (products.length) {
-                $('#modal-body').html(`<h5>Are you sure to delete these checked products from your Shopify Store?</h5>`);
+                $('#modal-body').html(`<h5>Are you sure to delete checked products from your Shopify Store?</h5>`);
                 $('#product_id').val('delete-products');
             } else {
                 $('#modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
@@ -203,7 +203,7 @@
         });
 
         $('#confirm').click(function() {
-            if ($('#product_id').val() != 'cancel'){
+            if ($('#product_id').val() != 'cancel') {
                 if ($('#product_id').val() == 'delete-products') deleteProducts();
                 else deleteProduct($('#product_id').val());
             }
@@ -218,66 +218,62 @@
             $(`#deleted-${id}`).hide();
             $(`#view-${id}`).hide();
             $(`#edit-${id}`).hide();
+            $(`#name-${id}`).css('pointer-events', 'none');
             $.post('{{url("/delete-shopify-product")}}', {
                 "_token": "{{ csrf_token() }}",
                 product_id: id
             }, function(data, status) {
                 if (data.result) {
-                    $(`#delete-${data.product_id}`).hide();
-                    $(`#deleting-${data.product_id}`).hide();
-                    $(`#deleted-${data.product_id}`).show();
+                    $(`#delete-${id}`).hide();
+                    $(`#deleting-${id}`).hide();
+                    $(`#deleted-${id}`).show();
                 }
             });
         }
 
         function deleteProducts() {
             let products = [];
+            let product_ids = [];
             $("input.checkbox:checked").each(function(index, ele) {
                 let product_id = $(ele).attr('id').split('-')[1];
                 if ($(`#delete-${product_id}`).is(":visible")) {
                     products.push({
                         product_id: $(ele).data('id'),
                         product_shopify_id: product_id
-                    })
+                    });
+                    product_ids.push(product_id);
                 }
             });
             products.forEach(product => {
                 $(`#check-${product.product_shopify_id}`).prop('disabled', true);
+                $(`#check-${product.product_shopify_id}`).prop('checked', false);
                 $(`#check-${product.product_shopify_id}`).removeClass();
                 $(`#delete-${product.product_shopify_id}`).hide();
                 $(`#deleting-${product.product_shopify_id}`).show();
                 $(`#deleted-${product.product_shopify_id}`).hide();
                 $(`#view-${product.product_shopify_id}`).hide();
                 $(`#edit-${product.product_shopify_id}`).hide();
+                $(`#name-${product.product_shopify_id}`).css('pointer-events', 'none');
             });
             $('#check-all-mp').prop('checked', false);
             $('#check-all-mp').prop('disabled', true);
+            window.localStorage.removeItem('my_product_ids');
+            window.localStorage.setItem('my_product_ids', JSON.stringify(product_ids));
             $.post('{{url("/delete-all-shopify-product")}}', {
                 "_token": "{{ csrf_token() }}",
                 products: products,
             }, function(data, status) {});
         }
-        var user_id = "{{Auth::user() ? Auth::user()->id : 0}}";
 
         function deleteProductsAjax() {
-            let product_ids = [];
-            $("input[type='checkbox']").each(function(index, ele) {
-                if (ele.disabled && ele.checked) {
-                    let product_id = $(ele).attr('id').split('-')[1];
-                    product_ids.push(product_id);
-                }
-
-            });
-            if (user_id && product_ids.length) {
-                $.ajax({
-                        type: 'POST',
-                        url: '/check-delete-shopify-products',
-                        data: {
-                            product_shopify_ids: product_ids,
-                            "_token": "{{ csrf_token() }}",
-                        },
-                    })
-                    .then(res => {
+            let product_ids = JSON.parse(window.localStorage.getItem('my_product_ids'));
+            if (product_ids) {
+                if (product_ids.length) {
+                    $.post('/check-delete-shopify-products', {
+                        product_shopify_ids: product_ids,
+                        "_token": "{{ csrf_token() }}",
+                    }).then(res => {
+                        window.localStorage.removeItem('my_product_ids');
                         res.product_shopify_ids.forEach(id => {
                             $(`#delete-${id}`).hide();
                             $(`#deleting-${id}`).hide();
@@ -286,22 +282,30 @@
                             $('#check-all-mp').prop('disabled', false);
                         });
                     });
+                }
             }
         }
         deleteProductsAjax();
         setInterval(deleteProductsAjax, 15000);
     });
     $('#product_data').on('click', '.btn-mp-delete', function() {
-        $('#modal-body').html(`<h5 style='text-align:center'>${$(this).data('name')}(${$(this).data('sku')})</h5><h5>This product will remove it from your Shopify store. Do you really want to delete it?</h5>`);
+        $('#modal-body').html(`<div style="display:flex;">
+                <img src="${$(this).data('img')}"/>
+                <div>
+                    <h5>${$(this).data('name')}</h5>
+                    <h5 style="text-align:center" class="mt-3">${$(this).data('sku')}</h5>
+                </div>
+            </div>
+            <h5 class="mt-3">This product will be removed from your Shopify store. Do you really want to delete it?</h5>`);
         $('#product_id').val($(this).data('myproductid'));
     })
     $('#product_data').on('click', '.edit-product', function() {
-        window.open('http://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');
+        window.open('https://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');
     });
     $('#product_data').on('click', '.vplist', function(e) {
         e.preventDefault();
-        var idp= $(this).attr('data-view');
-        if(!$(idp).hasClass("active")){
+        var idp = $(this).attr('data-view');
+        if (!$(idp).hasClass("active")) {
             $(".shoproductrow").removeClass("active");
             $(".productdatarow").removeClass("showp");
         }
