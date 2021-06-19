@@ -59,19 +59,18 @@ class MyProductsController extends Controller
     {
         $this->authorize('view-merchant-my-products');
         $this->authorize('plan_view-my-products');
-        $user_id = Auth::User()->id;
         $rows = [];
         foreach ($request->products as $product) {
             $rows[] = [
                 'id' => $product['product_id'],
-                'user_id' => $user_id,
+                'user_id' => Auth::user()->id,
                 'payload' => $product['product_shopify_id'],
                 'action' => 'delete'
             ];
         }
         DB::table('temp_publish_products')->insert($rows);
         $temp_product_ids = DB::table('temp_publish_products')
-            ->where('user_id', $user_id)
+            ->where('user_id', Auth::user()->id)
             ->where('action', 'delete')
             ->pluck('payload');
         if (ShopifyBulkDelete::dispatch(Auth::User(), $temp_product_ids, 'MyProducts')) {
@@ -87,8 +86,8 @@ class MyProductsController extends Controller
         $this->authorize('plan_view-my-products');
 
         $product_shopify_ids = $request->product_shopify_ids;
-        $result = DB::table('temp_publish_products')
-            ->whereIn('payload', $product_shopify_ids)->pluck('payload');
+        $result = DB::table('temp_publish_products')->where('user_id', Auth::User()->id)
+            ->whereIn('payload', $product_shopify_ids)->where('action', 'delete')->pluck('payload');
         $data = [];
         foreach ($product_shopify_ids as $product_shopify_id) {
             $flag = true;

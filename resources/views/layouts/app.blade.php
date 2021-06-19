@@ -343,7 +343,7 @@
   $(document).ready(function() {
     var usr_id = "{{Auth::user() ? Auth::user()->id : 0}}";
     function syncStockAjax(){
-        if(usr_id){
+        if(usr_id != '0'){
             $.ajax({
                 type: 'POST',
                 url: '/sync-magento/sync-shopify-stock',

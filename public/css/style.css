@@ -738,6 +738,10 @@ svg {
   padding-right: 60px;
   padding-bottom: 40px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 }
 .wrapcontent .maincontent .wrapinsidecontent .wbox:hover h2 {
   color: #1a6e34;
@@ -1607,6 +1611,11 @@ svg {
 }
 .greentable .skutd {
   width: 130px;
+}
+.greentable .skutd input {
+    border: none !important;
+    background: transparent;
+    text-align: center;
 }
 @media (max-width: 1200px) {
   .greentable .skutd {
@@ -3445,6 +3454,11 @@ a.buttonget:hover{
   padding-left: 30px;
   padding-right: 30px;
 }
+.pricecols .wrappc li{
+    display: flex;
+    align-items: center;
+    text-align: left;
+}
 @media (max-width: 1200px) {
   .pricecols .wrappc {
     font-size: 14px;
@@ -3470,6 +3484,7 @@ a.buttonget:hover{
 }
 .pricecols .wrappc ul li i {
   color: #44b955;
+  margin: 10px;
 }
 .pricecols .buttonsp {
   border-top: 1px solid #edf2f5;
@@ -3503,7 +3518,10 @@ a.buttonget:hover{
     max-width: 250px;
     border-radius: 14px;
 }
-
+.pricecols .buttonsp .currentPlan{
+    font-size: 1.2rem;
+    color: green;
+}
 .pricecols .buttonsp .spanAnswer  {
     float: left;
     width: 100%;

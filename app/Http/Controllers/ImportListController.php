@@ -180,6 +180,8 @@ class ImportListController extends Controller
             ->pluck('id_imp_product');
 
         DB::table('temp_publish_products')
+            ->where('user_id', Auth::User()->id)
+            ->where('action', 'publish')
             ->whereIn('id', $prods)
             ->delete();
 
