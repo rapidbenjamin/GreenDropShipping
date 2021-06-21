@@ -38,23 +38,22 @@ class PlansController extends Controller
     public function saveToken(Request $request)
     {
         $this->authorize('view-merchant-plans');
-        
+
         //Eval Token
         $tokenStatus = 0;
         $msg = 'Invalid Token';
 
-        if($request->token == env('APP_UNIVERSAL_TOKEN'))$tokenStatus = 1;
+        if ($request->token == env('APP_UNIVERSAL_TOKEN')) $tokenStatus = 1;
 
-        if($token = Token::where("token.token",$request->token)->first()){
-            if($token['status'] == 'active'){
+        if ($token = Token::where("token.token", $request->token)->first()) {
+            if ($token['status'] == 'active') {
                 $tokenStatus = 1;
-            }else{
+            } else {
                 $msg = 'Invalid Token, This User was disabled.';
-            } 
-                
+            }
         }
 
-        if($request->token != env('APP_UNIVERSAL_TOKEN') && User::select("users.*")->where("users.membership_token",$request->token)->first()){
+        if ($request->token != env('APP_UNIVERSAL_TOKEN') && User::select("users.*")->where("users.membership_token", $request->token)->first()) {
             $tokenStatus = 0;
             $msg = "Invalid Token. This token is already in use!";
         }
@@ -66,8 +65,8 @@ class PlansController extends Controller
             $user->plan = 'free';
             $user->save();
 
-            return response()->json(['result' => true]);            
-        }else{
+            return response()->json(['result' => true]);
+        } else {
             return response()->json(['result' => false, 'message' => $msg], 400);
         }
     }
@@ -97,12 +96,11 @@ class PlansController extends Controller
             if ($result) {
                 //Success upgrade
                 $resp2 = 'Downgrade Success';
-                $resp1 = true;
 
                 $user->plan = $request->plan;
                 $user->id_recurring_application = 0;
                 $user->api_client_id = 0;
-                $user->api_status =0;
+                $user->api_status = null;
                 $user->plan_updated_at = date('Y-m-d H:i:s');
                 $user->save();
 
@@ -112,21 +110,19 @@ class PlansController extends Controller
                 $merchant->start_date = date('Y-m-d H:i:s');
                 $merchant->end_date = date('Y-m-d', strtotime($date . ' + 1 month'));
                 $merchant->current = true;
-                $merchant->save();                
-            }else{
+                $merchant->save();
+            } else {
                 //Failure upgrade
                 $resp2 = 'Failure Upgrade';
-                $resp1 = false;
             }
         } else if ($request->plan == 'basic') {
             $result = ShopifyAdminApi::applyRecurringCharge($user, env('PLAN_BASIC_VALUE'));
 
             Log::info('Recurring - ' . json_encode($result));
-                       
+
             if ($result['id_recurring_application'] > 0) {
                 //Success upgrade
                 $resp2 = $result['confirmation_url'];
-                $resp1 = true;
 
                 //$user->plan = $request->plan;
                 $user->id_recurring_application = $result['id_recurring_application'];
@@ -141,11 +137,10 @@ class PlansController extends Controller
                 $merchant->start_date = date('Y-m-d H:i:s');
                 $merchant->end_date = date('Y-m-d', strtotime($date . ' + 1 month'));
                 $merchant->current = true;
-                $merchant->save();                
-            }else{
+                $merchant->save();
+            } else {
                 //Failure upgrade
                 $resp2 = 'Failure Upgrade';
-                $resp1 = false;
             }
         }
 
@@ -155,15 +150,18 @@ class PlansController extends Controller
     public function validateToken()
     {
         $user = User::find(Auth::user()->id);
-        $token = Token::where('token.token',$user->membership_token)->first();
+        $token = Token::where('token.token', $user->membership_token)->first();
 
-        if($token['status'] == 'active' || $user->membership_token == env('APP_UNIVERSAL_TOKEN'))return true;
-            return false;
+        if ($token['status'] == 'active' || $user->membership_token == env('APP_UNIVERSAL_TOKEN')) return true;
+        return false;
     }
 
-    public function updatePlanSuccess(){
+    public function updatePlanSuccess(Request $request)
+    {
+        if (isset($request['charge_id'])) {
+            DB::table('users')->where('id', Auth::user()->id)->update(['plan' => 'basic', 'api_status' => 'accepted']);
+        }
         $user = User::find(Auth::user()->id);
-        $user->save();
 
         return view('plan-success', ['user' => $user]);
     }
@@ -178,13 +176,12 @@ class PlansController extends Controller
         $plan = $_GET['p'];
         $price = 0;
 
-        if($plan = 'basic'){
+        if ($plan = 'basic') {
             $price = ENV('PLAN_BASIC_VALUE');
-        }elseif($plan = 'advanced'){
+        } elseif ($plan = 'advanced') {
             $price = ENV('PLAN_ADVANCED_VALUE');
         }
 
-        return view('plan-update',['price' => $price]);
+        return view('plan-update', ['price' => $price]);
     }
-
 }
