@@ -24,7 +24,7 @@
 
             <div class="alertan level2">
                <div class="agrid">
-                    <p><strong> Orders are submitted to GreenDropShip for processing once the grand total for each transaction is paid, which includes the wholesale price + shipping.</strong></p>
+                    <p><strong>You must pay the grand total for each transaction including wholesale price + shipping.</strong></p>
                </div>
             </div>
 

@@ -41,19 +41,7 @@ $(document).ready(function () {
 
     /* PRODUCT DETAIL */
     $('.imgThumb').click(function () {
-        $('.detailImage img').attr('src', $(this).data('img'))
-    })
-
-    $('.btn_import_list_detail').click(function () {
-        var parameters = {
-            action: 'add_import_list',
-            id_product: $(this).data('id')
-        }
-        let id = $(this).data('id')
-        $.getJSON(ajax_link, parameters, function (data) {
-            $('.add-to-import-list-' + id).hide()
-            $('.edit-on-import-list-' + id).show()
-        })
+        $('.detailImage img').attr('src', $(this).data('img').replace('dc09e1c71e492175f875827bcbf6a37c', 'e793809b0880f758cc547e70c93ae203'))
     })
 
     /* IMPORT LIST */
@@ -247,7 +235,8 @@ $(document).ready(function () {
             $('#next').prop('disabled', false);
         }
         $('#total_count').text(data.total_count);
-        $('#page_number').text(`${data.page_number}/${Math.ceil(data.total_count / data.page_size)}`);
+        $('#total_page').text(Math.ceil(data.total_count / data.page_size));
+        $('#page_number').text(data.page_number);
     }
 
     function showMyProducts (products) {
@@ -265,17 +254,16 @@ $(document).ready(function () {
                     </div>
                 </td>
                 <td data-label="PRODUCT NAME">
-                    ${product.name}
                     <a href="search-products/${product.id}" target="_blank" id="name-${product.id_shopify}">${product.name }</a>
                 </td>
                 <td data-label="COST GDS">
-                    ${parseFloat(product.price).toFixed(2)}
+                    $${parseFloat(product.price).toFixed(2)}
                 </td>
                 <td data-label="PROFIT">
                     ${product.profit}%
                 </td>
                 <td data-label="RETAIL PRICE">
-                    ${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}
+                    $${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}
                 </td>
                 <td data-label="SKU">
                     ${product.sku}
@@ -298,12 +286,12 @@ $(document).ready(function () {
                         </div>
                         <div class="productdata">
                             <h3>${product.name}</h3>
-                            <p class="price">Price ${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}</p>
+                            <p class="price">Price $${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}</p>
                             <p>
                                 Stock: ${product.stock}
                             </p>
                             <p>
-                                Cost: ${product.price}
+                                Cost: $${parseFloat(product.price).toFixed(2)}
                             </p>
                             <p>
                                 Profit: ${product.profit}%
@@ -313,7 +301,7 @@ $(document).ready(function () {
                             </p>
 
                             <div class="pbuttons">
-                                <button class="edit edit-product" data-shopifyid="${product.id_shopify}">Edit on Shopify</button>
+                                <button class="edit edit-product" id="edit-${product.id_shopify}" data-shopifyid="${product.id_shopify}">Edit on Shopify</button>
                             </div>
                         </div>
                     </div>
@@ -415,7 +403,6 @@ $(document).ready(function () {
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                         <div class="tab-2 tabcontent wpadding import-content import-description">
                             <textarea class="texteditor editor" name="" id="description${product.id_import_list}" cols="30" rows="10">${product.description}</textarea>
@@ -424,7 +411,6 @@ $(document).ready(function () {
                             <table class="greentable" cellspacing="0">
                                 <thead>
                                     <tr>
-
                                         <th>
                                             SKU <span class="simple-tooltip" title="Do not change this SKU in your Shopify store.">?</span>
                                         </th>
@@ -452,9 +438,7 @@ $(document).ready(function () {
                                     </tr>
                                 </thead>
                                 <tbody>
-
                                     <tr class="productdatarow">
-
                                         <td data-label="SKU" class="skutd">
                                             <input type="text" id="sku${product.id_import_list}" data-id="${product.id_import_list}" value="${product.sku}" disabled="disabled">
                                             <input type="hidden" id="upc${product.id_import_list}" value="${product.upc}" />
@@ -473,36 +457,21 @@ $(document).ready(function () {
                                         </td>
                                         <td data-label="COST" class="w100">
                                             <div class="costgrid">
-                                                <div>
-                                                    $
-                                                </div>
-                                                <input type="text" id="cost${product.id_import_list}" data-id="${product.id_import_list}" value="${Math.round(product.price * 100) /100}" disabled="disabled">
+                                                $<input type="text" style="width: 50%; text-align:center;" id="cost${product.id_import_list}" data-id="${product.id_import_list}" value="${parseFloat(product.price).toFixed(2)}" disabled="disabled">
                                             </div>
-
                                         </td>
                                         <td data-label="PROFIT (%) " class="w100">
                                             <span class="simple-tooltip" title="First tooltip">?</span>
                                             <div class="inpupercent">
-                                                <input type="text" class="box-profit" id="profit${product.id_import_list}" data-id="${product.id_import_list}" value="${data.profit}">
-                                                <div class="percent">
-                                                    %
-                                                </div>
+                                                <input type="text" style="width: 50%; text-align:center;" class="box-profit" id="profit${product.id_import_list}" data-id="${product.id_import_list}" value="${data.profit}">%
                                             </div>
-
                                         </td>
                                         <td data-label="PRICE" class="w100">
                                             <div class="inputprice">
-                                                <div class="currency">
-                                                    $
-                                                </div>
-                                                <input type="text" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat(product.price * (100 + data.profit) / 100).toFixed(2)}">
+                                                $<input type="text" style="width: 50%; text-align:center;" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat(product.price * (100 + data.profit) / 100).toFixed(2)}">
                                             </div>
-
                                         </td>
-
                                     </tr>
-
-
                                 </tbody>
                             </table>
                         </div>
@@ -527,30 +496,30 @@ $(document).ready(function () {
     }
 
     $('.migration').click(function () {
-        var parameters = {
-            action: 'migration',
-        };
-        $.getJSON(ajax_link, parameters, function (res) {
-            if (res.products == 0) {
-                $('#percentage').text('There is no products to migrate in your Shopify');
-            } else {
-                for (var i=0; i<res.products; i++) {
-                    $.getJSON(ajax_link, {
-                        action: 'migrating-products',
-                        index: i,
-                        location_id: res.location_id
-                    }, function (data) {
-                        $('#migrating-progress').val((data.index * 1 + 1)/(res.products)*100);
-                        $('#percentage').text(`${parseInt((data.index * 1 + 1)/(res.products)*100)}%`);
-                        if (data.index == res.products-1) {
-                            pagination(data);
-                            showMigrationPage(data.mig_products);
-                        }
-                    })
-                }
-            }
+        $.getJSON(ajax_link, {action: 'migration-count'}, function (res) {
+            bringProducts(res);
         })
     })
+
+    function bringProducts (data) {
+        $.getJSON(ajax_link, data, function (res) {
+            var params = {
+                action: 'migration',
+                index: res.index,
+                location_id: res.location_id,
+                total_count: res.total_count,
+                count: res.count,
+            }
+            $('#migrating-progress').val(res.count/res.total_count*100);
+            $('#percentage').text(`${parseInt(res.count/res.total_count*100)}%`);
+            if (res.count == res.total_count) {
+                pagination(res);
+                showMigrationPage(res.mig_products);
+            } else {
+                bringProducts(params);
+            }
+        })
+    }
 
     function showMigrationPage (data) {
         $('.migration').remove();
@@ -601,7 +570,6 @@ $(document).ready(function () {
         str += migrateProducts(data);
         str += `</tbody></table>`;
         $('.migrate-products').html(str);
-
     }
 
     function showMigrateProducts (data) {
@@ -610,12 +578,12 @@ $(document).ready(function () {
         $('#product_data').html(str);
     }
 
-    function migrateProducts (data) {
+    function migrateProducts (products) {
         var str = '';
-        data.products.forEach(product => {
+        products.forEach(product => {
             var payload = JSON.parse(product.payload);
             var button_str = '', profit_str = '';
-            var cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(payload.cost).toFixed(2)}</span>`;
+            var cost_str = '';
             if (product.type == 'migration'){
                 button_str = `<button class="btn-confirm-product confirmbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
                                 <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
@@ -624,15 +592,13 @@ $(document).ready(function () {
                                 <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                                 <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
                 profit_str = `<div style="display:flex; justify-content: center;">
-                    <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
+                    <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
                     %</div>`;
+                cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(product.cost).toFixed(2)}</span>`;
             } else {
                 button_str = `<button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
                                 <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                                 <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
-                profit_str = `<div style="display:flex; justify-content: center;">
-                    <input type="text" style="width:50%; text-align:center; border:none; background:transparent;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
-                    %</div>`;
             }
 
             str += `<tr class="productdatarow">

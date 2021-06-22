@@ -17,16 +17,15 @@
                     <label for="">To:</label>
                     <input type="date" id="dateTo">
                 </div>
-                <div class="noorder">
-                    Custom order number
-                </div>
-                <div class="search">
+                <div class="ordernumber">
+                    <span class="ordernumberlabel">Order Number</span>
                     <input type="text" id="idOrder" list="numbers" placeholder="Order #">
                     <datalist id="numbers">
                         <div id="number_data"></div>
                     </datalist>
                 </div>
-                <div>
+                <div class="merchantname">
+                    <span class="merchantlabel">Name</span>
                     <input type="text" id="merchant" list="names" placeholder="Merchant">
                     <datalist id="names">
                         <div id="merchant_data"></div>
@@ -156,30 +155,26 @@
                             </td>
                         </tr>
                         @endforeach
-
                     </tbody>
                 </table>
             </div>
-
-
-            <!-- pagination -->
-            <div class="pagination">
-                <ul class="pagination" role="navigation">
-                    <li class="page-item" id="prev">
-                        <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
-                    </li>
-
-                    <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1/{{ceil($total_count/10)}}</span></li>
-
-                    <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
-                        <span class="page-link" aria-hidden="true">›</span>
-                    </li>
-                </ul>
-                <input type="text" id="total_count" value="{{$total_count}}" hidden>
-            </div>
-            <!-- /pagination -->
-
         </div>
+        <!-- pagination -->
+        <div class="pagination">
+            <ul class="pagination" role="navigation">
+                <li class="page-item" id="prev">
+                    <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
+                </li>
+
+                <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
+
+                <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
+                    <span class="page-link" aria-hidden="true">›</span>
+                </li>
+            </ul>
+            <input type="text" id="total_count" value="{{$total_count}}" hidden>
+        </div>
+        <!-- /pagination -->
     </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>

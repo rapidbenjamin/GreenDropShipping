@@ -34,14 +34,6 @@ $( document ).ready(function() {
         });
     }
 
-
-    $(".thumbnails a").on("click", function (e) {
-          e.preventDefault();
-          var galleryImage = $(this).attr("href");
-          $(".maingreenproducimage").attr("src", galleryImage);
-          $(".maingreenproducimagelink").attr("href", galleryImage);
-    });
-
     Tipped.create('.simple-tooltip');
 
     $(".videolist a").click(function(e) {

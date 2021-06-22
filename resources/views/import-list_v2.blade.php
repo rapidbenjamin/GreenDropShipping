@@ -88,7 +88,7 @@
                         </div>
                         <div class="buttons import-actions">
                             {{--@can('plan_delete-product-import-list')--}}
-                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#delete-product-modal" @endcan class='delete @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}" data-img="{{env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37c'.$ap->images[0]->file}}">
+                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#delete-product-modal" @endcan class='delete @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}" data-img="{{$ap->images != null ? env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37c'.$ap->images[0]->file :  env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37cnoselection'}}">
                                 Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon">
                             </button>
                             <button class='delete' id="deleting-{{$ap->id_import_list}}" style="display: none;" data-id="{{$ap->id_import_list}}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
@@ -123,7 +123,7 @@
                                             <datalist id="collection{{$ap->id_import_list}}">
                                                 <div id="collection_data"></div>
                                             </datalist>
-                                            <span id="collection_error{{$ap->id_import_list}}" style="color:red; display:none;">One product can't exist in multiple colelctions.</span>
+                                            <span id="collection_error{{$ap->id_import_list}}" style="color:red; display:none;">You can only add a product to one collection.</span>
                                         </div>
                                         <div>
                                             <label for="">Type <span class="simple-tooltip" title="You can give this product a classification that will be saved in the 'Product Type' field in Shopify.">?</span></label>
@@ -131,7 +131,7 @@
                                             <datalist id="type{{$ap->id_import_list}}">
                                                 <div id="type_data"></div>
                                             </datalist>
-                                            <span id="type_error{{$ap->id_import_list}}" style="color:red; display:none;">One product have only one type.</span>
+                                            <span id="type_error{{$ap->id_import_list}}" style="color:red; display:none;">Every product has a single product type.</span>
                                         </div>
                                         <div>
                                             <label for="">Tags <span class="simple-tooltip" title="You can create your own tags separated by commas.">?</span></label>
@@ -143,7 +143,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                         <div class="tab-2 tabcontent wpadding import-content import-description">
                             <textarea class="texteditor editor" name="" id="description{{$ap->id_import_list}}" cols="30" rows="10">{!! $ap->description !!}</textarea>
@@ -152,7 +151,6 @@
                             <table class="greentable" cellspacing="0">
                                 <thead>
                                     <tr>
-
                                         <th>
                                             SKU <span class="simple-tooltip" title="Do not change this SKU in your Shopify store.">?</span>
                                         </th>
@@ -180,9 +178,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-
                                     <tr class="productdatarow">
-
                                         <td data-label="SKU" class="skutd">
                                             <input type="text" id="sku{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$ap->sku}}" disabled="disabled">
                                             <input type="hidden" id="upc{{$ap->id_import_list}}" value="{{$ap->upc}}" />
@@ -201,36 +197,21 @@
                                         </td>
                                         <td data-label="COST" class="w100">
                                             <div class="costgrid">
-                                                <div>
-                                                    $
-                                                </div>
-                                                <input type="text" id="cost{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$ap->price}}" disabled="disabled">
+                                                $<input type="text" style="width: 50%; text-align:center;" id="cost{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$ap->price}}" disabled="disabled">
                                             </div>
-
                                         </td>
                                         <td data-label="PROFIT (%) " class="w100">
                                             <span class="simple-tooltip" title="First tooltip">?</span>
                                             <div class="inpupercent">
-                                                <input type="text" class="box-profit" id="profit{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$profit}}">
-                                                <div class="percent">
-                                                    %
-                                                </div>
+                                                <input type="text" style="width: 50%; text-align:center;" class="box-profit" id="profit{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$profit}}">%
                                             </div>
-
                                         </td>
                                         <td data-label="PRICE" class="w100">
                                             <div class="inputprice">
-                                                <div class="currency">
-                                                    $
-                                                </div>
-                                                <input type="text" class="box-price" id="price{{$ap->id_import_list}}" data-price="{{$ap->price}}" data-id="{{$ap->id_import_list}}" value="{{number_format($ap->price * (100 + $profit) / 100, 2,'.','')}}">
+                                                $<input type="text" style="width: 50%; text-align:center;" class="box-price" id="price{{$ap->id_import_list}}" data-price="{{$ap->price}}" data-id="{{$ap->id_import_list}}" value="{{number_format($ap->price * (100 + $profit) / 100, 2,'.','')}}">
                                             </div>
-
                                         </td>
-
                                     </tr>
-
-
                                 </tbody>
                             </table>
                         </div>
@@ -268,7 +249,7 @@
             <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
         </li>
 
-        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1/{{ceil($total_count/10)}}</span></li>
+        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
 
         <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
             <span class="page-link" aria-hidden="true">›</span>
@@ -312,7 +293,6 @@
                     if (permission) {
                         $(`.btn-import-list-send-${productId}`).hide();
                         $(`.btn-import-list-send3-${productId}`).show();
-                        $(`.btn-import-list-send-${productId}`).prop('disabled', true);
                         $(ele).prop('disabled', true);
                         $(ele).prop('checked', false);
                         $(ele).removeClass();
@@ -321,6 +301,8 @@
                         // data array of all checked products
                         $("input.chk-img" + productId + ":checked").each(function(index, ele) {
                             images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
+                            $(ele).prop('disabled', true);
+                            $(ele).prop('checked', false);
                         });
                         product_ids.push(productId);
                         window.localStorage.removeItem('send_product_ids');
@@ -356,7 +338,7 @@
                 $('#check-all').prop('checked', false);
                 $.post('{{url("/publish-all-products")}}', {
                     "_token": "{{ csrf_token() }}",
-                    products: products
+                    products: JSON.stringify(products)
                 }, function(data, status) {
 
                 }).fail(function(data) {
@@ -450,8 +432,10 @@
                             $('#btn-import-list-sending').hide();
                             $('#btn-import-list-send-all').show();
                             data.id_shopify.forEach(productId => {
-                                $(`.btn-import-list-send3-${productId}`).hide();
+                                $(`.btn-import-list-send-${productId}`).hide();
                                 $(`.btn-import-list-send2-${productId}`).show();
+                                $(`.btn-import-list-send3-${productId}`).hide();
+                                $(`#delete-${productId}`).hide();
                                 $(`#check-${productId}`).prop('checked', false);
                                 $('#check-all').prop('disabled', false);
                             });
@@ -500,6 +484,8 @@
             let images = [];
             $("input.chk-img" + productId + ":checked").each(function(index, ele) {
                 images.push($('.img' + productId + '-' + $(ele).attr('data-index')).attr('src'));
+                $(ele).prop('disabled', true);
+                $(ele).prop('checked', false);
             });
 
             $(`.btn-import-list-send-${productId}`).hide();
@@ -544,7 +530,7 @@
     });
     $('#import-products').on('click', '.btn-import-list-delete', function() {
         $('#modal-body').html(`<div style="display:flex;">
-                <img src="${$(this).data('img')}"/>
+                <img style="width:75px; height:75px;" src="${$(this).data('img')}"/>
                 <div>
                     <h5>${$(this).data('name')}</h5>
                     <h5 style="text-align:center" class="mt-3">${$(this).data('sku')}</h5>
@@ -583,14 +569,14 @@
         e.preventDefault();
         $('#upgrade-plans-modal').modal('show');
     });
-    $('#import-products').on('change', '.collection', function(e) {
+    $('#import-products').on('keypress', '.collection', function(e) {
         var id = $(this).data('id');
         if ($(this).val().indexOf(',') > -1) {
             $(`#collection_error${id}`).show();
         } else {
             $(`#collection_error${id}`).hide();
         }
-        if ($(this).val().length > 2) {
+        if ($(this).val().length >= 2) {
             var parameters = {
                 action: 'product_collection',
             }
@@ -603,16 +589,16 @@
                 $('#collection_data').remove();
                 $(`#collection${id}`).html(str);
             })
-        }
+        } else $('#collection_data').remove();
     });
-    $('#import-products').on('change', '.type', function(e) {
+    $('#import-products').on('keypress', '.type', function(e) {
         var id = $(this).data('id');
         if ($(this).val().indexOf(',') > -1) {
             $(`#type_error${id}`).show();
         } else {
             $(`#type_error${id}`).hide();
         }
-        if ($(this).val().length > 2) {
+        if ($(this).val().length >= 2) {
             var parameters = {
                 action: 'product_type',
             }
@@ -625,10 +611,10 @@
                 $('#type_data').remove();
                 $(`#type${id}`).html(str);
             })
-        }
+        } else $('#type_data').remove();
     });
-    $('#import-products').on('change', '.tag', function(e) {
-        if ($(this).val().length > 2) {
+    $('#import-products').on('keypress', '.tag', function(e) {
+        if ($(this).val().length >= 2) {
             var parameters = {
                 action: 'product_tag',
             }
@@ -642,7 +628,7 @@
                 $('#tag_data').remove();
                 $(`#tag${id}`).html(str);
             })
-        }
+        } else $('#tag_data').remove();
     });
 </script>
 @endsection

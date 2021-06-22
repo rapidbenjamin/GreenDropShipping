@@ -14,6 +14,7 @@ body.bodyAdmin .leftmenu .mainmenu li a p {
 }
 body.bodyAdmin .leftmenu .mainmenu li a {
   color: #fff;
+  font-size: 1.2rem;
 }
 body.bodyAdmin .leftmenu .mainmenu li ul li {
   color: #fff;

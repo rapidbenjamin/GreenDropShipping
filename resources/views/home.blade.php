@@ -52,7 +52,7 @@
                                     </svg>
                                     <h2>Upgrade your plan</h2>
                                     <p>Get a <a href="https://greendropship.com/membership-account/membership-checkout/" target="_blank">GreenDropShip membership</a> to upgrade your plan.</p>
-                                    <p class="clickhere"><a href="/plans" >Select plan</a></p>
+                                    <p class="clickhere"><a href="/plans" >Current Plan</a></p>
                                 </div>
                                 <div  class="wbox">
 

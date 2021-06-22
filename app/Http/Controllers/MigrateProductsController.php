@@ -29,7 +29,10 @@ class MigrateProductsController extends Controller
     {
         $this->authorize('view-merchant-my-products');
         $this->authorize('plan_view-my-products');
-        $mig_products = DB::table('temp_migrate_products')->where('user_id', Auth::User()->id);
+        $mig_products = DB::table('temp_migrate_products')
+            ->select('temp_migrate_products.*', 'products.price as cost')
+            ->join('products', 'temp_migrate_products.sku', '=', 'products.sku')
+            ->where('user_id', Auth::User()->id);
         $total_count = $mig_products->count();
         $mig_products = $mig_products->paginate(10);
         $settings = Settings::where('id_merchant', Auth::user()->id)->first();
@@ -49,6 +52,7 @@ class MigrateProductsController extends Controller
         $product_ids = $request['product_ids'];
         ShopifyBulkDelete::dispatchNow(Auth::User(), $product_ids, 'MigrateProducts');
         $result = DB::table('temp_migrate_products')
+            ->where('user_id', Auth::user()->id)
             ->where('id_shopify', $product_ids[0])
             ->get();
         return response()->json([
@@ -63,12 +67,14 @@ class MigrateProductsController extends Controller
         $user_id = Auth::User()->id;
         $user = User::find($user_id);
         ShopifyBulkDelete::dispatch($user, $product_ids, 'MigrateProducts');
+        return 'success';
     }
 
     public function checkDeleteMigrateProducts(Request $request)
     {
         $product_ids = $request['product_ids'];
         $result = DB::table('temp_migrate_products')
+            ->where('user_id', Auth::user()->id)
             ->whereIn('id_shopify', $product_ids)->pluck('id_shopify');
         $data = [];
         foreach ($product_ids as $product_id) {
@@ -88,9 +94,12 @@ class MigrateProductsController extends Controller
     {
         $result = [];
         foreach ($request['products'] as $data) {
-            $mig_product = DB::table('temp_migrate_products')->where('id_shopify', $data['id'])->first();
+            $mig_product = DB::table('temp_migrate_products')
+                ->where('user_id', Auth::user()->id)
+                ->where('id_shopify', $data['id'])->first();
             $product = Products::where('sku', $mig_product->sku)->first();
-            $import_product = ImportList::where('id_product', $product->id)->where('id_customer', Auth::User()->id)->first();
+            $import_product = ImportList::where('id_product', $product->id)
+                ->where('id_customer', Auth::User()->id)->first();
             $my_product = MyProducts::where('id_product', $product->id)->first();
             $flag = false;
             $check_price = false;
@@ -108,11 +117,20 @@ class MigrateProductsController extends Controller
                     $check_price = true;
                     $data['result'] = true;
                 } else {
+                    DB::table('my_products')
+                        ->where('id_product', $product->id)
+                        ->update([
+                            'id_shopify' => $mig_product->id_shopify, 
+                            'id_variant_shopify' => $mig_product->id_variant_shopify
+                        ]);
                     if ($mig_product->location_id_shopify == Auth::User()->fulfillment_location_id) {
                         $check_price = true;
                         $data['result'] = true;
                     } else {
-                        DB::table('temp_migrate_products')->where('id_shopify', $data['id'])->update(['type' => 'delete']);
+                        DB::table('temp_migrate_products')
+                            ->where('user_id', Auth::user()->id)
+                            ->where('id_shopify', $data['id'])
+                            ->update(['type' => 'delete']);
                         DB::table('my_products')->where('id_shopify', $mig_product->id_shopify)->delete();
                         $data['result'] = false;
                     }
@@ -133,11 +151,19 @@ class MigrateProductsController extends Controller
             }
             if ($check_price) {
                 $price = $product->price * (100 + $data['profit']) / 100;
-                if ($price != $mig_product->price) {
-                    MyProducts::where('id_shopify', $mig_product->id_shopify)->update(['profit' => $data['profit'], 'cron' => 1]);
-                    DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)->where('id_shopify', $data['id'])->delete();
+                if (number_format($price, 2, '.', '') != $mig_product->price) {
+                    MyProducts::where('id_shopify', $mig_product->id_shopify)
+                        ->update([
+                            'profit' => $data['profit'], 
+                            'cron' => 1
+                        ]);
+                    DB::table('temp_migrate_products')
+                        ->where('user_id', Auth::User()->id)
+                        ->where('id_shopify', $data['id'])->delete();
                 } else {
-                    DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)->where('id_shopify', $data['id'])->delete();
+                    DB::table('temp_migrate_products')
+                        ->where('user_id', Auth::User()->id)
+                        ->where('id_shopify', $data['id'])->delete();
                 }
             }
             $result[] = $data;

@@ -60,14 +60,18 @@ class ShopifyBulkPublish implements ShouldQueue
             $attemps = 3;
             $i = 0;
             if (json_decode($product)->tags != null) {
-                $tag = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'T'], ['value', json_decode($product)->tags]])->first();
-                if ($tag == null) {
-                    $tag = [
-                        'user_id' => Auth::User()->id,
-                        'type' => 'T',
-                        'value' => json_decode($product)->tags
-                    ];
-                    DB::table('user_collections_tags_types')->insert($tag);
+                foreach (explode(',', json_decode($product)->tags) as $str) {
+                    if (trim($str) != '') {
+                        $tag = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'T'], ['value', trim($str)]])->first();
+                        if ($tag == null) {
+                            $tag = [
+                                'user_id' => Auth::User()->id,
+                                'type' => 'T',
+                                'value' => trim($str)
+                            ];
+                            DB::table('user_collections_tags_types')->insert($tag);
+                        }
+                    }
                 }
             }
             if (json_decode($product)->collections != null) {

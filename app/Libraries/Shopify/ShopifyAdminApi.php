@@ -41,7 +41,7 @@ class ShopifyAdminApi
                             "fulfillment_service" => "Greendropship",
                             "inventory_management" => "Greendropship",
                             "inventory_quantity" => $inventory_quantity,
-                            "inventory_policy" => 'continue'
+                            "inventory_policy" => 'deny'
                         )
                     ),
                     "images"=> $images,
@@ -546,11 +546,19 @@ class ShopifyAdminApi
 
     }
 
-    public static function getProducts($user) {
+    public static function getProducts($user, $index) {
         return ShopifyAdminApi::request(
             $user,
             'GET',
-            '/admin/api/2021-04/products.json'
+            '/admin/api/2021-04/products.json?limit=250&since_id='. $index
+        );
+    }
+
+    public static function countProducts($user) {
+        return ShopifyAdminApi::request(
+            $user,
+            'GET',
+            '/admin/api/2021-04/products/count.json'
         );
     }
 }

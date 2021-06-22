@@ -19,7 +19,7 @@
 
             <div class="alertan level2 alert-publish-all">
                 <div class="agrid">
-                    <p>You can view here all the products for migration from your Shopify store.</p>
+                    <p>You can view here all the products to migrate from your Shopify store.</p>
                 </div>
             </div>
             <div class="migrate-products" style="display: block;">
@@ -31,6 +31,7 @@
                     <button class="btn-delete-products alldeletebutton">Delete</button>
                     <button class="btn-confirm-products allconfirmbutton">Confirm</button>
                     <button class="btn-set-profit profit">Set Profit</button>
+                    <button class="btn-setting-profit profit" style="display: none;">Setting...</button>
                 </div>
                 <div class="pagesize">
                     <span>Size</span>
@@ -84,18 +85,14 @@
                                 {{json_decode($product->payload)->name}}
                             </td>
                             <td data-label="COST GDS">
-                                @if(isset(json_decode($product->payload)->cost))
-                                <span id="cost-{{$product->id_shopify}}">${{number_format(json_decode($product->payload)->cost,2,'.','')}}</span>
+                                @if($product->type == 'migration')
+                                <span id="cost-{{$product->id_shopify}}">${{number_format($product->cost,2,'.','')}}</span>
                                 @endif
                             </td>
                             <td data-label="PROFIT">
-                                @if(isset(json_decode($product->payload)->profit))
+                                @if($product->type == 'migration')
                                 <div style="display:flex; justify-content: center;">
-                                    @if($product->type == 'migration')
-                                    <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" value="{{number_format(json_decode($product->payload)->profit, 2, '.', '')}}">
-                                    @elseif($product->type == 'delete')
-                                    <input type="text" style="width:50%; text-align:center; border:none; background:transparent;" class="box-profit" id="profit-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" value="{{number_format(json_decode($product->payload)->profit, 2, '.', '')}}" disabled>
-                                    @endif
+                                    <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" data-sku="{{$product->sku}}" value="{{number_format(($product->price - $product->cost)/$product->cost*100, 2, '.', '')}}">
                                 %</div>
                                 @endif
                             </td>
@@ -113,7 +110,7 @@
                                 <button class="btn-mp-delete deletebutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Delete</button>
                                 <button class="deletebutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
                                 <button class="deletebutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
-                                @elseif ($product->type == 'delete')
+                                @else
                                 <button class="btn-mp-delete deletebutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}">Delete</button>
                                 <button class="deletebutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
                                 <button class="deletebutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
@@ -156,13 +153,14 @@
             <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
         </li>
 
-        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1/{{ceil($total_count/10)}}</span></li>
+        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
 
         <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
             <span class="page-link" aria-hidden="true">›</span>
         </li>
     </ul>
     <input type="text" id="total_count" value="{{$total_count}}" hidden>
+    <input type="text" id="csrf_token" value="{{csrf_token()}}" hidden>
     <input type="text" id="default_profit" value="{{$default_profit}}" hidden>
 </div>
 <!-- /pagination -->
@@ -190,6 +188,9 @@
                         },
                     })
                     .then(res => {
+                        $('.btn-delete-products').prop('disabled', false);
+                        $('.btn-confirm-products').prop('disabled', false);
+                        $('.btn-set-profit').prop('disabled', false);
                         res.product_ids.forEach(id => {
                             $(`#delete-${id}`).hide();
                             $(`#deleting-${id}`).hide();
@@ -203,25 +204,23 @@
         setInterval(deleteProductsAjax, 15000);
     });
     $('.migrate-products').on('click', '.btn-mp-delete', function() {
-        if (confirm('Are you sure to delete this product from shopify?')) {
-            $(`#check-${$(this).data('migproductid')}`).prop('disabled', true);
-            $(`#delete-${$(this).data('migproductid')}`).hide();
-            $(`#deleting-${$(this).data('migproductid')}`).show();
-            $(`#deleted-${$(this).data('migproductid')}`).hide();
-            $(`#check-${$(this).data('migproductid')}`).removeClass();
-            $(`#check-${$(this).data('migproductid')}`).prop('disabled', true);
-            $.post('{{url("/delete-migrate-product")}}', {
-                "_token": "{{ csrf_token() }}",
-                product_ids: [$(this).data('migproductid')]
-            }, function(data, status) {
-                if (data.result) {
-                    $(`#delete-${data.product_id}`).hide();
-                    $(`#deleting-${data.product_id}`).hide();
-                    $(`#deleted-${data.product_id}`).show();
-                    $(`#check-${data.product_id}`).prop('checked', false);
-                }
-            });
-        }
+        $(`#check-${$(this).data('migproductid')}`).prop('disabled', true);
+        $(`#delete-${$(this).data('migproductid')}`).hide();
+        $(`#deleting-${$(this).data('migproductid')}`).show();
+        $(`#deleted-${$(this).data('migproductid')}`).hide();
+        $(`#check-${$(this).data('migproductid')}`).removeClass();
+        $(`#check-${$(this).data('migproductid')}`).prop('disabled', true);
+        $.post('{{url("/delete-migrate-product")}}', {
+            "_token": "{{ csrf_token() }}",
+            product_ids: [$(this).data('migproductid')]
+        }, function(data, status) {
+            if (data.result) {
+                $(`#delete-${data.product_id}`).hide();
+                $(`#deleting-${data.product_id}`).hide();
+                $(`#deleted-${data.product_id}`).show();
+                $(`#check-${data.product_id}`).prop('checked', false);
+            }
+        });
     });
     $('.migrate-products').on('click', '#check-all-mp', function() {
         if ($('#check-all-mp').is(':checked')) {
@@ -240,6 +239,9 @@
         });
         if (product_ids.length) {
             if (confirm('Are you sure to delete these products from shopify?')) {
+                $('.btn-delete-products').prop('disabled', true);
+                $('.btn-confirm-products').prop('disabled', true);
+                $('.btn-set-profit').prop('disabled', true);
                 product_ids.forEach(product_id => {
                     $(`#check-${product_id}`).prop('disabled', true);
                     $(`#delete-${product_id}`).hide();
@@ -259,6 +261,11 @@
     });
     $('.migrate-products').on('click', '.btn-set-profit', function() {
         if (confirm('Are you sure to replace current profits of all products with {{$default_profit}}%?')) {
+            $(this).hide();
+            $('.btn-delete-products').prop('disabled', true);
+            $('.btn-confirm-products').prop('disabled', true);
+            $('.btn-confirm-product').prop('disabled', true);
+            $('.btn-setting-profit').show();
             var parameters = {
                 action: 'set-default-profit',
             }
@@ -269,6 +276,11 @@
                     var profit = $('#default_profit').val();
                     $(`#price-${$(ele).data('id')}`).text(parseFloat(cost.substr(1) * (1 + profit / 100)).toFixed(2));
                 });
+                $('.btn-setting-profit').hide();
+                $('.btn-set-profit').show();
+                $('.btn-delete-products').prop('disabled', false);
+                $('.btn-confirm-product').prop('disabled', false);
+                $('.btn-confirm-products').prop('disabled', false);
             })
         }
     });
@@ -290,15 +302,16 @@
                 $(`#confirm-${product.id}`).hide();
                 $(`#confirming-${product.id}`).hide();
                 $(`#check-${product.id}`).prop('checked', false);
+                $(`#profit-${product.id}`).prop('disabled', true);
+                $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
                 if (product.result) {
                     $(`#confirmed-${product.id}`).show();
                     $(`#check-${product.id}`).prop('checked', false);
                 } else {
                     $(`#delete-${product.id}`).show();
+                    $(`#confirmed-${product.id}`).hide();
                     $(`#check-${product.id}`).prop('disabled', false);
                     $(`#check-${product.id}`).addClass('checkbox');
-                    $(`#profit-${product.id}`).prop('disabled', true);
-                    $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
                 }
             });
         });
@@ -315,7 +328,10 @@
                 });
             }
         });
-        if (products.length) {
+        if (products.length > 0) {
+            $(this).prop('disabled', true);
+            $('.btn-delete-products').prop('disabled', true);
+            $('.btn-set-profit').prop('disabled', true);
             products.forEach(product => {
                 $(`#check-${product.id}`).prop('disabled', true);
                 $(`#confirm-${product.id}`).hide();
@@ -327,19 +343,23 @@
                 "_token": "{{ csrf_token() }}",
                 products: products,
             }, function(data, status) {
+                $('.btn-confirm-products').prop('disabled', false);
+                $('.btn-delete-products').prop('disabled', false);
+                $('.btn-set-profit').prop('disabled', false);
                 data.products.forEach(product => {
                     $(`#confirm-${product.id}`).hide();
                     $(`#confirming-${product.id}`).hide();
                     $(`#check-${product.id}`).prop('checked', false);
+                    $(`#profit-${product.id}`).prop('disabled', true);
+                    $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
                     if (product.result) {
                         $(`#confirmed-${product.id}`).show();
                         $(`#check-${product.id}`).prop('checked', false);
                     } else {
                         $(`#delete-${product.id}`).show();
+                        $(`#confirmed-${product.id}`).hide();
                         $(`#check-${product.id}`).prop('disabled', false);
                         $(`#check-${product.id}`).addClass('checkbox');
-                        $(`#profit-${product.id}`).prop('disabled', true);
-                        $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
                     }
                 });
             });
@@ -376,12 +396,12 @@
             var str = migrateProducts(data);
             $('#product_data').html(str);
         }
-        function migrateProducts (data) {
+        function migrateProducts (products) {
             var str = '';
-            data.products.forEach(product => {
+            products.forEach(product => {
                 var payload = JSON.parse(product.payload);
                 var button_str = '', profit_str = '';
-                var cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(payload.cost).toFixed(2)}</span>`;
+                var cost_str = '';
                 if (product.type == 'migration'){
                     button_str = `<button class="btn-confirm-product confirmbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
                                     <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
@@ -390,15 +410,13 @@
                                     <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                                     <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
                     profit_str = `<div style="display:flex; justify-content: center;">
-                        <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
+                        <input type="text" style="width:50%; text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
                         %</div>`;
+                    cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(product.cost).toFixed(2)}</span>`;
                 } else {
                     button_str = `<button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
                                     <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                                     <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
-                    profit_str = `<div style="display:flex; justify-content: center;">
-                        <input type="text" style="width:50%; text-align:center; border:none; background:transparent;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" value="${parseFloat(payload.profit).toFixed(2)}">
-                        %</div>`;
                 }
 
                 str += `<tr class="productdatarow">
@@ -441,7 +459,13 @@
         if (profit > 0) {
             value = parseFloat((cost.substr(1) * (100 + profit * 1)) / 100).toFixed(2);
         }
-        $('#price-' + id_product).text(`$${value}`);
+        $.getJSON(ajax_link, {
+            action: 'change-profit',
+            sku: $(this).data('sku'),
+            profit: profit
+        }, function (res) {
+            $('#price-' + id_product).text(`$${value}`);
+        })
     });
 </script>
 @endsection

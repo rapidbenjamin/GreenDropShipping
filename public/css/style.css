@@ -1334,15 +1334,16 @@ svg {
 }
 .pagination {
   list-style: none;
-  margin: 0;
   padding: 0;
-  margin-top: 30px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   display: table !important;
   margin-left: auto;
   margin-right: auto;
 }
 .pagination li {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 .pagination li:last-child a,
 .pagination li:first-child a {
@@ -2374,37 +2375,40 @@ svg {
   color: #6a6c6f;
 }
 .productboxelement .producttabs .contenttabs .greentable .costgrid {
-  display: grid;
+  display: flex;
+  justify-content: center;
   grid-template-columns: 10px 1fr;
   column-gap: 5px;
 }
 @media (max-width: 1200px) {
   .productboxelement .producttabs .contenttabs .greentable .costgrid {
-    justify-content: end;
+    justify-content: flex-end;
     grid-template-columns: 10px 100px;
   }
 }
 .productboxelement .producttabs .contenttabs .greentable .inpupercent {
-  display: grid;
+  display: flex;
+  justify-content: center;
   grid-template-columns: 1fr 10px;
   column-gap: 5px;
 }
 @media (max-width: 1200px) {
   .productboxelement .producttabs .contenttabs .greentable .inpupercent {
-    justify-items: end;
+    justify-content: flex-end;
   }
 }
 .productboxelement .producttabs .contenttabs .greentable .inpupercent .percent {
   font-weight: 700;
 }
 .productboxelement .producttabs .contenttabs .greentable .inputprice {
-  display: grid;
+  display: flex;
+  justify-content: center;
   grid-template-columns: 10px 1fr;
   column-gap: 5px;
 }
 @media (max-width: 1200px) {
   .productboxelement .producttabs .contenttabs .greentable .inputprice {
-    justify-content: right;
+    justify-content: flex-end;
     grid-template-columns: 10px 100px;
   }
 }
@@ -2497,10 +2501,19 @@ svg {
   .headerorders .paymentstatus {
     grid-column: span 2;
     display: flex;
-}
-.headerorders .orderstate {
+  }
+  .headerorders .orderstate {
     grid-column: span 2;
     display: flex;
+  }
+  .headerorders .ordernumber {
+    grid-column: span 2;
+    display: flex;
+  }
+  .headerorders .merchantname {
+    grid-column: span 1;
+    display: flex;
+    padding-top: 25px;
   }
 }
 @media (max-width: 1100px) {
@@ -2585,7 +2598,7 @@ svg {
   letter-spacing: 2px;
   padding-left: 22px;
 }
-.headerorders .paymentlabel, .headerorders .orderlabel {
+.headerorders .paymentlabel, .headerorders .orderlabel, .headerorders .ordernumberlabel, .headerorders .merchantlabel {
   font-size: 19px;
   font-weight: 700;
   color: #6a6c6f;
@@ -2655,6 +2668,7 @@ svg {
 }
 .headerorders div {
   padding-top: 25px;
+  text-align: center;
 }
 .headerorders .dates {
   padding-top: 0px;
@@ -3652,6 +3666,9 @@ ul.subcategories-content li.hide {
 }
 .screen-settings .inputs2 label {
   display: none;
+}
+.screen-settings .inputs2 input {
+  text-align: center;
 }
 .screen-settings .bgVC {
   color: #fff;

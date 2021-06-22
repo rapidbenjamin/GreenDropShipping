@@ -127,7 +127,7 @@
                                         Stock: {{ $pr->stock }}
                                     </p>
                                     <p>
-                                        Cost: {{ $pr->price }}
+                                        Cost: ${{ $pr->price }}
                                     </p>
                                     <p>
                                         Profit: {{ $pr->profit }}%
@@ -162,7 +162,7 @@
             <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
         </li>
 
-        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1/{{ceil($total_count/10)}}</span></li>
+        <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
 
         <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
             <span class="page-link" aria-hidden="true">›</span>
@@ -290,7 +290,7 @@
     });
     $('#product_data').on('click', '.btn-mp-delete', function() {
         $('#modal-body').html(`<div style="display:flex;">
-                <img src="${$(this).data('img')}"/>
+                <img style="width:75px; height:75px;" src="${$(this).data('img')}"/>
                 <div>
                     <h5>${$(this).data('name')}</h5>
                     <h5 style="text-align:center" class="mt-3">${$(this).data('sku')}</h5>

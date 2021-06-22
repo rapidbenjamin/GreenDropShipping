@@ -57,14 +57,25 @@ class AjaxController extends Controller
         }
 
         if ($parameters['action'] == 'add_import_list') {
-            $product = ImportList::where('id_customer', Auth::User()->id)->where('id_product', $parameters['id_product'])->first();
-            if ($product == null) {
-                $row = new ImportList;
-                $row->id_customer = Auth::user()->id;
-                $row->id_product = $parameters['id_product'];
-                $row->save();
+            $product = Products::where('sku', $parameters['sku'])->first();
+            if ($product != null) {
+                $import_product = ImportList::where('id_customer', Auth::User()->id)
+                    ->where('id_product', $product->id)->first();
+                if ($import_product == null) {
+                    $row = new ImportList;
+                    $row->id_customer = Auth::user()->id;
+                    $row->id_product = $product->id;
+                    $row->save();
+                }
+                return json_encode([
+                    'result' => true,
+                    'sku' => $parameters['sku']
+                ]);
+            } else {
+                return json_encode([
+                    'result' => false
+                ]);
             }
-            return json_encode($parameters['id_product']);
         }
 
         if ($parameters['action'] == 'delete_import_list') {
@@ -107,9 +118,13 @@ class AjaxController extends Controller
             $search = new SearchController;
             foreach ($prods as $product) {
                 $product['brand'] = $search->getAttributeByCode($product, 'brand');
-                if ($product->images != null && count(json_decode($product->images)) > 0)
+                if ($product->images != null && count(json_decode($product->images)) > 0) {
                     $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product->images)[0]->file;
-                $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
+                    $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
+                } else {
+                    $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37cno_selection';
+                    $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
+                }
             }
             return json_encode([
                 'prods' => $prods,
@@ -135,6 +150,9 @@ class AjaxController extends Controller
                 if ($product['images'] != null && count(json_decode($product['images'])) > 0) {
                     $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
                     $product['delete_image_url'] = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product['images'])[0]->file;
+                } else {
+                    $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
+                    $product['delete_image_url'] = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37cno_selection';
                 }
 
                 $search = new SearchController;
@@ -166,71 +184,66 @@ class AjaxController extends Controller
                 'page_number' => $page_number
             ]);
         }
-
-        if ($parameters['action'] == 'migration') {
-            $page_size = $parameters['page_size'];
-            $page_number = $parameters['page_number'];
-            $products = ShopifyAdminApi::getProducts(Auth::User());
-            $location_id = 0;
-            if (count($products['body']['products'])) {
-                $location_id = ShopifyAdminApi::getItemLocationId(Auth::User(), $products['body']['products'][0]['variants'][0]['inventory_item_id']);
-            }
+        if ($parameters['action'] == 'migration-count') {
+            $count = ShopifyAdminApi::countProducts(Auth::user());
             return json_encode([
-                'products' => count($products['body']['products']),
-                'location_id' => $location_id['body']['inventory_levels'][0]['location_id'],
+                'action' => 'migration',
+                'total_count' => $count['body']['count'],
+                'index' => 0,
+                'location_id' => 0,
+                'count' => 0
             ]);
         }
-
-        if ($parameters['action'] == 'migrating-products') {
-            $products = ShopifyAdminApi::getProducts(Auth::User());
-            $index = $parameters['index'];
-            $location_id = $parameters['location_id'];
-            $product = $products['body']['products'][$index];
-            if (substr($product['variants'][0]['sku'], 0, 2) == 'KH') {
-                $row = [
-                    'sku' => $product['variants'][0]['sku'],
-                    'price' => $product['variants'][0]['price'],
-                    'id_shopify' => $product['id'],
-                    'id_variant_shopify' => $product['variants'][0]['id'],
-                    'inventory_item_id_shopify' => $product['variants'][0]['inventory_item_id'],
-                    'location_id_shopify' => $location_id,
-                    'user_id' => Auth::User()->id,
-                ];
-                $mp = Products::where('sku', $row['sku'])->first();
-                if ($mp == null) {
-                    $row['payload'] = json_encode([
-                        'name' => $product['title'],
-                        'image_url' => $product['image']['src']
-                    ]);
-                    $row['type'] = 'delete';
-                } else {
-                    $cost = Products::where('sku', $row['sku'])->pluck('price')->first();
-                    $row['payload'] = json_encode([
-                        'cost' => $cost,
-                        'profit' => ($product['variants'][0]['price'] - $cost) / $cost * 100,
-                        'name' => $product['title'],
-                        'image_url' => $product['image']['src']
-                    ]);
-                    $row['type'] = 'migration';
-                }
-                DB::table('temp_migrate_products')->insert($row);
+        
+        if ($parameters['action'] == 'migration') {
+            $rows = [];
+            $products = ShopifyAdminApi::getProducts(Auth::User(), $parameters['index']);
+            if ($parameters['index']==0 && count($products['body']['products'])) {
+                $location_id = ShopifyAdminApi::getItemLocationId(Auth::User(), $products['body']['products'][0]['variants'][0]['inventory_item_id']);
+                $parameters['location_id'] = $location_id['body']['inventory_levels'][0]['location_id'];
             }
-            if ($parameters['index'] == count($products['body']['products']) - 1) {
-                $mig_products = DB::table('temp_migrate_products')->where('user_id', Auth::User()->id);
-                $total_count = DB::table('temp_migrate_products')->count();
-                $mig_products = DB::table('temp_migrate_products')->skip(0)->take(10)->get();
+            $parameters['index'] = $products['body']['products'][count($products['body']['products'])-1]['id'];
+            foreach ($products['body']['products'] as $product) {
+                if (substr($product['variants'][0]['sku'], 0, 2) == 'KH') {
+                    $rows[] = [
+                        'sku' => $product['variants'][0]['sku'],
+                        'price' => $product['variants'][0]['price'],
+                        'id_shopify' => $product['id'],
+                        'id_variant_shopify' => $product['variants'][0]['id'],
+                        'inventory_item_id_shopify' => $product['variants'][0]['inventory_item_id'],
+                        'location_id_shopify' => $parameters['location_id'],
+                        'user_id' => Auth::User()->id,
+                        'payload' => json_encode([
+                            'name' => $product['title'],
+                            'image_url' => $product['image'] != null ? $product['image']['src'] : ''        
+                        ]),
+                        'type' => Products::where('sku', $product['variants'][0]['sku'])->first() == null ? 'delete' : 'migration'
+                    ];
+                }
+            }
+            DB::table('temp_migrate_products')->insert($rows);
+            $parameters['count'] = $parameters['count'] + count($products['body']['products']);
+            if ($parameters['count'] == $parameters['total_count']) {
+                $mig_products = DB::table('temp_migrate_products')
+                    ->select('temp_migrate_products.*', 'products.price as cost')
+                    ->join('products', 'temp_migrate_products.sku', '=', 'products.sku')
+                    ->where('user_id', Auth::user()->id);
+                $total_count = $mig_products->count();
+                $mig_products = $mig_products->skip(0)->take(10)->get();
                 return json_encode([
-                    'index' => $parameters['index'],
-                    'mig_products' => [
-                        'products' => $mig_products,
-                    ],
+                    'mig_products' => $mig_products,
                     'total_count' => $total_count,
-                    'page_size' => 10,
-                    'page_number' => 1
+                    'count' => $parameters['count'],
+                    'page_number' => 1,
+                    'page_size' => 10
                 ]);
             } else {
                 return json_encode([
-                    'index' => $parameters['index']
+                    'action' => 'migration',
+                    'index' => $parameters['index'],
+                    'location_id' => $parameters['location_id'],
+                    'total_count' => $parameters['total_count'],
+                    'count' => $parameters['count'],
                 ]);
             }
         }
@@ -238,13 +251,14 @@ class AjaxController extends Controller
         if ($parameters['action'] == 'migrate-products') {
             $page_number = $parameters['page_number'];
             $page_size = $parameters['page_size'];
-            $mig_products = DB::table('temp_migrate_products')->where('user_id', Auth::User()->id);
+            $mig_products = DB::table('temp_migrate_products')
+                ->select('temp_migrate_products.*', 'products.price as cost')
+                ->join('products', 'temp_migrate_products.sku', '=', 'products.sku')
+                ->where('user_id', Auth::user()->id);
             $total_count = $mig_products->count();
             $mig_products = $mig_products->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             return json_encode([
-                'mig_products' => [
-                    'products' => $mig_products
-                ],
+                'mig_products' => $mig_products,
                 'page_size' => $page_size,
                 'page_number' => $page_number,
                 'total_count' => $total_count
@@ -252,16 +266,26 @@ class AjaxController extends Controller
         }
 
         if ($parameters['action'] == 'set-default-profit') {
-            $mig_skus = DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)->where('type', 'migration')->pluck('sku');
+            $mig_skus = DB::table('temp_migrate_products')
+                ->where('user_id', Auth::User()->id)
+                ->where('type', 'migration')->pluck('sku');
             foreach ($mig_skus as $sku) {
-                $payload = DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)->where('sku', $sku)->pluck('payload')->first();
-                $payload = json_decode($payload);
-                $payload->profit = Settings::where('id_merchant', Auth::user()->id)->first()->set8;
-                DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)->where('sku', $sku)->update(['payload' => json_encode($payload), 'price' => $payload->cost * (100 + $payload->profit) / 100]);
+                $cost = DB::table('products')->where('sku', $sku)->pluck('price')->first();
+                $profit = Settings::where('id_merchant', Auth::user()->id)->first()->set8;
+                DB::table('temp_migrate_products')
+                    ->where('user_id', Auth::User()->id)
+                    ->where('sku', $sku)
+                    ->update(['price' => $cost * (100 + $profit) / 100]);
             }
-            return json_encode([
-                'result' => true
-            ]);
+            return json_encode(['result' => true]);
+        }
+        
+        if ($parameters['action'] == 'change-profit') {
+            $cost = DB::table('products')->where('sku', $parameters['sku'])->pluck('price')->first();
+            DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)
+                ->where('sku', $parameters['sku'])
+                ->update(['price' => $cost * (100 + $parameters['profit']) / 100]);
+            return json_encode(['result' => true]);
         }
 
         if ($parameters['action'] == 'product_collection') {
@@ -381,17 +405,22 @@ class AjaxController extends Controller
     public function import(Request $request)
     {
         $rows = [];
-        foreach ($request->product_ids as $product_id) {
-            $product = ImportList::where('id_customer', Auth::User()->id)->where('id_product', $product_id)->first();
-            if ($product == null) {
-                $rows[] = [
-                    'id_customer' => Auth::User()->id,
-                    'id_product' => $product_id
-                ];
+        $skus = [];
+        foreach ($request->skus as $sku) {
+            $product = Products::where('sku', $sku)->first();
+            if ($product != null) {
+                $import_product = ImportList::where('id_customer', Auth::User()->id)->where('id_product', $product->id)->first();
+                if ($import_product == null) {
+                    $rows[] = [
+                        'id_customer' => Auth::User()->id,
+                        'id_product' => $product->id
+                    ];
+                    $skus[] = $sku;
+                }
             }
         }
         DB::table('import_list')->insert($rows);
-        return json_encode($request->product_ids);
+        return json_encode($skus);
     }
 
     public function saveSettings(Request $request)
