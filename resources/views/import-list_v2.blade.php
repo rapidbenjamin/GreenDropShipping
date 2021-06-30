@@ -53,10 +53,10 @@
             <div class="checksend" style="float: left; margin-right: 20px; margin-top: 10px;">
                 <input title="Select all products" type="checkbox" id="check-all">
             </div>
-            <div style="display: flex;">
-                <button class="btn-import-list-delete-all" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                <button class="btn-import-list-send-all" id="btn-import-list-send-all">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
-                <button class="btn-import-list-send-all" id="btn-import-list-sending" style="display: none;">Sending...<img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+            <div class="btn-import-actions">
+                <button class="btn-import-list-delete-all mx-1 my-1" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                <button class="btn-import-list-send-all mx-1 my-1" id="btn-import-list-send-all">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                <button class="btn-import-list-send-all mx-1 my-1" id="btn-import-list-sending" style="display: none;">Sending...<img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
             </div>
             <div class="pagesize">
                 <span>Show</span>
@@ -197,7 +197,7 @@
                                         </td>
                                         <td data-label="COST" class="w100">
                                             <div class="costgrid">
-                                                $<input type="text" style="width: 50%; text-align:center;" id="cost{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" value="{{$ap->price}}" disabled="disabled">
+                                                $<span id="cost{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}">{{$ap->price}}</span>
                                             </div>
                                         </td>
                                         <td data-label="PROFIT (%) " class="w100">
@@ -312,7 +312,7 @@
                             name: $(`#name${productId}`).val(),
                             weight: $(`#weight${productId}`).text().trim(),
                             price: $(`#price${productId}`).val(),
-                            cost: $(`#cost${productId}`).val(),
+                            cost: $(`#cost${productId}`).text(),
                             description: CKEDITOR.instances[`description${productId}`].getData(),
                             product_type: $(`#types${productId}`).val(),
                             tags: $(`#tags${productId}`).val().trim(),
@@ -502,7 +502,7 @@
                 name: $(`#name${productId}`).val(),
                 weight: $(`#weight${productId}`).text().trim(),
                 price: $(`#price${productId}`).val(),
-                cost: $(`#cost${productId}`).val(),
+                cost: $(`#cost${productId}`).text(),
                 description: CKEDITOR.instances[`description${productId}`].getData(),
                 product_type: $(`#types${productId}`).val().trim(),
                 tags: $(`#tags${productId}`).val().trim(),
@@ -541,7 +541,7 @@
     });
     $('#import-products').on('change', '.box-profit', function() {
         var id_product = $(this).data('id');
-        var cost = $(`#cost${id_product}`).val();
+        var cost = $(`#cost${id_product}`).text();
         var profit = $(this).val();
         if (profit > 0) {
             var value = parseFloat((cost * (100 + profit * 1)) / 100).toFixed(2);
@@ -552,7 +552,7 @@
     });
     $('#import-products').on('change', '.box-price', function() {
         var id_product = $(this).data('id');
-        var cost = $(`#cost${id_product}`).val();
+        var cost = $(`#cost${id_product}`).text();
         var precio = $(this).val();
         var value = 0;
         if (precio > 0) {

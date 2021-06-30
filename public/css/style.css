@@ -1981,13 +1981,11 @@ svg {
   box-sizing: border-box;
   border-radius: 10px;
   cursor: pointer;
-  flex: 0 1 224px;
   display: flex;
   justify-content: center;
 }
 .sendtoshopify .btn-import-list-send-all, .migrate-products .migration, .migrate-products .allconfirmbutton, .migrate-products .confirmbutton {
   background-color: #44b955;
-  margin-left: 10px;
 }
 .migrate-products .profit {
   background-color: #44b955;
@@ -2015,6 +2013,14 @@ svg {
 @media (max-width: 600px) {
   .sendtoshopify button {
     font-size: 15px;
+  }
+}
+.btn-import-actions {
+  display: flex;
+}
+@media (max-width: 500px) {
+  .btn-import-actions {
+    flex-direction: column;
   }
 }
 .productboxelement {
@@ -2140,6 +2146,34 @@ svg {
   cursor: pointer;
   align-items: center;
 }
+@media (max-width: 500px) {
+  .productboxelement .producttabs .headertabs .buttons {
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+}
+@media (min-width: 800px) {
+  .productboxelement .producttabs .headertabs .buttons {
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+}
+@media (min-width: 860px) {
+  .productboxelement .producttabs .headertabs .buttons {
+    flex-direction: row;
+  }
+}
+@media (min-width: 1220px) {
+  .productboxelement .producttabs .headertabs .buttons {
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+}
+@media (min-width: 1510px) {
+  .productboxelement .producttabs .headertabs .buttons {
+    flex-direction: row;
+  }
+}
 @media (max-width: 1220px) {
   .productboxelement .producttabs .headertabs .buttons {
     order: 2;
@@ -2151,7 +2185,7 @@ svg {
 @media (max-width: 440px) {
   .productboxelement .producttabs .headertabs .buttons {
     grid-template-columns: 1fr;
-    grid-row-gap: 23px;
+    /* grid-row-gap: 23px; */
   }
 }
 .productboxelement .producttabs .headertabs .buttons .sendto {
@@ -2169,9 +2203,8 @@ svg {
   padding-right: 20px;
   text-decoration: none;
   border-radius: 10px;
-  margin: 5px 0;
+  /* margin: 5px 0; */
   cursor: pointer;
-  flex: 0 1 224px;
   display: flex;
   justify-content: center;
   min-height: 43px;
@@ -2212,10 +2245,47 @@ svg {
   text-decoration: none;
   border-radius: 10px;
   cursor: pointer;
-  flex: 0 1 224px;
   display: flex;
   justify-content: center;
   min-height: 43px;
+}
+@media (max-width: 500px) {
+  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+}
+@media (min-width: 500px) {
+  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+    flex: 0 1 224px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+}
+@media (min-width: 800px) {
+  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .migrate-products button {
+    width: 100%;
+    flex: 0 1 0px;
+  }
+}
+@media (min-width: 860px) {
+  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+    flex: 0 1 224px;
+  }
+}
+@media (min-width: 1220px) {
+  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .migrate-products button {
+    flex: 0 1 0px;
+    width: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+}
+@media (min-width: 1510px) {
+  .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
+    flex: 0 1 224px;
+  }
 }
 
 .productboxelement .producttabs .headertabs .buttons .delete img {

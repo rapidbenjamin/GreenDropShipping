@@ -559,7 +559,7 @@ angular
             if (data.answerId) {
                 if (data.is_remove)
                     if (categoryids.length == 1)
-                        data.answerIds = celConfig.Settings.CategoryIds.concat(data.answerIds, temp);
+                        data.answerIds = categoryIds.concat(data.answerIds, temp);
                 else {
                     if (categoryids.length == 0 && categoryIds.indexOf(data.answerId * 1) < 0)
                         data.answerIds = categoryIds.concat(data.answerIds, temp);

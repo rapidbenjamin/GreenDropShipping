@@ -301,7 +301,7 @@ $(document).ready(function () {
                             </p>
 
                             <div class="pbuttons">
-                                <button class="edit edit-product" id="edit-${product.id_shopify}" data-shopifyid="${product.id_shopify}">Edit on Shopify</button>
+                                <button class="edit edit-product" id="edit-${product.id_shopify}" data-shopifyid="${product.id_shopify}">Edit in Shopify</button>
                             </div>
                         </div>
                     </div>
@@ -457,7 +457,7 @@ $(document).ready(function () {
                                         </td>
                                         <td data-label="COST" class="w100">
                                             <div class="costgrid">
-                                                $<input type="text" style="width: 50%; text-align:center;" id="cost${product.id_import_list}" data-id="${product.id_import_list}" value="${parseFloat(product.price).toFixed(2)}" disabled="disabled">
+                                                $<span id="cost${product.id_import_list}" data-id="${product.id_import_list}">${parseFloat(product.price).toFixed(2)}</span>
                                             </div>
                                         </td>
                                         <td data-label="PROFIT (%) " class="w100">

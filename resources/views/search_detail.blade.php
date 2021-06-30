@@ -61,7 +61,7 @@
                     @elseif($action == 'added')
                     <a href="{{url('/import-list')}}"><button class="addtoimport edit-on-import-list-{{ $product->sku }}">Added on Import List</button></a>
                     @elseif($action == 'my-product')
-                    <a href="http://{{Auth::user()->shopify_url}}/admin/products/{{$product->id_shopify}}" target="_blank"><button class="addtoimport btn_import_list_detail edit-on-shopify-{{ $product->id_shopify }}">Edit on Shopify<img class="button-icon" src="/img/edit.png" alt="Pencil in Square - Edit Icon"></button></a>
+                    <a href="http://{{Auth::user()->shopify_url}}/admin/products/{{$product->id_shopify}}" target="_blank"><button class="addtoimport btn_import_list_detail edit-on-shopify-{{ $product->id_shopify }}">Edit in Shopify<img class="button-icon" src="/img/edit.png" alt="Pencil in Square - Edit Icon"></button></a>
                     @endif
                 </div>
             </div>

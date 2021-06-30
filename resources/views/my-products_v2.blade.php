@@ -137,7 +137,7 @@
                                     </p>
 
                                     <div class="pbuttons">
-                                        <button class="edit edit-product" id="edit-{{$pr->id_shopify}}" data-shopifyid="{{ $pr->id_shopify }}">Edit on Shopify</button>
+                                        <button class="edit edit-product" id="edit-{{$pr->id_shopify}}" data-shopifyid="{{ $pr->id_shopify }}">Edit in Shopify</button>
                                     </div>
                                 </div>
                             </div>

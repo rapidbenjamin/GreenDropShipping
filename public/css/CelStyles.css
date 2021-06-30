@@ -1624,8 +1624,8 @@
 }
 
 @media (min-width: 1366px) {
-    #celUITDiv .products-list>li .cuit_item_container .product-shop {
-        margin-right: 30px;
+    #celUITDiv .products-list>li .cuit_item_container .add-to-cart {
+        margin-left: 30px;
     }
 }
 
