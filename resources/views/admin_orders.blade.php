@@ -131,7 +131,7 @@
                                 <input type="checkbox">
                             </td>
                             <td data-label="ORDER #">
-                                {{$ol->order_number_shopify}}
+                                {{$ol->magento_order_id}}
                             </td>
                             <td data-label="DATE">
                                 {{$ol->created_at}}
@@ -149,7 +149,7 @@
                                 <div class="buttonge" style="background-color: {{$ol->color2}}">{{$ol->status2}}</div>
                             </td>
                             <td>
-                                <a href="https://app.greendropship.com/admin/orders/{{$ol->id}}">
+                                <a href="/admin/orders/{{$ol->id}}">
                                     <button class="view">View</button>
                                 </a>
                             </td>
