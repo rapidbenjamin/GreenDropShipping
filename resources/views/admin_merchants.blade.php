@@ -19,9 +19,9 @@
                 </div>
             </div>
 
-            <div class="orders">
-                <h5>Search </h5>
-                <table class="tableorders mb-5" cellspacing="0">
+            <div class="merchants">
+                <h5 class="font-weight-bold">Search </h5>
+                <table class="searchtable tableorders mb-5" cellspacing="0">
                     <thead>
                         <tr>
                             <th>
@@ -128,23 +128,23 @@
                     </tbody>
                 </table>
             </div>
+            <!-- pagination -->
+            <div class="pagination">
+                <ul class="pagination" role="navigation">
+                    <li class="page-item" id="prev">
+                        <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
+                    </li>
+    
+                    <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
+    
+                    <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
+                        <span class="page-link" aria-hidden="true">›</span>
+                    </li>
+                </ul>
+                <input type="text" id="total_count" value="{{$total_count}}" hidden>
+            </div>
+            <!-- /pagination -->
         </div>
-        <!-- pagination -->
-        <div class="pagination">
-            <ul class="pagination" role="navigation">
-                <li class="page-item" id="prev">
-                    <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
-                </li>
-
-                <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
-
-                <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
-                    <span class="page-link" aria-hidden="true">›</span>
-                </li>
-            </ul>
-            <input type="text" id="total_count" value="{{$total_count}}" hidden>
-        </div>
-        <!-- /pagination -->
     </div>
 </div>
 <input type="text" id="user_id" hidden>

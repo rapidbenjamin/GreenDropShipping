@@ -712,7 +712,7 @@ svg {
 }
 .wrapcontent .maincontent .wrapinsidecontent .twocols {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr;
   column-gap: 40px;
 }
 @media (max-width: 1240px) {
@@ -944,9 +944,9 @@ svg {
   align-self: start;
 }
 .leftmenu2 .currenuser {
-  margin-top: 10px;
+  padding-top: 10px;
   display: grid;
-  grid-template-columns: minmax(auto, 50px) 1fr;
+  grid-template-columns: minmax(30px, 50px) 1fr;
   column-gap: 15px;
   align-items: center;
   justify-content: center;
@@ -1368,7 +1368,7 @@ svg {
 @media (max-width: 800px) {
   .pagination li:last-child,
   .pagination li:first-child {
-    width: 100%;
+    /* width: 100%; */
     text-align: center;
   }
 }
@@ -1686,6 +1686,7 @@ svg {
   letter-spacing: normal;
   text-align: center;
   color: #6a6c6f;
+  min-height: 38px;
 }
 .greentable tbody tr td.pimage {
   width: 97px;
@@ -2604,6 +2605,11 @@ svg {
   .headerorders .searchbtn {
     grid-column: span 3;
   }
+  .headerorders .merchantname {
+    grid-column: span 1;
+    display: flex;
+    padding-top: 25px;
+  }
 }
 @media (max-width: 900px) {
   .headerorders {
@@ -2621,6 +2627,11 @@ svg {
   }
   .headerorders .searchbtn {
     grid-column: span 1;
+  }
+  .headerorders .merchantname {
+    grid-column: span 2;
+    display: flex;
+    padding-top: 25px;
   }
 }
 .headerorders .date {
@@ -2887,6 +2898,10 @@ svg {
     border-bottom: 1px solid #d7e0f1;
     border-left: none;
   }
+  .merchants .searchtable thead tr {
+    display: flex;
+    flex-direction: column;
+  }
 }
 .tableorders .outstanding {
   background-color: #ffed4a;
@@ -2899,6 +2914,10 @@ svg {
 @media (max-width: 900px) {
   .tableorders .outstanding {
     font-size: 12px;
+  }
+  .users .searchtable thead tr {
+    display: flex;
+    flex-direction: column;
   }
 }
 .tableorders .cancel {

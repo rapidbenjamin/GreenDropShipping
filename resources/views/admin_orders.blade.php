@@ -85,7 +85,7 @@
                     <thead>
                         <tr>
                             <th>
-                                <input type="checkbox">
+                                <input type="checkbox" id="check-orders">
                             </th>
                             <th>
                                 ORDER #
@@ -128,7 +128,7 @@
                         @endif
                         <tr class="orderrow">
                             <td class="check">
-                                <input type="checkbox">
+                                <input type="checkbox" class="checkbox" data-id="{{$ol->id}}">
                             </td>
                             <td data-label="ORDER #">
                                 {{$ol->magento_order_id}}
@@ -158,23 +158,23 @@
                     </tbody>
                 </table>
             </div>
+            <!-- pagination -->
+            <div class="pagination">
+                <ul class="pagination" role="navigation">
+                    <li class="page-item" id="prev">
+                        <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
+                    </li>
+    
+                    <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
+    
+                    <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
+                        <span class="page-link" aria-hidden="true">›</span>
+                    </li>
+                </ul>
+                <input type="text" id="total_count" value="{{$total_count}}" hidden>
+            </div>
+            <!-- /pagination -->
         </div>
-        <!-- pagination -->
-        <div class="pagination">
-            <ul class="pagination" role="navigation">
-                <li class="page-item" id="prev">
-                    <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
-                </li>
-
-                <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
-
-                <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
-                    <span class="page-link" aria-hidden="true">›</span>
-                </li>
-            </ul>
-            <input type="text" id="total_count" value="{{$total_count}}" hidden>
-        </div>
-        <!-- /pagination -->
     </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
@@ -184,13 +184,14 @@
         $('#total_count').text("{{$total_count}}");
 
         $('#idOrder').keypress(function(e) {
-            if ($('#idOrder').val().length >= 2) {
+            if ($('#idOrder').val().trim().length >= 2) {
                 $.getJSON(ajax_link, {
-                    action: 'admin-order-number'
+                    action: 'admin-order-number',
+                    number: $('#idOrder').val().trim()
                 }, function(data) {
                     var str = '<div id="number_data">';
                     data.numbers.forEach(number => {
-                        str += `<option value="${number.substr(1)}">`;
+                        str += `<option value="${number}">`;
                     });
                     str += '</div>';
                     $('#number_data').remove();
@@ -200,9 +201,10 @@
         })
 
         $('#merchant').keypress(function(e) {
-            if ($('#merchant').val().length >= 2) {
+            if ($('#merchant').val().trim().length >= 2) {
                 $.getJSON(ajax_link, {
-                    action: 'admin-order-merchant'
+                    action: 'admin-order-merchant',
+                    name: $('#merchant').val().trim()
                 }, function(data) {
                     var str = '<div id="merchant_data">';
                     data.names.forEach(name => {
@@ -215,8 +217,17 @@
             } else $('#merchant_data').remove();
         })
 
+        $('#check-orders').click(function (event) {
+            if (event.target.checked) $('.checkbox').prop('checked', true);
+            else $('.checkbox').prop('checked', false);
+        })
+
         $('.exporsel').click(function() {
-            window.location.href = encodeURI('{{url("/admin/orders/exports")}}');
+            var ids = [];
+            $("input.checkbox:checked").each(function (index, ele) {
+                ids.push($(ele).data('id'));
+            });
+            window.location.href = `/admin/orders/exports?ids=${JSON.stringify(ids)}`;
 
         });
     });

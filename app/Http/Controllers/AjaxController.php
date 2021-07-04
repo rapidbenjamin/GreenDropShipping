@@ -14,6 +14,7 @@ use App\Order;
 use App\User;
 use App\Products;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class AjaxController extends Controller
 {
@@ -95,16 +96,84 @@ class AjaxController extends Controller
             return json_encode(1);
         }
 
+        if ($parameters['action'] == 'update-user') {
+            $user = User::where('id', '!=', Auth::user()->id)
+                ->where('email', $parameters['email'])->first();
+            if ($user == null) {
+                User::find(Auth::user()->id)->update([
+                    'name' => $parameters['name'],
+                    'email' => $parameters['email'],
+                    'password' => Hash::make($parameters['password'])
+                ]);
+                return json_encode(['result' => true]);
+            } else {
+                return json_encode(['result' => false]);
+            }
+        }
 
-        if ($parameters['action'] == 'save-user') {
-            $row = new User;
-            $row->name = $parameters['user'];
-            $row->email = $parameters['email'];
-            $row->password = $parameters['password'];
-            $row->role = 'admin';
-            $row->save();
+        if ($parameters['action'] == 'create-user') {
+            $user = User::where('email', $parameters['email'])->first();
+            if ($user == null) {
+                $row = new User;
+                $row->name = $parameters['name'];
+                $row->email = $parameters['email'];
+                $row->password = Hash::make($parameters['password']);
+                $row->role = 'admin';
+                $row->save();
+                return json_encode($row);
+            } else {
+                return json_encode(['result' => false]);
+            }
+        }
 
-            return json_encode(1);
+        if ($parameters['action'] == 'admin-users') {
+            $page_number = $parameters['page_number'];
+            $page_size = $parameters['page_size'];
+            $users = User::where('role', 'admin');
+            if ($parameters['name'] != '')
+                $users = $users->where('name', 'like', '%' . $parameters['name'] . '%');
+            if ($parameters['email'] != '')
+                $users = $users->where('email', 'like', '%' . $parameters['email'] . '%');
+            if ($parameters['active'] != '')
+                $users = $users->where('active', $parameters['active']);
+            $total_count = $users->count();
+            $users = $users->orderBy('users.id', 'asc')
+                ->skip(($page_number - 1) * $page_size)
+                ->take($page_size)->get();
+            return json_encode([
+                'users' => $users,
+                'total_count' => $total_count,
+                'page_size' => $page_size,
+                'page_number' => $page_number
+            ]);
+        }
+
+        if ($parameters['action'] == 'admin-user-name') {
+            $names = DB::table('users')
+                ->where('role', 'admin')
+                ->where('name', 'like', '%' . $parameters['name'] . '%')
+                ->orderBy('name')->pluck('name');
+            return json_encode(['names' => $names]);
+        }
+
+        if ($parameters['action'] == 'admin-user-email') {
+            $emails = DB::table('users')
+                ->where('role', 'admin')
+                ->where('email', 'like', '%' . $parameters['email'] . '%')
+                ->orderBy('email')->pluck('email');
+            return json_encode(['emails' => $emails]);
+        }
+
+        if ($parameters['action'] == 'admin-change-password') {
+            $old_password = json_decode($parameters['old_password']);
+            $new_password = json_decode($parameters['new_password']);
+            $password = User::find(Auth::user()->id)->password;
+            if (Hash::check($old_password, $password)) {
+                User::find(Auth::user()->id)->update(['password' => Hash::make($new_password)]);
+                return json_encode(['result' => true]);
+            } else {
+                return json_encode(['result' => false]);
+            }
         }
 
         if ($parameters['action'] == 'my-products') {
@@ -184,6 +253,7 @@ class AjaxController extends Controller
                 'page_number' => $page_number
             ]);
         }
+
         if ($parameters['action'] == 'migration-count') {
             $count = ShopifyAdminApi::countProducts(Auth::user());
             return json_encode([
@@ -194,15 +264,15 @@ class AjaxController extends Controller
                 'count' => 0
             ]);
         }
-        
+
         if ($parameters['action'] == 'migration') {
             $rows = [];
             $products = ShopifyAdminApi::getProducts(Auth::User(), $parameters['index']);
-            if ($parameters['index']==0 && count($products['body']['products'])) {
+            if ($parameters['index'] == 0 && count($products['body']['products'])) {
                 $location_id = ShopifyAdminApi::getItemLocationId(Auth::User(), $products['body']['products'][0]['variants'][0]['inventory_item_id']);
                 $parameters['location_id'] = $location_id['body']['inventory_levels'][0]['location_id'];
             }
-            $parameters['index'] = $products['body']['products'][count($products['body']['products'])-1]['id'];
+            $parameters['index'] = $products['body']['products'][count($products['body']['products']) - 1]['id'];
             foreach ($products['body']['products'] as $product) {
                 if (substr($product['variants'][0]['sku'], 0, 2) == 'KH') {
                     $rows[] = [
@@ -215,7 +285,7 @@ class AjaxController extends Controller
                         'user_id' => Auth::User()->id,
                         'payload' => json_encode([
                             'name' => $product['title'],
-                            'image_url' => $product['image'] != null ? $product['image']['src'] : ''        
+                            'image_url' => $product['image'] != null ? $product['image']['src'] : ''
                         ]),
                         'type' => Products::where('sku', $product['variants'][0]['sku'])->first() == null ? 'delete' : 'migration'
                     ];
@@ -279,7 +349,7 @@ class AjaxController extends Controller
             }
             return json_encode(['result' => true]);
         }
-        
+
         if ($parameters['action'] == 'change-profit') {
             $cost = DB::table('products')->where('sku', $parameters['sku'])->pluck('price')->first();
             DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)
@@ -304,12 +374,18 @@ class AjaxController extends Controller
         }
 
         if ($parameters['action'] == 'admin-order-number') {
-            $numbers = DB::table('orders')->distinct()->orderBy('order_number_shopify')->pluck('order_number_shopify');
+            $numbers = DB::table('orders')->distinct()
+                ->where('magento_order_id', 'like', '%' . $parameters['number'] . '%')
+                ->orderBy('magento_order_id')
+                ->pluck('magento_order_id');
             return json_encode(['numbers' => $numbers]);
         }
 
         if ($parameters['action'] == 'admin-order-merchant') {
-            $names = DB::table('users')->orderBy('name')->pluck('name');
+            $names = DB::table('users')
+                ->where('name', 'like', '%' . $parameters['name'] . '%')
+                ->orderBy('name')
+                ->pluck('name');
             return json_encode(['names' => $names]);
         }
 
@@ -322,7 +398,7 @@ class AjaxController extends Controller
                 ->join('status as st2', 'st2.id', 'orders.fulfillment_status')
                 ->join('users as us', 'us.id', 'orders.id_customer');
             if ($parameters['order_number'] != '')
-                $order_list = $order_list->where('order_number_shopify', '#' . $parameters['order_number']);
+                $order_list = $order_list->where('magento_order_id', 'like', '%' . $parameters['order_number'] . '%');
 
             if ($parameters['from'] != '')
                 $order_list = $order_list->whereDate('orders.created_at', '>=', $parameters['from']);
@@ -387,17 +463,26 @@ class AjaxController extends Controller
         }
 
         if ($parameters['action'] == 'admin-merchant-name') {
-            $names = DB::table('users')->where('role', 'merchant')->orderBy('name')->pluck('name');
+            $names = DB::table('users')
+                ->where('role', 'merchant')
+                ->where('name', 'like', '%' . $parameters['name'] . '%')
+                ->orderBy('name')->pluck('name');
             return json_encode(['names' => $names]);
         }
 
         if ($parameters['action'] == 'admin-merchant-email') {
-            $emails = DB::table('users')->where('role', 'merchant')->orderBy('email')->pluck('email');
+            $emails = DB::table('users')
+                ->where('role', 'merchant')
+                ->where('email', 'like', '%' . $parameters['email'] . '%')
+                ->orderBy('email')->pluck('email');
             return json_encode(['emails' => $emails]);
         }
 
         if ($parameters['action'] == 'admin-merchant-url') {
-            $urls = DB::table('users')->where('role', 'merchant')->orderBy('shopify_url')->pluck('shopify_url');
+            $urls = DB::table('users')
+                ->where('role', 'merchant')
+                ->where('shopify_url', 'like', '%' . $parameters['shopify_url'] . '%')
+                ->orderBy('shopify_url')->pluck('shopify_url');
             return json_encode(['urls' => $urls]);
         }
     }

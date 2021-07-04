@@ -92,7 +92,7 @@
                                                      document.getElementById('logout-form').submit();">
                                         {{ __('Logout') }}
                                     </a>
-
+                                    <input type="text" value="{{Auth::user()->role}}" id="role" hidden>
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                         @csrf
                                     </form>
@@ -107,116 +107,163 @@
     <!--left menu2 -->
     @if(Auth::user())
     <div class="leftmenu2" id="menu">
-
-           <div class="topel">
-              <div class="currenuser">
-                    <div class="avatar">
-                        <img src="/img/user_avatar.png">
+        <div id="merchant-menu" style="display:none;">
+            <div class="topel">
+                <div class="currenuser">
+                        <div class="avatar">
+                            <img src="/img/user_avatar.png">
+                        </div>
+                        <div>
+                            <h3>{{Auth::user()->name}}</h3>
+                            <p><a href="https://{{Auth::user()->shopify_url}}" target="_blank">Go to Shopify Store</a></p>
+                            <p>                                    <a class="dropdown-item" href="{{ route('logout') }}"
+                                        onclick="event.preventDefault();
+                                                        document.getElementById('logout-form').submit();">
+                                            {{ __('Logout') }}
+                                        </a></p>
+                        </div>
                     </div>
-                    <div>
-                        <h3>{{Auth::user()->name}}</h3>
-                        <p><a href="https://{{Auth::user()->shopify_url}}" target="_blank">Go to Shopify Store</a></p>
-                        <p>                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
-                                    </a></p>
-                    </div>
-                </div>
 
-                <ul class="mainmenu">
-                    <li class="active">
-                        <a href="{{ url('/') }}">
-                            <img src="{{ asset('img/dashboard.png') }}" srcset="img/dashboard@2x.png 2x,
-                                 img/dashboard@3x.png 3x">
-                            <p>Dashboard</p>
+                    <ul class="mainmenu">
+                        <li class="active">
+                            <a href="{{ url('/') }}">
+                                <img src="{{ asset('/img/dashboard.png') }}" srcset="/img/dashboard@2x.png 2x,
+                                    /img/dashboard@3x.png 3x">
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        @if(Auth::user()->shopify_url and Auth::user()->active == 1)
+                        <li>
+                            <a href="#">
+                                <img src="{{ asset('/img/mproduct.png') }}" srcset="/img/mproduct@2x.png 2x,
+                                            /img/mproduct@3x.png 3x">
+                                <p>Manage Product</p>
+                            </a>
+
+                            <ul>
+                                <li>
+                                    <a href="{{ url('/search-products') }}">
+                                        Search Products
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ url('/import-list') }}">
+                                        Import List
+                                    </a>
+                                </li>
+                                @can('plan_view-my-products')
+                                <li>
+                                    <a href="{{ url('/my-products') }}">
+                                        My Products
+                                    </a>
+                                </li>
+                                @else
+                                <li data-toggle="modal" data-target="#upgrade-plans-modal">
+                                    <a>
+                                        My Products
+                                    </a>
+                                </li>
+                                @endcan
+                            </ul>
+                        </li>
+                        @can('plan_view-manage-orders')
+                        <li>
+                            <a href="{{ url('/orders') }}">
+                                <img src="{{ asset('/img/manageorder.png') }}" srcset="/img/manageorder@2x.png 2x,
+                                        /img/manageorder@3x.png 3x">
+                                <p>Manage Order</p>
+                            </a>
+
+                        </li>
+                        @else
+                        <li data-toggle="modal" data-target="#upgrade-plans-modal">
+                        <a>
+                                <img src="{{ asset('/img/manageorder.png') }}" srcset="/img/manageorder@2x.png 2x,
+                                        /img/manageorder@3x.png 3x">
+                                <p>Manage Order</p>
                         </a>
-                    </li>
-
-                    @if(Auth::user()->shopify_url and Auth::user()->active == 1)
-                    <li>
-                        <a href="#">
-                            <img src="{{ asset('img/mproduct.png') }}" srcset="img/mproduct@2x.png 2x,
-                                         img/mproduct@3x.png 3x">
-                            <p>Manage Product</p>
-                        </a>
-
-                        <ul>
-                            <li>
-                                <a href="{{ url('/search-products') }}">
-                                    Search Products
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ url('/import-list') }}">
-                                    Import List
-                                </a>
-                            </li>
-                            @can('plan_view-my-products')
-                            <li>
-                                <a href="{{ url('/my-products') }}">
-                                    My Products
-                                </a>
-                            </li>
-                            @else
-                            <li data-toggle="modal" data-target="#upgrade-plans-modal">
-                                <a>
-                                    My Products
-                                </a>
-                            </li>
-                            @endcan
-                        </ul>
-                    </li>
-                    @can('plan_view-manage-orders')
-                    <li>
-                        <a href="{{ url('/orders') }}">
-                            <img src="{{ asset('img/manageorder.png') }}" srcset="img/manageorder@2x.png 2x,
-                                     img/manageorder@3x.png 3x">
-                            <p>Manage Order</p>
-                        </a>
-
-                    </li>
-                    @else
-                    <li data-toggle="modal" data-target="#upgrade-plans-modal">
-                      <a>
-                            <img src="{{ asset('img/manageorder.png') }}" srcset="img/manageorder@2x.png 2x,
-                                     img/manageorder@3x.png 3x">
-                            <p>Manage Order</p>
-                      </a>
-                    </li>
-                    @endcan
-                    @endif
-                </ul>
-           </div>
-
-
-
+                        </li>
+                        @endcan
+                        @endif
+                    </ul>
+            </div>
             <ul class="mainmenu footermenu">
                 <li>
                     <a href="{{ url('/settings') }}">
-                        <img src="{{ asset('img/settings.png') }}" srcset="img/settings@2x.png 2x,
-                                 img/settings@3x.png 3x">
+                        <img src="{{ asset('/img/settings.png') }}" srcset="/img/settings@2x.png 2x,
+                                /img/settings@3x.png 3x">
                         <p>Settings</p>
 
                     </a>
                 </li>
                 <li>
                     <a href="{{ url('/plans') }}">
-                        <img src="{{ asset('img/info.png') }}" srcset="img/info@2x.png 2x,
-                                 img/info@3x.png 3x">
+                        <img src="{{ asset('/img/info.png') }}" srcset="/img/info@2x.png 2x,
+                                /img/info@3x.png 3x">
                         <p>Your Plan</p>
 
                     </a>
                 </li>
                 <li>
                     <a href="http://greendropship.com/knowledge-base" target="_blank">
-                        <img src="{{ asset('img/info.png') }}" srcset="img/info@2x.png 2x,
-                                 img/info@3x.png 3x">
+                        <img src="{{ asset('/img/info.png') }}" srcset="/img/info@2x.png 2x,
+                                /img/info@3x.png 3x">
                         <p>Help</p>
 
                     </a>
                 </li>
             </ul>
+        </div>
+        <div id="admin-menu" class="leftmenu" style="display: none;">
+            <div class="currenuser">
+                <div class="avatar">
+                    <img src="{{ asset('/img/user_avatar.png') }}">
+                </div>
+                <div>
+                    <h3>{{Auth::user()->name}}</h3>
+                    <p><a class="dropdown-item text-light" href="{{ route('logout') }}"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        {{ __('Logout') }}
+                    </a></p>
+                </div>
+            </div>
+            <ul class="mainmenu footermenu">
+                <li>
+                    <a href="{{ url('/admin/dashboard') }}" class="colorBL bold" data-name="DASHBOARD">
+                        <img src="{{ asset('img/admin_03.png') }}">
+                        Dashboard
+                    </a>
+                </li>
+                <li><a href="{{ url('/admin/orders') }}" class="colorBL bold" data-name="MANAGE ORDERS">
+                    <img src="{{ asset('img/Admin_09.png') }}">
+                        Orders
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/admin/merchants') }}" class="colorBL bold" data-name="MANAGE MERCHANTS">
+                        <img src="{{ asset('img/admin_07.png') }}" >
+                        Merchants
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/admin/users') }}" class="colorBL bold" data-name="USERS">
+                        <img src="{{ asset('img/Admin_11.png') }}">
+                        Users
+                    </a>
+                </li>
+                <li>
+                    <a class="colorBL bold account" data-name="ACCOUNT">
+                        <img src="{{ asset('img/Admin_12.png') }}">
+                        Account
+                    </a>
+                    <ul style="display: none;" class="items">
+                        <li><a href="{{ url('/admin/profile') }}">Profile</a></li>
+                        <li><a href="{{ url('/admin/password') }}">Change password</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>        
     </div>
     @endif
     <!--/left menu2 -->
@@ -236,8 +283,8 @@
                        <i class="fa fa-times" aria-hidden="true"></i>
                    </span>
                </div>
-                  <a href="/">
-                    <img class="mainlogo" src="{{ asset('img/logo.png') }}">
+                  <a id="mainlogo">
+                    <img class="mainlogo" src="{{ asset('/img/logo.png') }}">
                   </a>
             </div>
             <div class="titlebox">
@@ -250,9 +297,9 @@
              <div class="leftmenu">
                <div class="leftmenu">
                    @can('view-admin-menu')
-                       @include('menu.admin-menu')
+                        @include('menu.admin-menu')
                    @else
-                      @include('menu.menu')
+                        @include('menu.menu')
                    @endcan
                </div>
              </div>
@@ -338,7 +385,6 @@
 
   </div>
 </div>
-
 <script type="text/javascript">
   $(document).ready(function() {
     var usr_id = "{{Auth::user() ? Auth::user()->id : 0}}";

@@ -118,6 +118,8 @@ Route::prefix('admin')->group(function () {
     Route::get('merchants/changeStatus/{merchant}/{status}', 'AdminMerchantsController@changeStatus');
     Route::get('merchants/show/{merchant}', 'AdminMerchantsController@show');
     Route::get('users', 'AdminUsersController@index');
+    Route::get('profile', 'AdminUsersController@profile');
+    Route::get('password', 'AdminUsersController@password');
     Route::get('orders', 'AdminOrdersController@index');
     Route::get('/orders/{orders}', 'AdminOrdersController@show');
     Route::post('/stats-data', 'AdminDashboardController@getData');

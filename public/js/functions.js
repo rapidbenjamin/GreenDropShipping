@@ -3,14 +3,20 @@ $( document ).ready(function() {
     $(window).on('resize', function(){
           var win = $(this);
           if (win.width() <= 800) {
-
+            if ($('#role').val() == 'admin') {
+                $('#merchant-menu').hide();
+                $('#admin-menu').show();
+            }
+            else{
+                $('#merchant-menu').show();
+                $('#admin-menu').hide();
+            }
                 var slideout = new Slideout({
                     'panel': document.getElementById('panel'),
                     'menu': document.getElementById('menu'),
                     'padding': 256,
                     'tolerance': 70
                 });
-
                 // Toggle button
                 document.querySelector('.toggle-button').addEventListener('click', function() {
                     slideout.toggle();
@@ -21,6 +27,14 @@ $( document ).ready(function() {
     });
 
     if($(window).width() <= 800) {
+        if ($('#role').val() == 'admin') {
+            $('#merchant-menu').hide();
+            $('#admin-menu').show();
+        }
+        else{
+            $('#merchant-menu').show();
+            $('#admin-menu').hide();
+        }
         var slideout = new Slideout({
             'panel': document.getElementById('panel'),
             'menu': document.getElementById('menu'),

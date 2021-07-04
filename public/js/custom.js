@@ -112,48 +112,219 @@ $(document).ready(function () {
     })
 
     /* ADMIN USERS */
-    $('#btn-save-user').click(function () {
-        //validation
-        if (
-            $('#txt-user-name').val().length > 2 &&
-            $('#txt-email').val().length > 2 &&
-            $('#txt-password').val().length > 2 &&
-            $('#txt-password').val() == $('#txt-repeat-password').val()
-        ) {
-            var parameters = {
-                action: 'save-user',
-                user: $('#txt-user-name').val(),
-                email: $('#txt-email').val(),
-                password: $('#txt-password').val()
-            }
-
-            $.getJSON(ajax_link, parameters, function (data) {
-                alert('The user was created successfully')
-                location.reload()
-            })
+    $('.account').click(function () {
+        if ($('.items').css('display') == 'none') $('.items').show();
+        else $('.items').hide();
+    });
+    
+    function passProgress(value) {
+        let flag = false;
+         if (value.indexOf(' ') > -1) {
+            $('#password-error').text('Whitespace is not allowed.');
+            $('#password-error').show();
         } else {
-            alert('You should fill all the fields.')
+            if (value.length < 12) {
+                if (value.length == 0) {
+                    $('#password-error').text(empty_msg);
+                    $('.progressbar').hide();
+                    $('#password-error').show();
+                } else {
+                    $('#password-error').text(len_msg(12, value.length));
+                    $('.progressbar').hide();
+                    $('#password-error').show();
+                }
+            } else {
+                let array = [];
+                array.push(value.match(/[A-Z]/));
+                array.push(value.match(/[a-z]/));
+                array.push(value.match(/\d/));
+                array.push(value.match(/[!#@$&_.-]/));
+                let sum = 0;
+                array.forEach(element => {
+                    sum += element ? 1 : 0;
+                });
+                switch (sum) {
+                    case 1: $('#password-error').hide(); $('#password-progress').val(25); $('.progressbar').show(); break;
+                    case 2: $('#password-error').hide(); $('#password-progress').val(50); $('.progressbar').show(); break;
+                    case 3: $('#password-error').hide(); $('#password-progress').val(75); $('.progressbar').show(); break;
+                    case 4: $('#password-error').hide(); $('#password-progress').val(100); $('.progressbar').show(); break;
+                    default: $('#password-progress').val(25); $('.progressbar').show(); break;
+                }
+                if (sum == 4 && value.length > 12) flag = true;
+            }
         }
+        return flag;
+    }
+
+    var empty_msg = '*Please fill out this field.';
+    var len_msg = (minimum, length) => `*Plase lengthen this text to ${minimum} characters or more (you are currently using ${length} characters).`
+    $('#btn-save-user').click(function (event) {
+        //validation
+        var flag = true;
+        var reg = /([A-Za-z0-9][._]?)+[A-Za-z0-9]@[A-Za-z0-9]+(\.?[A-Za-z0-9]){2}\.(com?|net|org)+(\.[A-Za-z0-9]{2,4})?/;
+        var name = $('#txt-user-name').val().trim();
+        var email = $('#txt-email').val().trim();
+        var password = $('#txt-password').val();
+        var confirm_password = $('#txt-confirm-password').val();
+        if (name.length < 3) {
+            flag = false;
+            if (name.length == 0) $('#name-error').text(empty_msg);
+            else $('#name-error').text(len_msg(3, name.length));
+            $('#name-error').show();
+        } else $('#name-error').hide();
+
+        if (!email.match(reg)) {
+            flag = false;
+            if (email.length == 0) $('#email-error').text(empty_msg);
+            else $('#email-error').text('*Please input valid email.');
+            $('#email-error').show();
+        } else $('#email-error').hide();
+
+        flag = passProgress(password);
+
+        if (confirm_password.length == 0) {
+            flag = false;
+            $('#confirm-error').text(empty_msg);
+            $('#confirm-error').show();
+        } else {
+            if ($('#txt-password').val() != $('#txt-confirm-password').val()) {
+                flag = false;
+                $('#confirm-error').text("*Confirm Password doesn't match");
+                $('#confirm-error').show();
+            } else $('#confirm-error').hide();
+        }
+        
+        if (flag) {
+            action = 'create-user';
+            if (window.location.pathname == '/admin/profile') {
+                action = 'update-user';
+            }
+            var parameters = {
+                action: action,
+                name: name,
+                email: email.match(reg)[0],
+                password: password,
+            }
+            $.getJSON(ajax_link, parameters, function (data) {
+                if (data.id) {
+                    $('#user_data').append(`<tr class="userdatarow">
+                        <td data-label="USER NAME">
+                            ${data.name}
+                        </td>
+                        <td data-label="EMAIL">
+                            ${data.email}
+                        </td>
+                        <td data-label="ACTIVE">
+                            <input type="checkbox" name="switch-button" id="switch-label${data.id}" class="switch-button__checkbox" checked>
+                        </td>
+                        <td>
+                            <a href="/admin/merchants/show/${data.id}"><button class="view">View</button></a>
+                        </td>
+                    </tr>`)
+                    $('#txt-user-name').val('');
+                    $('#txt-email').val('');
+                    $('#txt-password').val('');
+                    $('#txt-confirm-password').val('');
+                    $('#success-user').show();
+                    setTimeout(() => {
+                        $('#success-user').hide();
+                    }, 3000);
+                } else if (data.result) {
+                    $('#success-profile').show();
+                    setTimeout(() => {
+                        $('#success-profile').hide();
+                    }, 3000);
+                } else {
+                    $('#fail-user').show();
+                    setTimeout(() => {
+                        $('#fail-user').hide();
+                    }, 3000);
+                }
+            })
+        }
+    });
+
+    /* ADMIN PASSWORD */
+    $('#btn-save-password').click(function (event) {
+        var flag = true;
+        var old_password = $('#old-password').val();
+        var new_password = $('#new-password').val();
+        var confirm_password = $('#confirm-password').val();
+        
+        if (old_password.length == 0) {
+            flag = false;
+            $('#old-error').text(empty_msg);
+            $('#old-error').show();
+        } else $('#old-error').hide();
+
+        flag = passProgress(new_password);
+
+        if (confirm_password.length == 0) {
+            flag = false;
+            $('#confirm-error').text(empty_msg);
+            $('#confirm-error').show();
+        } else {
+            if ($('#new-password').val() != $('#confirm-password').val()) {
+                flag = false;
+                $('#confirm-error').text("*Confirm Password doesn't match");
+                $('#confirm-error').show();
+            } else $('#confirm-error').hide();
+        }
+
+        if (flag) {
+            var parameters = {
+                action: 'admin-change-password',
+                old_password: JSON.stringify(old_password),
+                new_password: JSON.stringify(new_password)
+            }
+            $.getJSON(ajax_link, parameters, function (data) {
+                if (data.result) {
+                    $('#old-password').val('');
+                    $('#new-password').val('');
+                    $('#confirm-password').val('');
+                    $('#success-password').show();
+                    setTimeout(() => {
+                        $('#success-password').hide();
+                    }, 3000);
+                } else {
+                    $('#fail-password').show();
+                    setTimeout(() => {
+                        $('#fail-password').hide();
+                    }, 3000);
+                }
+            })
+        }
+    });
+
+    $('#mainlogo').click(function () {
+        if($('#role').val() == 'admin') window.location.href = '/admin/dashboard';
+        else window.location.href = '/';
     })
-    var action = '';
-    if (window.location.pathname == '/my-products') {
-        action = 'my-products';
-    }
-    if (window.location.pathname == '/import-list') {
-        action = 'import-list';
-    }
-    if (window.location.pathname == '/migrate-products') {
-        action = 'migrate-products';
-    }
-    if (window.location.pathname == '/admin/orders') {
-        action = 'admin-orders';
-    }
-    if (window.location.pathname == '/admin/merchants') {
-        action = 'admin-merchants';
+    function getAction() {
+        var action = '';
+        if (window.location.pathname == '/my-products') {
+            action = 'my-products';
+        }
+        if (window.location.pathname == '/import-list') {
+            action = 'import-list';
+        }
+        if (window.location.pathname == '/migrate-products') {
+            action = 'migrate-products';
+        }
+        if (window.location.pathname == '/admin/orders') {
+            action = 'admin-orders';
+        }
+        if (window.location.pathname == '/admin/merchants') {
+            action = 'admin-merchants';
+        }
+        if (window.location.pathname == '/admin/users') {
+            action = 'admin-users';
+        }
+        return action;
     }
     $('#page_size').change(function (event) {
         var parameters = {
-            action: action,
+            action: getAction(),
             page_size: event.target.value,
             page_number: 1
         }
@@ -165,7 +336,7 @@ $(document).ready(function () {
         var page_size = $('#page_size').val();
         var page_number = $('#page_number').text().split('/')[0];
         var parameters = {
-            action: action,
+            action: getAction(),
             page_size: page_size,
             page_number: page_number * 1 + 1
         }
@@ -175,7 +346,7 @@ $(document).ready(function () {
 
     $('#prev').click(function () {
         var parameters = {
-            action: action,
+            action: getAction(),
             page_size: $('#page_size').val(),
             page_number: $('#page_number').text().split('/')[0] - 1
         }
@@ -185,6 +356,7 @@ $(document).ready(function () {
 
     function getData(parameters) {
         var flag = true;
+        var action = getAction();
         if (action == 'admin-orders') {
             flag = orderSearchPermission();
             if (flag)
@@ -206,6 +378,13 @@ $(document).ready(function () {
                 active: $('#merchant_active').val()
             })
         }
+        if (action == 'admin-users') {
+            Object.assign(parameters, {
+                name: $('#user_name').val(),
+                email: $('#user_email').val(),
+                active: $('#user_active').val()
+            })
+        }
         if (flag)
             $.getJSON(ajax_link, parameters, function (res) {
                 pagination(res);
@@ -219,6 +398,8 @@ $(document).ready(function () {
                     showAdminOrders(res.order_list);
                 } else if(res.merchants) {
                     showMerchants(res.merchants);
+                } else if(res.users) {
+                    showUsers(res.users);
                 }
             })
     }
@@ -637,7 +818,7 @@ $(document).ready(function () {
         var flag = orderSearchPermission();
         if (flag) {
             var parameters = {
-                action: action,
+                action: getAction(),
                 page_size: $('#page_size').val(),
                 page_number: 1,
                 from: $('#dateFrom').val(),
@@ -676,10 +857,10 @@ $(document).ready(function () {
         orders.forEach(order => {
             str += `<tr class="orderrow">
                 <td class="check">
-                    <input type="checkbox">
+                    <input type="checkbox" class="checkbox" data-id="${order.id}}">
                 </td>
                 <td data-label="ORDER #">
-                    ${order.order_number_shopify}
+                    ${order.magento_order_id ? order.magento_order_id : ''}
                 </td>
                 <td data-label="DATE">
                     ${order.created_at}
@@ -697,7 +878,7 @@ $(document).ready(function () {
                     <div class="buttonge" style="background-color: ${order.color2}">${order.status2}</div>
                 </td>
                 <td>
-                    <a href="https://app.greendropship.com/admin/orders/${order.id}">
+                    <a href="/admin/orders/${order.id}">
                         <button class="view">View</button>
                     </a>
                 </td>
@@ -739,10 +920,10 @@ $(document).ready(function () {
     }
 
     $('#merchant_name').keypress(function(e) {
-        if ($('#merchant_name').val().length >= 2) {
+        if ($('#merchant_name').val().trim().length >= 2) {
             $.getJSON(ajax_link, {
                 action: 'admin-merchant-name',
-                name: ''
+                name: $('#merchant_name').val().trim()
             }, function(res) {
                 var str = '<div id="name_data">';
                 res.names.forEach(name => {
@@ -755,10 +936,10 @@ $(document).ready(function () {
         } else $('#name_data').remove();
     });
     $('#merchant_email').keypress(function(e) {
-        if ($('#merchant_email').val().length >= 2) {
+        if ($('#merchant_email').val().trim().length >= 2) {
             $.getJSON(ajax_link, {
                 action: 'admin-merchant-email',
-                email: ''
+                email: $('#merchant_email').val().trim()
             }, function(res) {
                 var str = '<div id="email_data">';
                 res.emails.forEach(email => {
@@ -771,10 +952,10 @@ $(document).ready(function () {
         } else $('#email_data').remove();
     });
     $('#merchant_url').keypress(function(e) {
-        if ($('#merchant_url').val().length >= 2) {
+        if ($('#merchant_url').val().trim().length >= 2) {
             $.getJSON(ajax_link, {
                 action: 'admin-merchant-url',
-                url: ''
+                url: $('#merchant_url').val().trim()
             }, function(res) {
                 var str = '<div id="url_data">';
                 res.urls.forEach(url => {
@@ -804,11 +985,83 @@ $(document).ready(function () {
 
     function getMerchantData() {
         var parameters = {
-            action: action,
+            action: getAction(),
             page_number: 1,
             page_size: $('#page_size').val()
         }
         getData(parameters);
     }
+
+    function showUsers(users) {
+        var str = '';
+        users.forEach(user => {
+            var active_str = `<input type="checkbox" name="switch-button" id="switch-label${user.id}" class="switch-button__checkbox">`;
+            if (user.active) active_str = `<input type="checkbox" name="switch-button" id="switch-label${user.id}" class="switch-button__checkbox" checked>`;
+            str += `<tr class="userdatarow">
+                <td data-label="USER NAME">
+                    ${user.name}
+                </td>
+                <td data-label="EMAIL">
+                    ${user.email}
+                </td>
+                <td data-label="ACTIVE">
+                    ${active_str}
+                </td>
+                <td>
+                    <a href="/admin/merchants/show/${user.id}"><button class="view">View</button></a>
+                </td>
+            </tr>`;
+        });
+        $('.userdatarow').remove();
+        $('#user_data').html(str);
+    }
+
+    $('#user_name').keypress(function(e) {
+        if ($('#user_name').val().trim().length >= 2) {
+            $.getJSON(ajax_link, {
+                action: 'admin-user-name',
+                name: $('#user_name').val().trim()
+            }, function(res) {
+                var str = '<div id="name_data">';
+                res.names.forEach(name => {
+                    str += `<option value="${name}">`;
+                });
+                str += '</div>';
+                $('#name_data').remove();
+                $('#names').html(str);
+            })
+        } else $('#name_data').remove();
+    });
+
+    $('#user_email').keypress(function(e) {
+        if ($('#user_email').val().trim().length >= 2) {
+            $.getJSON(ajax_link, {
+                action: 'admin-user-email',
+                email: $('#user_email').val().trim()
+            }, function(res) {
+                var str = '<div id="email_data">';
+                res.emails.forEach(email => {
+                    str += `<option value="${email}">`;
+                });
+                str += '</div>';
+                $('#email_data').remove();
+                $('#emails').html(str);
+            })
+        } else $('#email_data').remove();
+    });
+
+    $('#user_name').change(function(e) {
+        if ($('#user_name').val().length == 0) $('name_data').remove();
+        getMerchantData();
+    });
+
+    $('#user_email').change(function(e) {
+        if ($('#user_email').val().length == 0) $('email_data').remove();
+        getMerchantData();
+    });
+
+    $('#user_active').change(function(e) {
+        getMerchantData();
+    });
 
 })

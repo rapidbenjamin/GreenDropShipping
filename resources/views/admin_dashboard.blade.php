@@ -683,7 +683,7 @@
 
 			$('#txt-orders').text(data.num_sales);
 			$('#txt-returns').text(data.num_returns);
-			$('#txt-sales').text('$' + data.total_sales[0].TotalSales);
+			$('#txt-sales').text(data.total_sales[0].TotalSales ? `$${data.total_sales[0].TotalSales}` : 0);
 			$('#txt-newinstalls').text(data.new_installations);
 			$('#txt-affiates').text();
 

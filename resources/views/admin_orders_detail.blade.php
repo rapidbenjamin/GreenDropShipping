@@ -70,6 +70,9 @@
                                    <h3>Customer Address</h3>
                                    <div class="cwrap">
 
+                                        <p><strong>Name</strong> <br>
+                                       {{$osa->first_name}} {{$osa->last_name}}
+                                       </p>
                                         <p><strong>Address</strong> <br>
                                        {{$osa->address1}} {{$osa->address2}}
                                        </p>
