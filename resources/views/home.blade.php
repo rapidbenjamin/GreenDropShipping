@@ -178,47 +178,6 @@
                                             </div>
 
                                         </div>
-                                        <div class="icon">
-                                            <!--
-                                            <ul class="videolist">
-                                                <li>
-                                                    <a href="#" vid="PXR6Xdvl88U">
-                                                        <span class="playi">
-                                                            <i class="fa fa-play" aria-hidden="true"></i>
-                                                        </span>
-                                                        <span class="textvip">
-                                                            Dropshipping App for Shopify Coming in 2021
-                                                        </span>
-                                                        <span class="time">
-                                                            1:27
-                                                        </span>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#" vid="LV5zqh8vthg">
-                                                        <span class="playi">
-                                                            <i class="fa fa-play" aria-hidden="true"></i>
-                                                        </span>
-                                                        <span class="textvip">Dropshipping App for Shopify Coming in 2021</span>
-                                                        <span class="time">
-                                                            5:18
-                                                        </span>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="#" vid="PXR6Xdvl88U">
-                                                        <span class="playi">
-                                                            <i class="fa fa-play" aria-hidden="true"></i>
-                                                        </span>
-                                                        <span class="textvip">Dropshipping App for Shopify Coming in 2021</span>
-                                                        <span class="time">
-                                                            1:27
-                                                        </span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        -->
-                                        </div>
                                     </div>
                                 </div>
                             </div>

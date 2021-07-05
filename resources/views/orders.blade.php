@@ -103,9 +103,9 @@
 
 
                <div class="actions">
-		            <button id="checkout-button" class="btn-order-pay-selected pays">Pay Selected Orders</button>
-		            <button class="btn-order-export-selected exporsel">Export Selected Orders</button>
 		            <button class="btn-order-notifications pendingpay" title="Outstanding orders that require payment"> <span class="badge">{{$notifications}}</span> Pending payments</button>
+                    <div></div>
+                    <div></div>
                </div>
                @endif
 
@@ -113,9 +113,6 @@
                    <table class="greentable tableorders" cellspacing="0">
                        <thead>
                            <tr>
-                               <th>
-                                   <input type="checkbox" id="check-all-mp" value="">
-                               </th>
                                <th>
                                    ORDER #
                                </th>
@@ -145,9 +142,6 @@
                        <tbody>
                        	   @foreach($order_list as $ol)
                            <tr class="productdatarow">
-                               <td class="check">
-                                   <input class="checkbox cb{{$ol->id}}" type="checkbox" data-id="{{$ol->id}}" value="">
-                               </td>
                                <td data-label="ORDER #">
                                    {{$ol->order_number_shopify}}
                                </td>
@@ -220,73 +214,8 @@
             }
         });
 
-        $('.btn-order-export-selected').click(function() {
-            let orders = '';
-            $("input.checkbox:checked").each(function(index, ele) {
-                orders += $(ele).attr('data-id') + ',';
-            });
-            if (orders == '') {
-                alert('you must select at least one order');
-                return;
-            }
-            window.location.href = encodeURI('{{url("/orders/exports")}}?orders=' + orders);
-
-        });
-
         $('.btn-order-notifications').click(function() {
             window.location.href = encodeURI('{{url("/orders/")}}?notifications=true');
-        });
-
-
-
-        var checkoutButton = document.getElementById('checkout-button');
-        checkoutButton.addEventListener('click', function() {
-
-            var stripe = Stripe('{{env("STRIPE_API_KEY")}}');
-            let orders = [$(this).attr('data-id')];
-
-            $("input.checkbox:checked").each(function(index, ele) {
-                orders.push($(ele).attr('data-id'));
-            });
-            // Create a new Checkout Session using the server-side endpoint you
-            // created in step 3.
-            fetch('/create-checkout-session', {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json, text-plain, */*",
-                        "X-Requested-With": "XMLHttpRequest",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                    },
-                    method: 'POST',
-                    body: JSON.stringify({
-                        orders: orders
-                    }),
-                })
-                .then(function(response) {
-                    if (response.status == 406) {
-                        $('#order-limit-modal').modal('show')
-                    }
-                    return response.json();
-                })
-                .then(function(session) {
-                    return stripe.redirectToCheckout({
-                        sessionId: session.id
-                    }).then(function(result) {
-                        console.log('res', result);
-                    });
-                })
-                .then(function(result) {
-                    // If `redirectToCheckout` fails due to a browser or network
-                    // error, you should display the localized error message to your
-                    // customer using `error.message`.
-                    if (result.error) {
-                        alert(result.error.message);
-                    }
-                })
-                .catch(function(error) {
-                    console.error('Error:', error);
-                });
-
         });
 
         $("div.alert button.close").click(function() {

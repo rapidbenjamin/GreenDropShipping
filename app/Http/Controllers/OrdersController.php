@@ -208,8 +208,9 @@ class OrdersController extends Controller
 			->join('status as st1', 'st1.id', 'orders.financial_status')
 			->join('order_details as od', 'orders.id', 'od.id_order')
 			->join('products as p', 'p.sku', 'od.sku')
-			->join('status as st2', 'st2.id', 'orders.fulfillment_status')->whereIn('orders.id', explode(',', $request->orders))
-			->where('orders.id_customer', Auth::user()->id)->get()->toArray();
+			->join('status as st2', 'st2.id', 'orders.fulfillment_status')
+			->whereIn('orders.id', explode(',', $request->orders))
+			->where('orders.id_customer', Auth::user()->id)->orderBy('orders.id')->get()->toArray();
 
 		self::GDSLOG('Export Order', 'Export Order => ' . $request->orders);
 
@@ -229,10 +230,9 @@ class OrdersController extends Controller
 
 		ob_start();
 		$df = fopen("php://output", 'w');
-
-		fwrite($df, implode(";", array_keys(reset($order_list))) . "\n");
+        fputcsv($df, array_keys(reset($order_list)));
 		foreach ($order_list as $merchant) {
-			fwrite($df, implode(";", $merchant) . "\n");
+            fputcsv($df, $merchant);
 		}
 		fclose($df);
 		echo ob_get_clean();

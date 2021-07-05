@@ -72,7 +72,7 @@
                                        </p>
 
                                       
-                                       <p><strong>Shipping Information</strong> <br>
+                                       <p><a href="https://greendropship.com/shipping-rates/"><strong>Shipping Information</strong></a> <br>
 					                        @if($order->shipping_title)
 					                            <div class="sod-row"><label>Shipping</label>
 					                                <value>{{$order->shipping_title}}</value>

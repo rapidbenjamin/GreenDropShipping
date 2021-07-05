@@ -498,7 +498,7 @@ svg {
   background-color: #ffffff;
 }
 .wrapcontent .leftmenu.fixedpos {
-  position: fixed;
+  position: absolute;
   width: 384px;
   margin-top: 105px;
 }
