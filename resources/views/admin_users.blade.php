@@ -18,12 +18,12 @@
 						<p style="display: none;" id="email-error"></p>
 					</div>
 					<div class="user-info">
-						<label>Password<span>*</span> </label><input type="password" minlength="12" id="txt-password" autocomplete="new-password" title="more than 12 characters, lowercase, uppercase, number, symbol" required>
+						<label>Password<span>*</span> </label><input type="password" minlength="12" id="txt-password" autocomplete="new-password" title="more than 12 characters, lowercase, uppercase, number, symbol" required><i class="fa fa-eye" data-id="#txt-password"></i>
 						<p style="display: none;" id="password-error"></p>
 						<progress class="progressbar" id="password-progress" max="100" value="0" style="width:100%; display:none;"> 0% </progress>
 					</div>
 					<div class="user-info">
-						<label>Confirm Password<span>*</span> </label><input type="password" minlength="12" id="txt-confirm-password" autocomplete="new-password" required>
+						<label>Confirm Password<span>*</span> </label><input type="password" minlength="12" id="txt-confirm-password" autocomplete="new-password" required><i class="fa fa-eye" data-id="#txt-confirm-password"></i>
 						<p style="display: none;" id="confirm-error"></p>
 					</div>
 					<div class="update-user">

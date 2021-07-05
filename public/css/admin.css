@@ -377,6 +377,10 @@ body.bodyAdmin .new-user h4, body.bodyAdmin .profile h4 {
   padding-bottom: 8px;
   margin-bottom: 32px;
 }
+body.bodyAdmin .nuform .user-info .fa {
+  position: relative;
+  margin-left: -25px;
+}
 body.bodyAdmin .new-user .nuform {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -487,28 +491,12 @@ body.bodyAdmin .profile .nuform {
   }
 }
 body.bodyAdmin .profile .nuform .user-info {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
   width: 100%;
 }
 body.bodyAdmin .profile .nuform .update-user, body.bodyAdmin .new-user .nuform .update-user {
   width: 100%;
   display: flex;
   justify-content: center;
-}
-@media (min-width: 1200px) {
-  body.bodyAdmin .profile .nuform label {
-    text-align: right;
-    padding-right: 50px;
-  }
-}
-@media (max-width: 1200px) {
-  body.bodyAdmin .profile .nuform .user-info {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
-  }
 }
 body.bodyAdmin .orderDetailContent {
   margin-top: 104px;

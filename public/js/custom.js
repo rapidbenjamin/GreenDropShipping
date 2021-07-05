@@ -116,6 +116,13 @@ $(document).ready(function () {
         if ($('.items').css('display') == 'none') $('.items').show();
         else $('.items').hide();
     });
+
+    $('.fa-eye').click(function (event) {
+        $(this).toggleClass('fa-eye fa-eye-slash');
+        let input = $($(this).data("id"));
+        if (input.attr("type") == "password") input.attr("type", "text");
+        else input.attr("type", "password");
+    })
     
     function passProgress(value) {
         let flag = false;
