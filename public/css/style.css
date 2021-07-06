@@ -2000,6 +2000,15 @@ svg {
     height: 20px;
     margin: 10px;
 }
+@media (min-width: 1220px) {
+  .migrate-products .box-profit {
+    width: 50%;
+  }
+  .migrate-products #profit {
+    display: flex;
+    justify-content: center;
+  }
+}
 .sendtoshopify button  img {
   display: inline-block;
   margin-left: 10px;
