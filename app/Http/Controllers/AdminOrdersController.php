@@ -64,6 +64,10 @@ class AdminOrdersController extends Controller
             $order_list = $order_list->where('us.name', 'like', '%' . $request->merchant . '%');
         }
 
+        if ($request->merchantid != '') {
+            $order_list = $order_list->where('orders.id_customer', $request->merchantid);
+        }
+
         return view('admin_orders', array(
             'order_list' => $order_list->orderBy('orders.updated_at', 'desc')->take(10)->get(),
             'status' => Status::get(),

@@ -401,7 +401,7 @@ svg {
     max-width: 200px;
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
   .theheader {
     grid-template-columns: 1fr;
     grid-template-rows: 104px auto;
@@ -414,7 +414,7 @@ svg {
   justify-content: center;
   align-items: center;
 }
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
   .theheader .logo {
     grid-template-columns: minmax(auto, 30px) 1fr;
     column-gap: 15px;
@@ -450,7 +450,7 @@ svg {
   width: 100%;
   margin-bottom: 3px;
 }
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
   .theheader .logo .hamburguer {
     display: block;
   }
@@ -488,7 +488,7 @@ svg {
     grid-template-columns: minmax(auto, 300px) 1fr;
   }
 }
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
   .wrapcontent {
     grid-template-columns: 1fr;
   }
@@ -513,11 +513,6 @@ svg {
   }
 }
 @media (max-width: 1000px) {
-  .wrapcontent .leftmenu {
-    align-content: start;
-  }
-}
-@media (max-width: 800px) {
   .wrapcontent .leftmenu {
     display: none;
   }
@@ -1052,7 +1047,7 @@ svg {
   }
 }
 /* slideout */
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
   .slideout-menu {
     position: fixed;
     top: 0;

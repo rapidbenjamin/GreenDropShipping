@@ -119,7 +119,7 @@
                             <td class="btngroup">
 
                                 <button class="view detail-merchants" data-merchantid="{{$ml->id}}">View</button>
-                                <button class="payorder orders-customers" data-merchant="{{$ml->name}}">Orders</button>
+                                <button class="payorder orders-customers" data-merchantid="{{$ml->id}}">Orders</button>
 
                             </td>
                         </tr>
@@ -128,23 +128,23 @@
                     </tbody>
                 </table>
             </div>
-            <!-- pagination -->
-            <div class="pagination">
-                <ul class="pagination" role="navigation">
-                    <li class="page-item" id="prev">
-                        <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
-                    </li>
-    
-                    <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
-    
-                    <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
-                        <span class="page-link" aria-hidden="true">›</span>
-                    </li>
-                </ul>
-                <input type="text" id="total_count" value="{{$total_count}}" hidden>
-            </div>
-            <!-- /pagination -->
         </div>
+        <!-- pagination -->
+        <div class="pagination">
+            <ul class="pagination" role="navigation">
+                <li class="page-item" id="prev">
+                    <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
+                </li>
+
+                <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
+
+                <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
+                    <span class="page-link" aria-hidden="true">›</span>
+                </li>
+            </ul>
+            <input type="text" id="total_count" value="{{$total_count}}" hidden>
+        </div>
+        <!-- /pagination -->
     </div>
 </div>
 <input type="text" id="user_id" hidden>
@@ -168,12 +168,21 @@
         });
 
     });
+
     $('#merchant_data').on('click', 'input.change-status', function() {
         let status = $(this).is(':checked')
         if ($(this).is(':checked')) $(this).prop('checked', false);
         else $(this).prop('checked', true);
         $('#user_id').val($(this).data('merchantid'));
         $('#modal-body').html(`<h5>Are your sure to ${$(this).is(':checked') ? 'disable' : 'enable'} this merchant?</h5>`);
+    });
+    
+    $('#merchant_data').on('click', 'button.orders-customers', function () {
+        window.location.href = '/admin/orders?merchantid=' + $(this).data('merchantid');
+    })
+
+    $('#merchant_data').on('click', 'button.detail-merchants', function () {
+        window.location.href = '/admin/merchants/show/' + $(this).data('merchantid');
     })
 </script>
 @endsection

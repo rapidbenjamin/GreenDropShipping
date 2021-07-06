@@ -78,16 +78,6 @@ $(document).ready(function () {
             .show()
     })
 
-    $('button.orders-customers').click(function () {
-        window.location.href =
-            '/admin/orders?merchant=' +
-            encodeURIComponent($(this).data('merchant'))
-    })
-    $('button.detail-merchants').click(function () {
-        window.location.href =
-            '/admin/merchants/show/' + $(this).data('merchantid')
-    })
-
     $('.buttonDisabled').mouseover(function () {
         $('.answerBD' + $(this).data('id')).show()
     })
@@ -213,6 +203,8 @@ $(document).ready(function () {
                 password: password,
             }
             $.getJSON(ajax_link, parameters, function (data) {
+                $('#txt-password').val('');
+                $('#txt-confirm-password').val('');
                 if (data.id) {
                     $('#user_data').append(`<tr class="userdatarow">
                         <td data-label="USER NAME">
@@ -230,18 +222,18 @@ $(document).ready(function () {
                     </tr>`)
                     $('#txt-user-name').val('');
                     $('#txt-email').val('');
-                    $('#txt-password').val('');
-                    $('#txt-confirm-password').val('');
                     $('#success-user').show();
                     setTimeout(() => {
                         $('#success-user').hide();
                     }, 3000);
                 } else if (data.result) {
                     $('#success-profile').show();
+                    $('.progressbar').hide();
                     setTimeout(() => {
                         $('#success-profile').hide();
                     }, 3000);
                 } else {
+                    $('.progressbar').hide();
                     $('#fail-user').show();
                     setTimeout(() => {
                         $('#fail-user').hide();
@@ -252,6 +244,14 @@ $(document).ready(function () {
     });
 
     /* ADMIN PASSWORD */
+    $('#new-password').keydown(function (event) {
+        $('.progressbar').hide();
+    });
+
+    $('#txt-password').keydown(function (event) {
+        $('.progressbar').hide();
+    });
+
     $('#btn-save-password').click(function (event) {
         var flag = true;
         var old_password = $('#old-password').val();
@@ -290,10 +290,12 @@ $(document).ready(function () {
                     $('#new-password').val('');
                     $('#confirm-password').val('');
                     $('#success-password').show();
+                    $('.progressbar').hide();
                     setTimeout(() => {
                         $('#success-password').hide();
                     }, 3000);
                 } else {
+                    $('.progressbar').hide();
                     $('#fail-password').show();
                     setTimeout(() => {
                         $('#fail-password').hide();
@@ -917,7 +919,7 @@ $(document).ready(function () {
                 <td class="btngroup">
 
                     <button class="view detail-merchants" data-merchantid="${merchant.id}">View</button>
-                    <button class="payorder orders-customers" data-merchant="${merchant.name}">Orders</button>
+                    <button class="payorder orders-customers" data-merchantid="${merchant.id}">Orders</button>
 
                 </td>
             </tr>`;
