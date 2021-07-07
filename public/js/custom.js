@@ -123,11 +123,9 @@ $(document).ready(function () {
             if (value.length < 12) {
                 if (value.length == 0) {
                     $('#password-error').text(empty_msg);
-                    $('.progressbar').hide();
                     $('#password-error').show();
                 } else {
-                    $('#password-error').text(len_msg(12, value.length));
-                    $('.progressbar').hide();
+                    $('#password-error').text(pass_msg);
                     $('#password-error').show();
                 }
             } else {
@@ -140,25 +138,25 @@ $(document).ready(function () {
                 array.forEach(element => {
                     sum += element ? 1 : 0;
                 });
-                switch (sum) {
-                    case 1: $('#password-error').hide(); $('#password-progress').val(25); $('.progressbar').show(); break;
-                    case 2: $('#password-error').hide(); $('#password-progress').val(50); $('.progressbar').show(); break;
-                    case 3: $('#password-error').hide(); $('#password-progress').val(75); $('.progressbar').show(); break;
-                    case 4: $('#password-error').hide(); $('#password-progress').val(100); $('.progressbar').show(); break;
-                    default: $('#password-progress').val(25); $('.progressbar').show(); break;
+                if (sum == 4) {
+                    flag = true;
+                    $('#password-error').hide();
                 }
-                if (sum == 4 && value.length > 12) flag = true;
+                else {
+                    $('#password-error').text(pass_msg);
+                    $('#password-error').show();
+                }
             }
         }
         return flag;
     }
 
     var empty_msg = '*Please fill out this field.';
-    var len_msg = (minimum, length) => `*Plase lengthen this text to ${minimum} characters or more (you are currently using ${length} characters).`
+    var pass_msg = 'more than 12 characters, lowercase, uppercase, number, symbol';
     $('#btn-save-user').click(function (event) {
         //validation
         var flag = true;
-        var reg = /([A-Za-z0-9][._]?)+[A-Za-z0-9]@[A-Za-z0-9]+(\.?[A-Za-z0-9]){2}\.(com?|net|org)+(\.[A-Za-z0-9]{2,4})?/;
+        var reg = /([A-Za-z0-9][._]?)+[A-Za-z0-9]@[A-Za-z0-9]+(\.?[A-Za-z0-9]){1}\.(com?|net|org|ca|es|be|ru|by|kz|it|de|fr|cn|fm|me|ch)+(\.[A-Za-z0-9]{2,4})?/;
         var name = $('#txt-user-name').val().trim();
         var email = $('#txt-email').val().trim();
         var password = $('#txt-password').val();
@@ -166,7 +164,7 @@ $(document).ready(function () {
         if (name.length < 3) {
             flag = false;
             if (name.length == 0) $('#name-error').text(empty_msg);
-            else $('#name-error').text(len_msg(3, name.length));
+            else $('#name-error').text(`*Plase lengthen this text to 3 characters or more (you are currently using ${name.length} characters).`);
             $('#name-error').show();
         } else $('#name-error').hide();
 
@@ -228,12 +226,10 @@ $(document).ready(function () {
                     }, 3000);
                 } else if (data.result) {
                     $('#success-profile').show();
-                    $('.progressbar').hide();
                     setTimeout(() => {
                         $('#success-profile').hide();
                     }, 3000);
                 } else {
-                    $('.progressbar').hide();
                     $('#fail-user').show();
                     setTimeout(() => {
                         $('#fail-user').hide();
@@ -244,14 +240,6 @@ $(document).ready(function () {
     });
 
     /* ADMIN PASSWORD */
-    $('#new-password').keydown(function (event) {
-        $('.progressbar').hide();
-    });
-
-    $('#txt-password').keydown(function (event) {
-        $('.progressbar').hide();
-    });
-
     $('#btn-save-password').click(function (event) {
         var flag = true;
         var old_password = $('#old-password').val();
@@ -279,29 +267,33 @@ $(document).ready(function () {
         }
 
         if (flag) {
-            var parameters = {
-                action: 'admin-change-password',
-                old_password: JSON.stringify(old_password),
-                new_password: JSON.stringify(new_password)
-            }
-            $.getJSON(ajax_link, parameters, function (data) {
-                if (data.result) {
-                    $('#old-password').val('');
-                    $('#new-password').val('');
-                    $('#confirm-password').val('');
-                    $('#success-password').show();
-                    $('.progressbar').hide();
-                    setTimeout(() => {
-                        $('#success-password').hide();
-                    }, 3000);
-                } else {
-                    $('.progressbar').hide();
-                    $('#fail-password').show();
-                    setTimeout(() => {
-                        $('#fail-password').hide();
-                    }, 3000);
+            if (old_password == new_password) {
+                $('#password-error').text('New password is same as current password.');
+                $('#password-error').show();
+            } else {
+                $('#password-error').hide();
+                var parameters = {
+                    action: 'admin-change-password',
+                    old_password: JSON.stringify(old_password),
+                    new_password: JSON.stringify(new_password)
                 }
-            })
+                $.getJSON(ajax_link, parameters, function (data) {
+                    if (data.result) {
+                        $('#old-password').val('');
+                        $('#new-password').val('');
+                        $('#confirm-password').val('');
+                        $('#success-password').show();
+                        setTimeout(() => {
+                            $('#success-password').hide();
+                        }, 3000);
+                    } else {
+                        $('#fail-password').show();
+                        setTimeout(() => {
+                            $('#fail-password').hide();
+                        }, 3000);
+                    }
+                })
+            }
         }
     });
 

@@ -425,8 +425,8 @@ body.bodyAdmin .new-user .nuform input, body.bodyAdmin .profile .nuform input {
     font-size: 12px;
   }
   body.bodyAdmin .new-user .nuform input, body.bodyAdmin .profile .nuform input {
-    font-size: .6rem;
-    height: 20px;
+    font-size: .8em;
+    height: 40px;
   }
 }
 body.bodyAdmin .new-user p, body.bodyAdmin .profile p {
@@ -481,7 +481,7 @@ body.bodyAdmin .profile .nuform {
   margin: auto;
   padding: 5%;
   width: 60%;
-  height: 60%;
+  height: 80%;
   justify-content: space-evenly;
   background: #fff;
 }

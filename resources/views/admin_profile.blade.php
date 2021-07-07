@@ -19,15 +19,14 @@
 					</div>
 					<div class="user-info">
 						<label>Password: </label><input type="password" minlength="12" id="txt-password" title="more than 12 characters, lowercase, uppercase, number, symbol" autocomplete="new-password" required><i class="fa fa-eye" data-id="#txt-password"></i>
-						<p style="display: none;" id="password-error"></p>
-						<p class="progressbar" style="display:none;"></p><progress class="progressbar" id="password-progress" max="100" value="0" style="width:100%; display:none;"> 0% </progress>
+						<p id="password-error"></p>
 					</div>
 					<div class="user-info">
 						<label>Confirm Password: </label><input type="password" minlength="12" id="txt-confirm-password" autocomplete="new-password" required><i class="fa fa-eye" data-id="#txt-confirm-password"></i>
 						<p style="display: none;" id="confirm-error"></p>
 					</div>
 					<div class="update-user">
-						<button class="bgVC colorBL btn btn-sm btn-success" id="btn-save-user">Save</button>
+						<button class="bgVC colorBL btn btn-success" id="btn-save-user">Save</button>
 					</div>
 				</div>
 			</div>
