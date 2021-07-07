@@ -301,27 +301,42 @@ $(document).ready(function () {
         if($('#role').val() == 'admin') window.location.href = '/admin/dashboard';
         else window.location.href = '/';
     })
+    let pathname = window.location.pathname;
     function getAction() {
         var action = '';
-        if (window.location.pathname == '/my-products') {
+        if (pathname == '/my-products') {
             action = 'my-products';
         }
-        if (window.location.pathname == '/import-list') {
+        if (pathname == '/import-list') {
             action = 'import-list';
         }
-        if (window.location.pathname == '/migrate-products') {
+        if (pathname == '/migrate-products') {
             action = 'migrate-products';
         }
-        if (window.location.pathname == '/admin/orders') {
+        if (pathname == '/admin/orders') {
             action = 'admin-orders';
         }
-        if (window.location.pathname == '/admin/merchants') {
+        if (pathname == '/admin/merchants') {
             action = 'admin-merchants';
         }
-        if (window.location.pathname == '/admin/users') {
+        if (pathname == '/admin/users') {
             action = 'admin-users';
         }
         return action;
+    }
+
+    if (pathname == '/my-products' || pathname == '/import-list' || pathname == '/migrate-products' || pathname == '/admin/orders' || pathname == '/admin/merchants' || pathname == '/admin/users') {
+        $('#pagination').html(`<div class="pagination">
+            <ul class="pagination" role="navigation">
+                <li class="page-item" id="prev">
+                    <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
+                </li>
+                <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">${Math.ceil($('#total_count').val()/10) == 0 ? 0 : 1}</span> of <span id="total_page" class="page-link">${Math.ceil($('#total_count').val()/10)}</span></li>
+                <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
+                    <span class="page-link" aria-hidden="true">›</span>
+                </li>
+            </ul>
+        </div>`);
     }
     $('#page_size').change(function (event) {
         var parameters = {
@@ -417,8 +432,13 @@ $(document).ready(function () {
             $('#next').prop('disabled', false);
         }
         $('#total_count').text(data.total_count);
-        $('#total_page').text(Math.ceil(data.total_count / data.page_size));
-        $('#page_number').text(data.page_number);
+        if (Math.ceil(data.total_count / data.page_size) == 0) {
+            $('#total_page').text(0);
+            $('#page_number').text(0);
+        } else {
+            $('#total_page').text(Math.ceil(data.total_count / data.page_size));
+            $('#page_number').text(data.page_number);
+        }
     }
 
     function showMyProducts (products) {

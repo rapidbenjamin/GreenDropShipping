@@ -15,12 +15,10 @@
         var myproduct_ids = "{{ $myproduct_ids }}";
         var shopify_ids = "{{ $shopify_ids }}";
         var shopify_url = "https://{{ Auth::User()->shopify_url }}/admin/products/";
-        var names = <?php echo $names ?>;
         window.localStorage.setItem('imported_ids', imported_ids);
         window.localStorage.setItem('myproduct_ids', myproduct_ids);
         window.localStorage.setItem('shopify_ids', shopify_ids);
         window.localStorage.setItem('shopify_url', shopify_url);
-        window.localStorage.setItem('names', JSON.stringify(names));
     });
 </script>
 @endsection

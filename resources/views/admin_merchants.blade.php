@@ -124,30 +124,17 @@
                             </td>
                         </tr>
                         @endforeach
-
                     </tbody>
                 </table>
             </div>
         </div>
-        <!-- pagination -->
-        <div class="pagination">
-            <ul class="pagination" role="navigation">
-                <li class="page-item" id="prev">
-                    <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
-                </li>
-
-                <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">1</span> of <span id="total_page" class="page-link">{{ceil($total_count/10)}}</span></li>
-
-                <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
-                    <span class="page-link" aria-hidden="true">›</span>
-                </li>
-            </ul>
-            <input type="text" id="total_count" value="{{$total_count}}" hidden>
-        </div>
-        <!-- /pagination -->
     </div>
 </div>
+
+<div id="pagination"></div>
+<input type="text" id="total_count" value="{{$total_count}}" hidden>
 <input type="text" id="user_id" hidden>
+
 <script type="text/javascript">
     $(document).ready(function() {
         $('#total_count').text("{{$total_count}}");

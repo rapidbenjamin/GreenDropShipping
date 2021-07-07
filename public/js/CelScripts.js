@@ -537,6 +537,10 @@ angular
             var storageids = urlParams.getAll('Storage');
             var priceids = urlParams.getAll('By_price_range');
             var sizeids = urlParams.getAll('Size');
+            var pagesize = urlParams.getAll('PageSize');
+            var display = urlParams.getAll('Display');
+            var sortby = urlParams.getAll('SortBy');
+            var ascending = urlParams.getAll('Ascending');
             if (categoryids.length == 1 && typeof(categoryids[0]) == 'string')
                 categoryids = categoryids[0].split(',');
             if (specialtyids.length == 1 && typeof(specialtyids[0]) == 'string')
@@ -589,7 +593,15 @@ angular
             if (ids.length == 0)
                 ids = categoryIds;
             var search_key = document.getElementById('search-products').value.trim();
-            data.query = search_key == '{{settings.search_key}}' ? '' : search_key;
+            data.query = search_key == '{{settings.search_key}}' ? celConfig.Settings.search_key : search_key;
+            if (sortby.length) data.fieldName = sortby[0];
+            else data.fieldName = 'Relevancy';
+            if (ascending.length) data.isAscending = ascending[0] == 'true' ? true : false;
+            else data.isAscending = false;
+            if (data.fieldName == 'Price') data.isNumericSort = true;
+            else data.isNumericSort = false;
+            if (pagesize.length) data.pageSize = pagesize[0];
+            else data.pageSize = 12;
             data.answerIds = ids;
             data = JSON.parse(JSON.stringify(data));
             for (var param in data) {
@@ -646,54 +658,6 @@ angular
             }
             return result;
         }
-        var names = JSON.parse(window.localStorage.getItem('names'));
-        var filterCategories = function (data) {
-            var answers = [];
-            var extra_answers = [];
-            var products_count = 0;
-            if (data.Questions[0].Name == 'Category') {
-                data.Questions[0].Answers.forEach(question => {
-                    var flag = false;
-                    if (data.SearchPath[0].Answers.length == 0)
-                        if (data.Query == '') flag = true;
-                    if (flag) {
-                        if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
-                            answers.push(question);
-                            extra_answers.push(question);
-                            products_count += question.ProductCount;
-                        }
-                    } else {
-                        if (names.indexOf(question.Name) > -1) {
-                            answers.push(question);
-                            extra_answers.push(question);
-                            products_count += question.ProductCount;
-                        }
-                    }
-                });
-                data.Questions[0].ExtraAnswers.forEach(question => {
-                    var flag = false;
-                    if (data.SearchPath[0].Answers.length == 0)
-                        if (data.Query == '') flag = true;
-                    if (flag) {
-                        if (question.Name == 'Grocery' || question.Name == 'Beauty & Body Care' || question.Name == 'Vitamins & Supplements' || question.Name == 'Baby' || question.Name == 'Home Products' || question.Name == 'Health' || question.Name == 'Pet') {
-                            answers.push(question);
-                            extra_answers.push(question);
-                            products_count += question.ProductCount;
-                        }
-                    } else {
-                        if (names.indexOf(question.Name) > -1) {
-                            answers.push(question);
-                            extra_answers.push(question);
-                            products_count += question.ProductCount;
-                        }
-                    }
-                });
-                data.Questions[0].Answers = answers.splice(0,7);
-                data.Questions[0].ExtraAnswers = extra_answers.slice(7);
-                data.ProductsCount = products_count;
-            }
-            return data;
-        }
 
         return {
             doSearch: doSearch,
@@ -742,22 +706,11 @@ angular
                         scope.$parent.loading = true;
                     }
 
-                    //var answerID = breadcrumb.attributes["answer-id"].value;
-                    //var questionText;
-
                     var data = JSON.parse(JSON.stringify(scope.data));
                     if (data.answerIds !== undefined) {
                         delete data.answerIds;
                     }
                     data.answerId = answerID;
-
-                    //for (key in $location.search()) {
-                    //    if (isNaN($location.search()[key]) && $location.search()[key].indexOf(answerID) > -1) {
-                    //        questionText = key;
-                    //    } else if (!isNaN($location.search()[key]) && $location.search()[key] === answerID) {
-                    //        questionText = key;
-                    //    }
-                    //}
 
                     scope.$apply(function () {
                         parent.showApply = true;
@@ -769,23 +722,6 @@ angular
                                 scope.data.answerIds = scope.data.answerIds.split(',');
                             scope.data.answerId = scope.data.answerIds.splice(index, 1);
                         }
-
-                        ///* Update selected Answer array */
-                        //index = parent.selectedAnswers.indexOf(answerID);
-                        //if (index > -1) {
-                        //parent.selectedAnswers.splice(index, 1);
-                        //}
-
-                        ///* Update Breadcrumbs */
-                        //index = -1;
-                        //for (var i = 0; i < parent.results.SearchPath.Answers.length; i++) {
-                        //if (answerID == parent.results.SearchPath.Answers[i].ID) {
-                        //index = i;
-                        //}
-                        //}
-                        //if (index >= 0) {
-                        //parent.results.SearchPath.Answers.splice(index, 1);
-                        //}
 
                         $location.search("Page", null);
 
