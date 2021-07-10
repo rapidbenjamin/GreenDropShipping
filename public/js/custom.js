@@ -727,9 +727,12 @@ $(document).ready(function () {
         $('.migration').remove();
         var str = `<div style="display: flex;">
                     <input type="checkbox" id="check-all-mp" value="" data-mark="false">
-                    <button class="btn-delete-products alldeletebutton">Delete</button>
-                    <button class="btn-confirm-products allconfirmbutton">Confirm</button>
-                    <button class="btn-set-profit profit">Set Profit</button>
+                    <div id="migrate-actions">
+                        <button class="btn-delete-products alldeletebutton mx-1">Delete</button>
+                        <button class="btn-confirm-products allconfirmbutton mx-1">Confirm</button>
+                        <button class="btn-set-profit profit mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
+                        <button class="btn-setting-profit profit mx-1" style="display: none;">Setting...</button>
+                    </div>
                 </div>
                 <div class="pagesize">
                     <span>Show</span>
@@ -827,7 +830,7 @@ $(document).ready(function () {
                 <td data-label="SKU">
                     ${product.sku}
                 </td>
-                <td>
+                <td id="action">
                     ${button_str}
                 </td>
             </tr>`;

@@ -26,15 +26,17 @@
                 @if($total_count == 0)
                 <button class="btn-migration migration" data-toggle="modal" data-target="#migrate-products-modal">Migrate</button>
                 @else
-                <div style="display: flex;">
+                <div style="display: flex; align-items: center;">
                     <input type="checkbox" id="check-all-mp" value="" data-mark="false">
-                    <button class="btn-delete-products alldeletebutton mx-1">Delete</button>
-                    <button class="btn-confirm-products allconfirmbutton mx-1">Confirm</button>
-                    <button class="btn-set-profit profit mx-1">Set Profit</button>
-                    <button class="btn-setting-profit profit mx-1" style="display: none;">Setting...</button>
+                    <div id="migrate-actions">
+                        <button class="btn-delete-products alldeletebutton mx-1">Delete</button>
+                        <button class="btn-confirm-products allconfirmbutton mx-1">Confirm</button>
+                        <button class="btn-set-profit profit mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
+                        <button class="btn-setting-profit profit mx-1" style="display: none;">Setting...</button>
+                    </div>
                 </div>
                 <div class="pagesize">
-                    <span>Size</span>
+                    <span class="font-weight-bold">Size:</span>
                     <select name="PageSize" id="page_size">
                         <option value="10">10</option>
                         <option value="20">20</option>
@@ -102,7 +104,7 @@
                             <td data-label="SKU">
                                 {{$product->sku}}
                             </td>
-                            <td>
+                            <td id="action">
                                 @if ($product->type == 'migration')
                                 <button class="btn-confirm-product confirmbutton mx-0" data-id="{{$product->id_shopify}}" id="confirm-{{$product->id_shopify}}">Confirm</button>
                                 <button class="confirmbutton mx-0" data-id="{{$product->id_shopify}}" id="confirming-{{$product->id_shopify}}" style="display: none;">Confirming...</button>
@@ -155,6 +157,30 @@
     $(document).ready(function() {
         $('#total_count').text("{{$total_count}}");
 
+        $('#confirm').click(function() {
+            $('.btn-set-profit').hide();
+            $('.btn-delete-products').prop('disabled', true);
+            $('.btn-confirm-products').prop('disabled', true);
+            $('.btn-confirm-product').prop('disabled', true);
+            $('.btn-setting-profit').show();
+            var parameters = {
+                action: 'set-default-profit',
+            }
+            $.getJSON(ajax_link, parameters, function (res) {
+                $('.box-profit').each(function(index, ele) {
+                    $(ele).val($('#default_profit').val());
+                    var cost = $(`#cost-${$(ele).data('id')}`).text();
+                    var profit = $('#default_profit').val();
+                    $(`#price-${$(ele).data('id')}`).text(parseFloat(cost.substr(1) * (1 + profit / 100)).toFixed(2));
+                });
+                $('.btn-setting-profit').hide();
+                $('.btn-set-profit').show();
+                $('.btn-delete-products').prop('disabled', false);
+                $('.btn-confirm-product').prop('disabled', false);
+                $('.btn-confirm-products').prop('disabled', false);
+            })
+        });
+
         var user_id = "{{Auth::user() ? Auth::user()->id : 0}}";
         function deleteProductsAjax() {
             let product_ids = [];
@@ -178,6 +204,7 @@
                         res.product_ids.forEach(id => {
                             $(`#delete-${id}`).hide();
                             $(`#deleting-${id}`).hide();
+                            $(`#confirmed-${product.id}`).hide();
                             $(`#deleted-${id}`).show();
                             $(`#check-${id}`).prop('checked', false);
                         });
@@ -187,6 +214,7 @@
         deleteProductsAjax();
         setInterval(deleteProductsAjax, 15000);
     });
+
     $('.migrate-products').on('click', '.btn-mp-delete', function() {
         $(`#check-${$(this).data('migproductid')}`).prop('disabled', true);
         $(`#delete-${$(this).data('migproductid')}`).hide();
@@ -206,6 +234,7 @@
             }
         });
     });
+    
     $('.migrate-products').on('click', '#check-all-mp', function() {
         if ($('#check-all-mp').is(':checked')) {
             $('.checkbox').prop('checked', true);
@@ -213,6 +242,7 @@
             $('.checkbox').prop('checked', false);
         }
     })
+    
     $('.migrate-products').on('click', '.btn-delete-products', function() {
         let product_ids = [];
         $("input.checkbox:checked").each(function(index, ele) {
@@ -240,34 +270,18 @@
                 }, function(data, status) {});
             }
         } else {
-            alert('At least one checkbox must be selected');
+            $(this).attr('data-toggle', 'modal');
+            $(this).attr('data-target', '#delete-product-modal');
+            $('#modal-body').html('<h5>At least one checkbox must be selected</h5>');
+            $('.modal-footer').hide();
         }
     });
+    
     $('.migrate-products').on('click', '.btn-set-profit', function() {
-        if (confirm('Are you sure to replace current profits of all products with {{$default_profit}}%?')) {
-            $(this).hide();
-            $('.btn-delete-products').prop('disabled', true);
-            $('.btn-confirm-products').prop('disabled', true);
-            $('.btn-confirm-product').prop('disabled', true);
-            $('.btn-setting-profit').show();
-            var parameters = {
-                action: 'set-default-profit',
-            }
-            $.getJSON(ajax_link, parameters, function (res) {
-                $('.box-profit').each(function(index, ele) {
-                    $(ele).val($('#default_profit').val());
-                    var cost = $(`#cost-${$(ele).data('id')}`).text();
-                    var profit = $('#default_profit').val();
-                    $(`#price-${$(ele).data('id')}`).text(parseFloat(cost.substr(1) * (1 + profit / 100)).toFixed(2));
-                });
-                $('.btn-setting-profit').hide();
-                $('.btn-set-profit').show();
-                $('.btn-delete-products').prop('disabled', false);
-                $('.btn-confirm-product').prop('disabled', false);
-                $('.btn-confirm-products').prop('disabled', false);
-            })
-        }
+        $('#modal-body').html(`<h5>Are you sure to replace current profits of all products with {{$default_profit}}%?</h5>`);
+        $('.modal-footer').show();
     });
+
     $('.migrate-products').on('click', '.btn-confirm-product', function() {
         $(`#check-${$(this).data('id')}`).prop('disabled', true);
         $(`#confirm-${$(this).data('id')}`).hide();
@@ -300,6 +314,7 @@
             });
         });
     });
+    
     $('.migrate-products').on('click', '.btn-confirm-products', function() {
         let products = [];
         $("input.checkbox:checked").each(function(index, ele) {
@@ -336,6 +351,7 @@
                     $(`#check-${product.id}`).prop('checked', false);
                     $(`#profit-${product.id}`).prop('disabled', true);
                     $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
+                    console.log(product.result)
                     if (product.result) {
                         $(`#confirmed-${product.id}`).show();
                         $(`#check-${product.id}`).prop('checked', false);
@@ -348,9 +364,13 @@
                 });
             });
         } else {
-            alert('At least one checkbox must be selected');
+            $(this).attr('data-toggle', 'modal');
+            $(this).attr('data-target', '#delete-product-modal');
+            $('#modal-body').html('<h5>At least one checkbox must be selected</h5>');
+            $('.modal-footer').hide();
         }
     });
+    
     $('.migrate-products').on('change', '.page_size', function (event) {
         var parameters = {
             action: 'migrate-products',
@@ -427,7 +447,7 @@
                     <td data-label="SKU">
                         ${product.sku}
                     </td>
-                    <td>
+                    <td id="action">
                         ${button_str}
                     </td>
                 </tr>`;
@@ -435,6 +455,7 @@
             return str;
         }
     });
+    
     $('.migrate-products').on('change', '.box-profit', function() {
         var id_product = $(this).data('id');
         var cost = $('#cost-' + id_product).text();

@@ -1067,8 +1067,8 @@ svg {
   }
   .slideout-panel {
     position: relative;
-    z-index: 1;
-    will-change: transform;
+    z-index: auto;
+    will-change: auto;
     background-color: #FFF;
     /* A background-color is required */
     min-height: 100vh;
@@ -1703,6 +1703,10 @@ svg {
     border: solid 1px #d7e0f1;
     background-color: #ffffff;
   }
+  .greentable tbody tr #action {
+    display: flex;
+    justify-content: center;
+  }
   .greentable tbody tr td::before {
     content: attr(data-label);
     float: left;
@@ -1991,7 +1995,7 @@ svg {
   background-color: #f39ca2;
 }
 .migrate-products #check-all-mp {
-    width: 20px;
+    min-width: 20px;
     height: 20px;
     margin: 10px;
 }
@@ -2254,11 +2258,23 @@ svg {
   justify-content: center;
   min-height: 43px;
 }
+.migrate-products #migrate-actions {
+  display: flex;
+  width: 100%;
+}
+@media (max-width: 500px) {
+  .migrate-products #migrate-actions {
+    flex-direction: column;
+  }
+}
 @media (max-width: 500px) {
   .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
     width: 100%;
     margin-top: 5px;
     margin-bottom: 5px;
+  }
+  .migrate-products button {
+    max-width: 450px;
   }
 }
 @media (min-width: 500px) {
@@ -2273,6 +2289,9 @@ svg {
     width: 100%;
     flex: 0 1 0px;
   }
+  .migrate-products button {
+    flex: 0 1 224px;
+  }
 }
 @media (min-width: 860px) {
   .productboxelement .producttabs .headertabs .buttons .delete, .productboxelement .producttabs .headertabs .buttons .sendto, .sendtoshopify button, .migrate-products button {
@@ -2285,6 +2304,9 @@ svg {
     width: 100%;
     margin-top: 0px;
     margin-bottom: 0px;
+  }
+  .migrate-products button {
+    flex: 0 1 224px;
   }
 }
 @media (min-width: 1510px) {
