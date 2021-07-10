@@ -19,7 +19,7 @@
                 </div>
                 <div class="ordernumber">
                     <span class="ordernumberlabel">Order Number</span>
-                    <input type="text" id="idOrder" list="numbers" placeholder="Order #">
+                    <input type="text" id="idOrder" list="numbers" placeholder="GDS ORDER #">
                     <datalist id="numbers">
                         <div id="number_data"></div>
                     </datalist>
@@ -88,7 +88,7 @@
                                 <input type="checkbox" id="check-orders">
                             </th>
                             <th>
-                                ORDER #
+                                GDS ORDER #
                             </th>
                             <th>
                                 DATE

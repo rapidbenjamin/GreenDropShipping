@@ -195,7 +195,6 @@
             $(`#delete-${id}`).hide();
             $(`#deleting-${id}`).show();
             $(`#deleted-${id}`).hide();
-            $(`#view-${id}`).hide();
             $(`#edit-${id}`).hide();
             $(`#name-${id}`).css('pointer-events', 'none');
             $.post('{{url("/delete-shopify-product")}}', {
@@ -230,7 +229,6 @@
                 $(`#delete-${product.product_shopify_id}`).hide();
                 $(`#deleting-${product.product_shopify_id}`).show();
                 $(`#deleted-${product.product_shopify_id}`).hide();
-                $(`#view-${product.product_shopify_id}`).hide();
                 $(`#edit-${product.product_shopify_id}`).hide();
                 $(`#name-${product.product_shopify_id}`).css('pointer-events', 'none');
             });

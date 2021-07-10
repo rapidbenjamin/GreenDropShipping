@@ -1494,6 +1494,7 @@
 @media (min-width: 1366px) {
     #celUITDiv .products-list>li .cuit_item_container>.price-action {
         display: flex;
+        column-gap: 15px;
     }
 }
 #celUITDiv .products>li .cuit_item_container>div {
@@ -1747,7 +1748,7 @@
 
 #celUITDiv .products>li .cuit_item_container .add-to-cart .edit {
     /* width: 100%; */
-    background: #d4d4d4;
+    background: #009444;
     color: #fff;
     cursor: pointer;
     display: inline-block;
@@ -1826,8 +1827,8 @@
 }
 
 #celUITDiv .products>li .cuit_item_container .add-to-cart .edit:hover {
-    background: #d4d4d4;
-    border: 1px solid #d4d4d4;
+    background: #009444;
+    border: 1px solid #009444;
     color: #fff;
 }
 
