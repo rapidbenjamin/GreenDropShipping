@@ -32,7 +32,7 @@
                     <input type="checkbox" id="check-all-mp" value="" data-mark="false">
                 </div>
                 <div>
-                    <button class="btn-mp-delete-all alldeletebutton" data-toggle="modal" data-target="#delete-product-modal">Delete</button>
+                    <button class="btn-mp-delete-all alldeletebutton redbutton" data-toggle="modal" data-target="#delete-product-modal">Delete</button>
                 </div>
                 <div class="pagesize">
                     <span>Show</span>
@@ -105,12 +105,12 @@
                             {{$pr->sku}}
                         </td>
                         <td>
-                            <button class="btn-mp-view viewbutton vplist" data-id="{{ $pr->id }}" id="view-{{$pr->id_shopify}}" data-view="#product{{ $pr->id }}">View</button>
+                            <button class="btn-mp-view viewbutton greenbutton vplist" data-id="{{ $pr->id }}" id="view-{{$pr->id_shopify}}" data-view="#product{{ $pr->id }}">View</button>
                         </td>
                         <td>
-                            <button class="btn-mp-delete deletebutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" data-name="{{ $pr->name }}" data-sku="{{ $pr->sku }}" data-img="{{$pr->image_url_75}}">Delete</button>
-                            <button class="deletebutton" id="deleting-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" style="display: none;">Deleting...</button>
-                            <button class="deletebutton" id="deleted-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id }}" style="display: none;">Deleted</button>
+                            <button class="btn-mp-delete deletebutton redbutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" data-name="{{ $pr->name }}" data-sku="{{ $pr->sku }}" data-img="{{$pr->image_url_75}}">Delete</button>
+                            <button class="deletebutton redbutton" id="deleting-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" style="display: none;">Deleting...</button>
+                            <button class="deletebutton redbutton" id="deleted-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id }}" style="display: none;">Deleted</button>
                         </td>
                     </tr>
                     <tr class="shoproductrow" id="product{{ $pr->id }}">
@@ -137,7 +137,7 @@
                                     </p>
 
                                     <div class="pbuttons">
-                                        <button class="edit edit-product" id="edit-{{$pr->id_shopify}}" data-shopifyid="{{ $pr->id_shopify }}">Edit in Shopify</button>
+                                        <button class="edit greenbutton edit-product" id="edit-{{$pr->id_shopify}}" data-shopifyid="{{ $pr->id_shopify }}">Edit in Shopify</button>
                                     </div>
                                 </div>
                             </div>
@@ -152,6 +152,7 @@
 
 <div id="pagination"></div>
 <input type="text" id="product_id" value="" hidden>
+<input type="text" id="total_count" value="{{$total_count}}" hidden>
 
 <script type="text/javascript">
     $(document).ready(function() {
@@ -174,9 +175,11 @@
             if (products.length) {
                 $('#modal-body').html(`<h5>Are you sure to delete checked products from your Shopify Store?</h5>`);
                 $('#product_id').val('delete-products');
+                $('#modal-footer').show();
             } else {
                 $('#modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
                 $('#product_id').val('cancel');
+                $('#modal-footer').hide();
             }
 
         });
@@ -275,6 +278,7 @@
             </div>
             <h5 class="mt-3">This product will be removed from your Shopify store. Do you really want to delete it?</h5>`);
         $('#product_id').val($(this).data('myproductid'));
+        $('#modal-footer').show();
     })
     $('#product_data').on('click', '.edit-product', function() {
         window.open('https://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');

@@ -174,7 +174,7 @@ class ImportListController extends Controller
 
         $prods = MyProducts::where('id_customer', Auth::User()->id)
             ->whereIn('id_imp_product', $product_ids)
-            ->pluck('id_imp_product');
+            ->pluck('id_imp_product', 'id_shopify');
 
         DB::table('temp_publish_products')
             ->where('user_id', Auth::User()->id)

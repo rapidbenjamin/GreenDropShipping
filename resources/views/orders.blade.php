@@ -14,9 +14,7 @@
             @if(Auth::user()->plan == 'free')
             <div class="alertan">
                <div class="agrid">
-                   <img src="img/infogray.png"
-                     srcset="img/infogray@2x.png 2x,
-                         img/infogray@3x.png 3x">
+                    <img src="/img/infogray.png" srcset="/img/infogray@2x.png 2x,/img/infogray@3x.png 3x">
                     <p>You have a free plan. <a href="/plans">Click here to upgrade your plan.</a></p>
                </div>
             </div>
@@ -84,7 +82,7 @@
 		                </select>
                    </div>
                    <div class="searchbtn">
-                   	   <button class="btn-order-search searchbutton">
+                   	   <button class="btn-order-search searchbutton greenbutton">
                    	   		<i class="fa fa-search" aria-hidden="true"></i>
                    	   Search</button>
                    </div>
@@ -172,7 +170,7 @@
 					                @endif
                                </td>
                                <td>
-                                   <a href="/orders/{{$ol->id}}"><button class="view">VIEW</button></a>
+                                   <a href="/orders/{{$ol->id}}"><button class="view greenbutton">VIEW</button></a>
                                </td>
                            </tr>
                            @endforeach

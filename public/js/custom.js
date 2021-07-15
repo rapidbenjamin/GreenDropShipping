@@ -92,12 +92,19 @@ $(document).ready(function () {
         var parameters = {
             action: 'update_notes',
             id_order: $(this).data('id'),
-            notes: ' ' + texto + '. '
+            notes: ' ' + texto
         }
 
         $.getJSON(ajax_link, parameters, function (data) {
-            alert('The notes have been updated successfully')
-            location.reload()
+            $('textarea.ta' + $(this).data('id')).val(' ' + texto);
+            $('#modal-body').html(`<h5>The notes have been updated successfully</h5>`);
+            $('#modal-footer').hide();
+            $('#delete-product-modal').css('display', 'block');
+            $('#delete-product-modal').addClass('show');
+            setTimeout(() => {
+                $('#delete-product-modal').css('display', 'none');
+                $('#delete-product-modal').removeClass('show');
+            }, 2000);
         })
     })
 
@@ -215,7 +222,7 @@ $(document).ready(function () {
                             <input type="checkbox" name="switch-button" id="switch-label${data.id}" class="switch-button__checkbox" checked>
                         </td>
                         <td>
-                            <a href="/admin/merchants/show/${data.id}"><button class="view">View</button></a>
+                            <a href="/admin/merchants/show/${data.id}"><button class="view greenbutton">View</button></a>
                         </td>
                     </tr>`)
                     $('#txt-user-name').val('');
@@ -474,9 +481,9 @@ $(document).ready(function () {
                     <button class="btn-mp-view viewbutton vplist" data-id="${product.id}" id="view-${product.id_shopify}" data-view="#product${product.id}">View</button>
                 </td>
                 <td>
-                    <button class="btn-mp-delete deletebutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-${product.id_shopify}" data-myproductid="${product.id_shopify}"  data-name="${product.name}" data-sku="${product.sku}" data-img="${product.image_url_75}">Delete</button>                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                    <button class="deletebutton" id="deleted-${product.id_shopify}" data-myproductid="${product.id}" style="display: none;">Deleted</button>
+                    <button class="btn-mp-delete deletebutton redbutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-${product.id_shopify}" data-myproductid="${product.id_shopify}"  data-name="${product.name}" data-sku="${product.sku}" data-img="${product.image_url_75}">Delete</button>                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                    <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                    <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-myproductid="${product.id}" style="display: none;">Deleted</button>
                 </td>
             </tr>
             <tr class="shoproductrow" id="product${product.id}">
@@ -523,15 +530,15 @@ $(document).ready(function () {
             if (data.plan == 'free') {
                 button_str += `<button data-toggle="modal" data-target="#upgrade-plans-modal" class='delete id="delete-${product.id_import_list}" data-id="${product.id_import_list}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class='delete' id="deleting-${product.id_import_list}" style="display: none;" data-id="${product.id_import_list}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                    <button data-toggle="modal" data-target="#upgrade-plans-modal" class='sendto btn-import-list-send btn-import-list-send-${product.id_import_list} verModal' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
-                    <button class="sendto sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
-                    <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-${product.id_import_list}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>`;
+                    <button data-toggle="modal" data-target="#upgrade-plans-modal" class='sendto greenbutton btn-import-list-send-${product.id_import_list}' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                    <button class="sendto greenbutton sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
+                    <button class="sendto greenbutton edit-in-shopify btn-import-list-send2 btn-import-list-send2-${product.id_import_list}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>`;
             } else {
                 button_str += `<button class='delete btn-import-list-delete' data-toggle="modal" data-target="#delete-product-modal" id="delete-${product.id_import_list}" data-id="${product.id_import_list}"  data-name="${product.name}" data-sku="${product.sku}" data-img="${product.delete_image_url}">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class='delete' id="deleting-${product.id_import_list}" style="display: none;" data-id="${product.id_import_list}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                    <button class='sendto btn-import-list-send btn-import-list-send-${product.id_import_list}' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
-                    <button class="sendto sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
-                    <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-${product.id_import_list}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>`;
+                    <button class='sendto greenbutton btn-import-list-send btn-import-list-send-${product.id_import_list}' data-id="${product.id_import_list}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                    <button class="sendto greenbutton sending btn-import-list-send3 btn-import-list-send3-${product.id_import_list}" data-shopifyid="0" style="display:none">Sending...</button>
+                    <button class="sendto greenbutton edit-in-shopify btn-import-list-send2 btn-import-list-send2-${product.id_import_list}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>`;
             }
             product.images.forEach((image, i) => {
                 image_str += `<div class="selectimage">
@@ -728,8 +735,8 @@ $(document).ready(function () {
         var str = `<div style="display: flex;">
                     <input type="checkbox" id="check-all-mp" value="" data-mark="false">
                     <div id="migrate-actions">
-                        <button class="btn-delete-products alldeletebutton mx-1">Delete</button>
-                        <button class="btn-confirm-products allconfirmbutton mx-1">Confirm</button>
+                        <button class="btn-delete-products alldeletebutton redbutton mx-1">Delete</button>
+                        <button class="btn-confirm-products allconfirmbutton greenbutton mx-1">Confirm</button>
                         <button class="btn-set-profit profit mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
                         <button class="btn-setting-profit profit mx-1" style="display: none;">Setting...</button>
                     </div>
@@ -790,20 +797,20 @@ $(document).ready(function () {
             var button_str = '', profit_str = '';
             var cost_str = '';
             if (product.type == 'migration'){
-                button_str = `<button class="btn-confirm-product confirmbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
-                                <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
-                                <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>
-                                <button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Delete</button>
-                                <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                                <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+                button_str = `<button class="btn-confirm-product greenbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
+                                <button class="greenbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
+                                <button class="greenbutton mx-0" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>
+                                <button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Delete</button>
+                                <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                                <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
                 profit_str = `<div id="profit">
                     <input type="text" style="text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
                     %</div>`;
                 cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(product.cost).toFixed(2)}</span>`;
             } else {
-                button_str = `<button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
-                                <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                                <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+                button_str = `<button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
+                                <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                                <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
             }
 
             str += `<tr class="productdatarow">
@@ -871,8 +878,11 @@ $(document).ready(function () {
         if (from != '' && to != '')
             if (moment(from).isAfter(moment(to).format('YYYY-MM-DD'))) {
                 flag = false;
-                alert('Invalid date range.');
-            }
+                $('#modal-body').html(`<h5>Invalid date range</h5>`);
+                $('#modal-footer').hide();
+                $('#search').attr('data-toggle', 'modal');
+                $('#search').attr('data-target', '#delete-product-modal');
+            } else $('#search').attr('data-toggle', '');
         return flag;
     }
 
@@ -903,7 +913,7 @@ $(document).ready(function () {
                 </td>
                 <td>
                     <a href="/admin/orders/${order.id}">
-                        <button class="view">View</button>
+                        <button class="view greenbutton">View</button>
                     </a>
                 </td>
             </tr>`;
@@ -933,7 +943,7 @@ $(document).ready(function () {
                 </td>
                 <td class="btngroup">
 
-                    <button class="view detail-merchants" data-merchantid="${merchant.id}">View</button>
+                    <button class="view greenbutton detail-merchants" data-merchantid="${merchant.id}">View</button>
                     <button class="payorder orders-customers" data-merchantid="${merchant.id}">Orders</button>
 
                 </td>
@@ -1032,7 +1042,7 @@ $(document).ready(function () {
                     ${active_str}
                 </td>
                 <td>
-                    <a href="/admin/merchants/show/${user.id}"><button class="view">View</button></a>
+                    <a href="/admin/merchants/show/${user.id}"><button class="view greenbutton">View</button></a>
                 </td>
             </tr>`;
         });

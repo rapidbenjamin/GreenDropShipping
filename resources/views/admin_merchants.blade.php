@@ -118,7 +118,7 @@
                             </td>
                             <td class="btngroup">
 
-                                <button class="view detail-merchants" data-merchantid="{{$ml->id}}">View</button>
+                                <button class="view greenbutton detail-merchants" data-merchantid="{{$ml->id}}">View</button>
                                 <button class="payorder orders-customers" data-merchantid="{{$ml->id}}">Orders</button>
 
                             </td>

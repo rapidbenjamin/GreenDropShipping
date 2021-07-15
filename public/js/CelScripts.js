@@ -1408,7 +1408,10 @@ angular
 
             }
             else {
-                alert('At least one checkbox must be selected');
+                $('#modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
+                $('#modal-footer').hide();
+                $('.all-add-products').attr('data-toggle', 'modal');
+                $('.all-add-products').attr('data-target', '#delete-product-modal');
             }
         };
         $scope.editonimportlist = function (event) {

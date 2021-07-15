@@ -24,15 +24,15 @@
             </div>
             <div class="migrate-products" style="display: block;">
                 @if($total_count == 0)
-                <button class="btn-migration migration" data-toggle="modal" data-target="#migrate-products-modal">Migrate</button>
+                <button class="btn-migration migration greenbutton" data-toggle="modal" data-target="#migrate-products-modal">Migrate</button>
                 @else
                 <div style="display: flex; align-items: center;">
                     <input type="checkbox" id="check-all-mp" value="" data-mark="false">
                     <div id="migrate-actions">
-                        <button class="btn-delete-products alldeletebutton mx-1">Delete</button>
-                        <button class="btn-confirm-products allconfirmbutton mx-1">Confirm</button>
-                        <button class="btn-set-profit profit mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
-                        <button class="btn-setting-profit profit mx-1" style="display: none;">Setting...</button>
+                        <button class="btn-delete-products alldeletebutton redbutton mx-1">Delete</button>
+                        <button class="btn-confirm-products allconfirmbutton greenbutton mx-1">Confirm</button>
+                        <button class="btn-set-profit profit greenbutton mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
+                        <button class="btn-setting-profit profit greenbutton mx-1" style="display: none;">Setting...</button>
                     </div>
                 </div>
                 <div class="pagesize">
@@ -106,16 +106,16 @@
                             </td>
                             <td id="action">
                                 @if ($product->type == 'migration')
-                                <button class="btn-confirm-product confirmbutton mx-0" data-id="{{$product->id_shopify}}" id="confirm-{{$product->id_shopify}}">Confirm</button>
-                                <button class="confirmbutton mx-0" data-id="{{$product->id_shopify}}" id="confirming-{{$product->id_shopify}}" style="display: none;">Confirming...</button>
-                                <button class="confirmbutton mx-0" data-id="{{$product->id_shopify}}" id="confirmed-{{$product->id_shopify}}" style="display: none;">Confirmed</button>
-                                <button class="btn-mp-delete deletebutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Delete</button>
-                                <button class="deletebutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
-                                <button class="deletebutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
+                                <button class="btn-confirm-product greenbutton mx-0" data-id="{{$product->id_shopify}}" id="confirm-{{$product->id_shopify}}">Confirm</button>
+                                <button class="greenbutton mx-0" data-id="{{$product->id_shopify}}" id="confirming-{{$product->id_shopify}}" style="display: none;">Confirming...</button>
+                                <button class="greenbutton mx-0" data-id="{{$product->id_shopify}}" id="confirmed-{{$product->id_shopify}}" style="display: none;">Confirmed</button>
+                                <button class="btn-mp-delete deletebutton redbutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Delete</button>
+                                <button class="deletebutton redbutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
+                                <button class="deletebutton redbutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
                                 @else
-                                <button class="btn-mp-delete deletebutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}">Delete</button>
-                                <button class="deletebutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
-                                <button class="deletebutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
+                                <button class="btn-mp-delete deletebutton redbutton" id="delete-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}">Delete</button>
+                                <button class="deletebutton redbutton" id="deleting-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleting...</button>
+                                <button class="deletebutton redbutton" id="deleted-{{$product->id_shopify}}" data-migproductid="{{$product->id_shopify}}" style="display: none;">Deleted</button>
                                 @endif
                             </td>
                         </tr>
@@ -204,7 +204,7 @@
                         res.product_ids.forEach(id => {
                             $(`#delete-${id}`).hide();
                             $(`#deleting-${id}`).hide();
-                            $(`#confirmed-${product.id}`).hide();
+                            $(`#confirmed-${id}`).hide();
                             $(`#deleted-${id}`).show();
                             $(`#check-${id}`).prop('checked', false);
                         });
@@ -252,34 +252,33 @@
             }
         });
         if (product_ids.length) {
-            if (confirm('Are you sure to delete these products from shopify?')) {
-                $('.btn-delete-products').prop('disabled', true);
-                $('.btn-confirm-products').prop('disabled', true);
-                $('.btn-set-profit').prop('disabled', true);
-                product_ids.forEach(product_id => {
-                    $(`#check-${product_id}`).prop('disabled', true);
-                    $(`#delete-${product_id}`).hide();
-                    $(`#deleting-${product_id}`).show();
-                    $(`#deleted-${product_id}`).hide();
-                    $(`#check-${product_id}`).removeClass();
-                    $(`#check-${product_id}`).prop('disabled', true);
-                });
-                $.post('{{url("/delete-migrate-products")}}', {
-                    "_token": "{{ csrf_token() }}",
-                    product_ids: product_ids,
-                }, function(data, status) {});
-            }
+            $(this).attr('data-toggle', '');
+            $('.btn-delete-products').prop('disabled', true);
+            $('.btn-confirm-products').prop('disabled', true);
+            $('.btn-set-profit').prop('disabled', true);
+            product_ids.forEach(product_id => {
+                $(`#check-${product_id}`).prop('disabled', true);
+                $(`#delete-${product_id}`).hide();
+                $(`#deleting-${product_id}`).show();
+                $(`#deleted-${product_id}`).hide();
+                $(`#check-${product_id}`).removeClass();
+                $(`#check-${product_id}`).prop('disabled', true);
+            });
+            $.post('{{url("/delete-migrate-products")}}', {
+                "_token": "{{ csrf_token() }}",
+                product_ids: product_ids,
+            }, function(data, status) {});
         } else {
             $(this).attr('data-toggle', 'modal');
             $(this).attr('data-target', '#delete-product-modal');
             $('#modal-body').html('<h5>At least one checkbox must be selected</h5>');
-            $('.modal-footer').hide();
+            $('#modal-footer').hide();
         }
     });
     
     $('.migrate-products').on('click', '.btn-set-profit', function() {
         $('#modal-body').html(`<h5>Are you sure to replace current profits of all products with {{$default_profit}}%?</h5>`);
-        $('.modal-footer').show();
+        $('#modal-footer').show();
     });
 
     $('.migrate-products').on('click', '.btn-confirm-product', function() {
@@ -351,7 +350,6 @@
                     $(`#check-${product.id}`).prop('checked', false);
                     $(`#profit-${product.id}`).prop('disabled', true);
                     $(`#profit-${product.id}`).css({'border': 'none', 'background': 'transparent'});
-                    console.log(product.result)
                     if (product.result) {
                         $(`#confirmed-${product.id}`).show();
                         $(`#check-${product.id}`).prop('checked', false);
@@ -367,7 +365,7 @@
             $(this).attr('data-toggle', 'modal');
             $(this).attr('data-target', '#delete-product-modal');
             $('#modal-body').html('<h5>At least one checkbox must be selected</h5>');
-            $('.modal-footer').hide();
+            $('#modal-footer').hide();
         }
     });
     
@@ -407,20 +405,20 @@
                 var button_str = '', profit_str = '';
                 var cost_str = '';
                 if (product.type == 'migration'){
-                    button_str = `<button class="btn-confirm-product confirmbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
-                                    <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
-                                    <button class="confirmbutton mx-0" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>
-                                    <button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Delete</button>
-                                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                                    <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+                    button_str = `<button class="btn-confirm-product greenbutton mx-0" data-id="${product.id_shopify}" id="confirm-${product.id_shopify}">Confirm</button>
+                                    <button class="greenbutton mx-0" data-id="${product.id_shopify}" id="confirming-${product.id_shopify}" style="display: none;">Confirming...</button>
+                                    <button class="greenbutton mx-0" data-id="${product.id_shopify}" id="confirmed-${product.id_shopify}" style="display: none;">Confirmed</button>
+                                    <button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Delete</button>
+                                    <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                                    <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
                     profit_str = `<div id="profit">
                         <input type="text" style="text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
                         %</div>`;
                     cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(product.cost).toFixed(2)}</span>`;
                 } else {
-                    button_str = `<button class="btn-mp-delete deletebutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
-                                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                                    <button class="deletebutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
+                    button_str = `<button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
+                                    <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
+                                    <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
                 }
 
                 str += `<tr class="productdatarow">

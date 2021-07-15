@@ -68,7 +68,7 @@
 
             </div>
 
-                <button class="bgVC colorBL" id="save-settings">Save</button>
+                <button class="bgVC colorBL greenbutton" id="save-settings">Save</button>
 
             </div>
 

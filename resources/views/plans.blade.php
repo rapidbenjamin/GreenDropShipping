@@ -181,7 +181,7 @@
 
                         @if(Auth::user()->plan != 'free' && Auth::user()->membership_token != '')
 
-                        <button data-plan="free" class="bgVO colorBL update">Downgrade</button>
+                        <button data-plan="free" class="bgVO colorBL greenbutton update">Downgrade</button>
 
                         @elseif(Auth::user()->plan == 'free' && Auth::user()->membership_token != '')
 

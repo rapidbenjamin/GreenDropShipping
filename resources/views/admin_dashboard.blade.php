@@ -559,9 +559,12 @@
 
 	$("#apply").click(function() {
 		if (moment($('#start').val()).isAfter( moment($('#to').val()).format('YYYY-MM-DD')) ) {
-			alert('Invalid date range.');
+			$('#modal-body').html(`<h5>Invalid date range</h5>`);
+			$('#modal-footer').hide();
+			$('#apply').attr('data-toggle', 'modal');
+			$('#apply').attr('data-target', '#delete-product-modal');
 			return;
-		}
+		} else $('#apply').attr('data-toggle', '');
 		applyFilter(12);
 	});
 

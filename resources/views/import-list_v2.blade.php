@@ -54,9 +54,9 @@
                 <input title="Select all products" type="checkbox" id="check-all">
             </div>
             <div class="btn-import-actions">
-                <button class="btn-import-list-delete-all mx-1 my-1" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                <button class="btn-import-list-send-all mx-1 my-1" id="btn-import-list-send-all">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
-                <button class="btn-import-list-send-all mx-1 my-1" id="btn-import-list-sending" style="display: none;">Sending...<img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                <button class="btn-import-list-delete-all redbutton mx-1 my-1" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                <button class="btn-import-list-send-all greenbutton mx-1 my-1" id="btn-import-list-send-all">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                <button class="btn-import-list-send-all greenbutton mx-1 my-1" id="btn-import-list-sending" style="display: none;">Sending...<img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
             </div>
             <div class="pagesize">
                 <span>Show</span>
@@ -76,7 +76,7 @@
                 <div class="producttabs">
                     <div class="headertabs">
                         <div class="checkt">
-                            <input type="checkbox" id="check-{{$ap->id_import_list}}" class="checkbox" style="display: block;">
+                            <input type="checkbox" id="check-{{$ap->id_import_list}}" class="checkbox" style="display: block; width: 20px; height: 20px;">
                         </div>
                         <div class="tabs">
 
@@ -88,15 +88,15 @@
                         </div>
                         <div class="buttons import-actions">
                             {{--@can('plan_delete-product-import-list')--}}
-                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#delete-product-modal" @endcan class='delete @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}" data-img="{{$ap->images != null ? env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37c'.$ap->images[0]->file :  env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37cnoselection'}}">
+                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#delete-product-modal" @endcan class='delete redbutton @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}" data-img="{{$ap->images != null ? env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37c'.$ap->images[0]->file :  env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37cnoselection'}}">
                                 Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon">
                             </button>
-                            <button class='delete' id="deleting-{{$ap->id_import_list}}" style="display: none;" data-id="{{$ap->id_import_list}}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                            <button class='delete redbutton' id="deleting-{{$ap->id_import_list}}" style="display: none;" data-id="{{$ap->id_import_list}}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                             {{--@endcan--}}
                             {{--@can('plan_publish-product-import-list')--}}
-                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot class='sendto btn-import-list-send btn-import-list-send-{{$ap->id_import_list}} @cannot("plan_view-my-products") verModal @endcannot' data-id="{{$ap->id_import_list}}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
-                            <button class="sendto sending btn-import-list-send3 btn-import-list-send3-{{$ap->id_import_list}}" data-shopifyid="0" style="display:none">Sending...</button>
-                            <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-{{$ap->id_import_list}}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>
+                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot class='sendto greenbutton @can("plan_view-my-products") btn-import-list-send @endcan btn-import-list-send-{{$ap->id_import_list}}' data-id="{{$ap->id_import_list}}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                            <button class="sendto greenbutton sending btn-import-list-send3 btn-import-list-send3-{{$ap->id_import_list}}" data-shopifyid="0" style="display:none">Sending...</button>
+                            <button class="sendto greenbutton edit-in-shopify btn-import-list-send2 btn-import-list-send2-{{$ap->id_import_list}}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>
                             {{--@endcan--}}
                         </div>
                     </div>
@@ -311,8 +311,12 @@
 
 
             if (products.length == 0) {
-                alert('At least one checkbox must be selected');
+                $(this).attr('data-toggle', 'modal');
+                $(this).attr('data-target', '#delete-product-modal');
+                $('#modal-body').html('<h5>At least one checkbox must be selected</h5>');
+                $('#modal-footer').hide();
             } else {
+                $(this).attr('data-toggle', '');
                 $(this).hide();
                 $('.btn-import-list-delete-all').prop('disabled', true);
                 $('#btn-import-list-sending').show();
@@ -339,8 +343,10 @@
             if (product_ids.length) {
                 $('#modal-body').html(`<h5>Are you sure to delete checked products from Import List?</h5>`);
                 $('#product_id').val('delete-products');
+                $('#modal-footer').show();
             } else {
                 $('#modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
+                $('#modal-footer').hide();
                 $('#product_id').val('cancel');
             }
         })
@@ -413,14 +419,17 @@
                             $('.btn-import-list-delete-all').prop('disabled', false);
                             $('#btn-import-list-sending').hide();
                             $('#btn-import-list-send-all').show();
-                            data.id_shopify.forEach(productId => {
-                                $(`.btn-import-list-send-${productId}`).hide();
-                                $(`.btn-import-list-send2-${productId}`).show();
-                                $(`.btn-import-list-send3-${productId}`).hide();
-                                $(`#delete-${productId}`).hide();
-                                $(`#check-${productId}`).prop('checked', false);
+                            console.log(data);
+                            for (const key in data.id_shopify) {
+                                $(`.btn-import-list-send-${data.id_shopify[key]}`).hide();
+                                $(`.btn-import-list-send2-${data.id_shopify[key]}`).show();
+                                $(`.btn-import-list-send2-${data.id_shopify[key]}`).attr('data-shopifyid', key);
+                                $(`.btn-import-list-send3-${data.id_shopify[key]}`).hide();
+                                $(`#delete-${data.id_shopify[key]}`).hide();
+                                $(`#check-${data.id_shopify[key]}`).prop('checked', false);
                                 $('#check-all').prop('disabled', false);
-                            });
+                                
+                            }
                         }
                     });
                 }
@@ -498,7 +507,6 @@
                 "_token": "{{ csrf_token() }}",
                 product: product
             }, function(data, status) {
-                $(this).prop('disabled', false);
                 $('.alert-publish-single').show();
                 $(`.btn-import-list-send3-${productId}`).hide();
                 $(`.btn-import-list-send2-${productId}`).show();
@@ -520,6 +528,7 @@
             </div>
             <h5 class="mt-3">This product will be removed from Import List. Do you really want to delete it?</h5>`);
         $('#product_id').val($(this).data('id'));
+        $('#modal-footer').show();
     });
     $('#import-products').on('change', '.box-profit', function() {
         var id_product = $(this).data('id');
@@ -545,7 +554,7 @@
     });
     $('#import-products').on('click', '.btn-import-list-send2', function(e) {
         e.preventDefault();
-        window.open('http://{{Auth::user()->shopify_url}}/admin/products/', '_blank');
+        window.open(`http://{{Auth::user()->shopify_url}}/admin/products/${e.target.dataset.shopifyid}`, '_blank');
     });
     $('#import-products').on('click', '.verModal', function(e) {
         e.preventDefault();

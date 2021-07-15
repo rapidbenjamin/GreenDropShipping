@@ -1753,9 +1753,16 @@ svg {
   border: none;
   cursor: pointer;
 }
+.greentable tbody .viewbutton:hover {
+  background-color: #42b253;
+}
+.greentable tbody .viewbutton:focus {
+  border: none;
+  outline: none;
+}
 @media (max-width: 1460px) {
   .greentable tbody .viewbutton {
-    font-size: 13px;
+    font-size: 16px;
   }
 }
 @media (max-width: 1200px) {
@@ -1784,6 +1791,9 @@ svg {
   cursor: pointer;
   width: 135px;
 }
+.greentable tbody .deletebutton:hover {
+  background-color: #ee949a;
+}
 .merchant-search {
     padding-left: 10px;
     width: 100%;
@@ -1810,7 +1820,7 @@ svg {
 }
 @media (max-width: 1460px) {
   .greentable tbody .deletebutton {
-    font-size: 13px;
+    font-size: 16px;
   }
 }
 @media (max-width: 1200px) {
@@ -1913,6 +1923,9 @@ svg {
   border-radius: 10px;
   border: none;
 }
+.greentable tbody .productlisthow .productdata .pbuttons .edit:hover {
+  background-color: #42b253;
+}
 @media (max-width: 1200px) {
   .greentable tbody .productlisthow .productdata .pbuttons .edit {
     font-size: 14px;
@@ -1984,15 +1997,21 @@ svg {
   display: flex;
   justify-content: center;
 }
-.sendtoshopify .btn-import-list-send-all, .migrate-products .migration, .migrate-products .allconfirmbutton, .migrate-products .confirmbutton {
+.greenbutton {
   background-color: #44b955;
 }
-.migrate-products .profit {
-  background-color: #44b955;
-  margin-left: 10px;
+.greenbutton:hover {
+  background-color: #42b253;
 }
-.sendtoshopify .btn-import-list-delete-all, .migrate-products .alldeletebutton {
+.redbutton {
   background-color: #f39ca2;
+}
+.redbutton:hover {
+  background-color: #ee949a;
+}
+.greenbutton:focus, .redbutton:focus {
+  border: none;
+  outline: none;
 }
 .migrate-products #check-all-mp {
     min-width: 20px;
@@ -2218,6 +2237,9 @@ svg {
   justify-content: center;
   min-height: 43px;
 }
+.productboxelement .producttabs .headertabs .buttons .sendto:hover {
+  background-color: #42b253;
+}
 
 .productboxelement .producttabs .headertabs .buttons .sendto img {
     height: 25px;
@@ -2257,6 +2279,9 @@ svg {
   display: flex;
   justify-content: center;
   min-height: 43px;
+}
+.productboxelement .producttabs .headertabs .buttons .delete:hover {
+  background-color: #ee949a;
 }
 .migrate-products #migrate-actions {
   display: flex;
@@ -2763,6 +2788,9 @@ svg {
   border-radius: 10px;
   cursor: pointer;
 }
+.headerorders .searchbutton:hover {
+  background-color: #42b253;
+}
 @media (max-width: 1600px) {
   .headerorders .searchbutton {
     width: 100%;
@@ -2858,6 +2886,13 @@ svg {
   letter-spacing: 1px;
   border-radius: 10px;
   cursor: pointer;
+}
+.actions .exporsel:focus {
+  border: none;
+  outline: none;
+}
+.actions .exporsel:hover {
+  background-color: #f7a204;
 }
 @media (max-width: 1100px) {
   .actions .exporsel {
@@ -3026,6 +3061,9 @@ svg {
   border-radius: 10px;
   text-align: center;
 }
+.tableorders .view:hover {
+  background-color: #42b253;
+}
 @media (max-width: 1200px) {
   .tableorders .view {
     width: 100%;
@@ -3047,6 +3085,13 @@ svg {
   min-height: 34px;
   box-sizing: border-box;
   cursor: pointer;
+}
+.tableorders .payorder:focus {
+  border: none;
+  outline: none;
+}
+.tableorders .payorder:hover {
+  background-color: #93b947;
 }
 @media (max-width: 1200px) {
   .tableorders .payorder {
@@ -3374,7 +3419,7 @@ svg {
 .ordertable .productbtn {
   display: grid;
   grid-template-columns: 200px 200px;
-  justify-content: flex-end;
+  justify-content: space-evenly;
   column-gap: 20px;
 }
 @media (max-width: 1300px) {
@@ -3402,20 +3447,35 @@ svg {
   }
 }
 .ordertable .productbtn .payments {
-background-color: #44b955;
-    color: #fff;
-    border: solid 1px #44b955;
+  background-color: #44b955;
+  color: #fff;
+  border: solid 1px #44b955;
     padding: 10px;
     border-radius: 15px;
     font-weight: bold;
-}
-.ordertable .productbtn .cancel {
+  }
+  .ordertable .productbtn .payments:hover {
+    background-color: #42b253;
+  }
+  .ordertable .productbtn .payments:focus {
+    border: none;
+    outline: none;
+  }
+  .ordertable .productbtn .cancel {
   background-color: #e30613;
-    color: #fff;
-    border: solid 1px #e30613;
-    padding: 10px;
-    border-radius: 15px;
-    font-weight: bold;
+  color: #fff;
+  border: solid 1px #e30613;
+  padding: 10px;
+  border-radius: 15px;
+  font-weight: bold;
+}
+.ordertable .productbtn .cancel:hover {
+  background: #d30715;
+  border: solid 1px #d30715;
+}
+.ordertable .productbtn .cancel:focus {
+  border: none;
+  outline: none;
 }
 .plantitle {
     font-size: 26px;
@@ -3737,14 +3797,21 @@ ul.subcategories-content li.hide {
   font-weight: 700;
 }
 #save-address {
-    background-color: #44b955;
-    padding: 8px;
-    color: #fff;
-    text-align: center;
-    border: none;
-    width: 30%;
-    margin-bottom: 13px;
-    border-radius: 10px;
+  background-color: #44b955;
+  padding: 8px;
+  color: #fff;
+  text-align: center;
+  border: none;
+  width: 30%;
+  margin-bottom: 13px;
+  border-radius: 10px;
+}
+#save-address:hover {
+  background-color: #42b253;
+}
+#save-address:focus {
+  border: none;
+  outline: none;
 }
 .sod-title strong {
   color: #44b955;

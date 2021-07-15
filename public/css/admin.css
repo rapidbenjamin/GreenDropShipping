@@ -269,6 +269,7 @@ body.bodyAdmin .basicbtn {
   text-align: center;
   padding: 2px;
   letter-spacing: 1px;
+  border-radius: 10px;
 }
 body.bodyAdmin .headerorders.adminorders-settings {
   grid-template-columns: 48px 150px 150px 112px 1fr 1fr 1fr 1fr auto;

@@ -58,15 +58,11 @@
                     </select>
                 </div>
                 <div class="searchbtn">
-                    <button id="search" class="searchbutton"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+                    <button id="search" class="searchbutton greenbutton"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
                 </div>
             </div>
 
-
-            <div class="results">
-            </div>
-
-            <div class="actions">
+            <div class="actions my-5">
                 <button class="exporsel">Export Selected Orders</button>
                 <div></div>
                 <div class="pagesize">
@@ -150,7 +146,7 @@
                             </td>
                             <td>
                                 <a href="/admin/orders/{{$ol->id}}">
-                                    <button class="view">View</button>
+                                    <button class="view greenbutton">View</button>
                                 </a>
                             </td>
                         </tr>
@@ -214,7 +210,7 @@
             $("input.checkbox:checked").each(function (index, ele) {
                 ids.push($(ele).data('id'));
             });
-            window.location.href = `/admin/orders/exports?ids=${JSON.stringify(ids)}`;
+            if (ids.length) window.location.href = `/admin/orders/exports?ids=${JSON.stringify(ids)}`;
 
         });
     });

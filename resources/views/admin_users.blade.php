@@ -110,7 +110,7 @@
 								<input type="checkbox" name="switch-button" id="switch-label{{$user->id}}" data-userid="{{$user->id}}" data-toggle="modal" data-target="#delete-product-modal" class="switch-button__checkbox change-status" @if($user->active == 1)checked @endif>
 							</td>
 							<td>
-								<a href="/admin/merchants/show/{{$user->id}}"><button class="view">View</button></a>
+								<a href="/admin/merchants/show/{{$user->id}}"><button class="view greenbutton">View</button></a>
 							</td>
 						</tr>
 						@endforeach

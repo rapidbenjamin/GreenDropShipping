@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Libraries\Magento\MagentoApi;
 use App\Libraries\Magento\MOrder;
 use App\Libraries\OrderStatus;
 use App\Log;
@@ -144,11 +145,19 @@ class OrdersController extends Controller
 		if ($user_canceled != null) {
 			$user_canceled_name = $user_canceled->name;
 		}
+		$api = MagentoApi::getInstance();
+        $criteria = [
+            'searchCriteria[filterGroups][1][filters][0][field]' => 'increment_id',
+            'searchCriteria[filterGroups][1][filters][0][value]' => $orders->magento_order_id,
+            'searchCriteria[filterGroups][1][filters][0][condition_type]' => "eq"
+        ];
+        $mg_order = $api->query('GET', 'orders', $criteria);
 
 		self::GDSLOG('View Order Detail', 'View Order Detail => ' . $orders->id);
 
 		return view('order_detail', array(
 			'order' => $orders,
+			'mg_order' => json_decode($mg_order)->items[0],
 			'osa' => $osa,
 			'fs' => $fs,
 			'os' => $os,
