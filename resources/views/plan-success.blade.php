@@ -61,7 +61,7 @@
                 <li><label>Transaction:</label> {{$user->id_recurring_application}}</li>
                 <li><label>Shopify Url:</label> {{$user->shopify_url}}</li>
                 <li><label>Current Plan:</label> {{$user->plan}}</li>
-                <a href="/plans"><button>CONTINUE</button></a>
+                <a href="/plans"><button class="greenbutton">CONTINUE</button></a>
             </ul>
 
 

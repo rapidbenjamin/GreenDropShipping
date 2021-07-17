@@ -145,7 +145,7 @@
                                                     5. Make a sale
                                                 </strong>
                                                 <p>
-                                                    When you make a sale, go to <a href="/orders">Manage Orders</a> in the GreenDropShip app.
+                                                    When you make a sale, go to <a @can('plan_view-manage-orders') href="/orders" @endcan>Manage Orders</a> in the GreenDropShip app.
 
                                                 </p>
                                             </span>

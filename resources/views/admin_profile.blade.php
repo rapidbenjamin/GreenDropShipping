@@ -26,7 +26,7 @@
 						<p style="display: none;" id="confirm-error"></p>
 					</div>
 					<div class="update-user">
-						<button class="bgVC colorBL btn btn-success" id="btn-save-user">Save</button>
+						<button class="bgVC colorBL" id="btn-save-user">Save</button>
 					</div>
 				</div>
 			</div>

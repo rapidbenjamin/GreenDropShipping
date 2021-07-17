@@ -1391,6 +1391,8 @@ angular
             });
             if (product_ids.length) {
                 event.target.disabled = true;
+                document.querySelector('.check-all-products').checked = false;
+                document.querySelector('.check-all-products').disabled = true;
                 $http.post('/ajax',{skus: product_ids})
                     .then(res=> {
                         event.target.disabled = false;
@@ -1398,6 +1400,7 @@ angular
                         var new_ids = [];
                         new_ids = imported_ids.concat(res.data);
                         window.localStorage.setItem('imported_ids', JSON.stringify(new_ids));
+                        document.querySelector('.check-all-products').disabled = false;
                         res.data.forEach(sku => {
                             document.getElementById(`add-${sku}`).hidden = true;
                             document.getElementById(`${sku}`).href = 'import-list';

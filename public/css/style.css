@@ -1558,6 +1558,13 @@ svg {
   border: none;
   cursor: pointer;
 }
+.productbox .addtoimport:hover {
+  background-color: #42b253;
+}
+.productbox .addtoimport:focus {
+  border: none;
+  outline: none;
+}
 @media (max-width: 1300px) {
   .productbox .addtoimport {
     width: 100%;
@@ -1662,10 +1669,10 @@ svg {
   .greentable tbody tr {
     display: block;
   }
-  .greentable tbody tr.productdatarow {
+  .greentable tbody tr.productdatarow, .greentable tbody tr.orderrow, .greentable tbody tr.merchantrow, .greentable tbody tr.userdatarow {
     margin-top: 40px;
   }
-  .greentable tbody tr.productdatarow:first-child {
+  .greentable tbody tr.productdatarow:first-child, .greentable tbody tr.orderrow:first-child, .greentable tbody tr.merchantrow:first-child, .greentable tbody tr.userdatarow:first-child {
     margin-top: 0;
   }
 }
@@ -2749,8 +2756,7 @@ svg {
   }
 }
 .headerorders .search input {
-  text-align: left;
-  padding-left: 20px;
+  text-align: center;
   font-size: 19px;
   color: #6a6c6f6b;
 }
@@ -2802,11 +2808,16 @@ svg {
   }
 }
 .headerorders div {
-  padding-top: 25px;
+  padding-top: 20px;
   text-align: center;
 }
 .headerorders .dates {
-  padding-top: 0px;
+  padding-top: 25px;
+}
+@media (min-width: 1100px) {
+  .headerorders .dates {
+    padding-top: 0px;
+  }
 }
 .results {
   display: grid;
@@ -2913,6 +2924,13 @@ svg {
   letter-spacing: 1px;
   border-radius: 10px;
   cursor: pointer;
+}
+.actions .pendingpay:hover {
+  background-color: #444a50;
+}
+.actions .pendingpay:focus {
+  border: none;
+  outline: none;
 }
 @media (max-width: 1100px) {
   .actions .pendingpay {
@@ -3694,6 +3712,13 @@ a.buttonget:hover{
     max-width: 250px;
     border-radius: 10px;
     cursor: pointer;
+}
+.pricecols .buttonsp .update:hover {
+  background-color: #42b253;
+}
+.pricecols .buttonsp .update:focus {
+  border: none;
+  outline: none;
 }
 
 .pricecols .buttonsp .buttonDisabled {

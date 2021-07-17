@@ -41,7 +41,7 @@ background-color: #44b955;
             	<ul class="return-page">
                 <H2>There was a problem updating your plan.  Please try again later.</H2>
 
-            	<a href="/plans"><button>CONTINUE</button></a>
+            	<a href="/plans"><button class="greenbutton">CONTINUE</button></a>
             	</ul>
             </div>
 

@@ -59,7 +59,7 @@
                        N<sup>o</sup> Order
                    </div>
                    <div class="search">
-                       <input type="text" id="txt-order-search" value="{{Request()->order}}" placeholder="Search Order">
+                       <input type="text" id="txt-order-search" value="{{Request()->order}}" placeholder="Order #">
                    </div>
                    <div class="paymentstatus">
 		                <select id="selectFS" name="selectFS">
@@ -87,25 +87,6 @@
                    	   Search</button>
                    </div>
                </div>
-
-
-               @if(Auth::user()->plan == 'basic')
-               <div class="results">
-                   <div><strong>Period</strong></div>
-                   <div>{{$basic_period_orders}}</div>
-                   <div><strong>Total Orders</strong></div>
-                   <div>
-                       <span class="badge" style="{{($total_period_orders >= env('LIMIT_ORDERS'))?'background-color:red':''}}">{{$total_period_orders}}</span> of <span class="badge">100</span>
-                   </div>
-               </div>
-
-
-               <div class="actions">
-		            <button class="btn-order-notifications pendingpay" title="Outstanding orders that require payment"> <span class="badge">{{$notifications}}</span> Pending payments</button>
-                    <div></div>
-                    <div></div>
-               </div>
-               @endif
 
                <div class="orders">
                    <table class="greentable tableorders" cellspacing="0">
@@ -165,6 +146,8 @@
                                <td>
 					                @if($ol->financial_status== App\Libraries\OrderStatus::Outstanding && ($ol->fulfillment_status != 9 && $ol->fulfillment_status != 12))
 					                <button class="payorder pay-button checkout-button checkout-button2"  data-id="{{$ol->id}}">PAY ORDER</button>
+					                @elseif($ol->fulfillment_status == 9)
+					                <button class="payorder payorderoff disabled" data-id="{{$ol->id}}">Canceled</button>
 					                @else
 					                <button class="payorder payorderoff disabled" data-id="{{$ol->id}}">PAID</button>
 					                @endif

@@ -271,6 +271,13 @@ body.bodyAdmin .basicbtn {
   letter-spacing: 1px;
   border-radius: 10px;
 }
+body.bodyAdmin .basicbtn:hover {
+  background-color: #1a6331;
+}
+body.bodyAdmin .basicbtn:hover {
+  border: none;
+  outline: none;
+}
 body.bodyAdmin .headerorders.adminorders-settings {
   grid-template-columns: 48px 150px 150px 112px 1fr 1fr 1fr 1fr auto;
 }
@@ -455,6 +462,9 @@ body.bodyAdmin .new-user #fail-user, body.bodyAdmin .profile #fail-user, body.bo
   color: #f00;
   text-align: center;
 }
+.headerorders.adminorders-settings .dates {
+  padding-top: 25px;
+}
 body.bodyAdmin .new-user .nuform button, body.bodyAdmin .profile .nuform button {
   font-size: 18px;
   color: #fff;
@@ -465,6 +475,14 @@ body.bodyAdmin .new-user .nuform button, body.bodyAdmin .profile .nuform button 
   border-radius: 10px;
   margin: 10px;
   cursor: pointer;
+  height: 40px;
+}
+body.bodyAdmin .new-user .nuform button:hover, body.bodyAdmin .profile .nuform button:hover {
+  background-color: #1a6331;
+}
+body.bodyAdmin .new-user .nuform button:focus, body.bodyAdmin .profile .nuform button:focus {
+  border: none;
+  outline: none;
 }
 @media (max-width: 400px) {
   body.bodyAdmin .new-user .nuform button, body.bodyAdmin .profile .nuform button {

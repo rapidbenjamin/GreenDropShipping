@@ -221,24 +221,24 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td><strong>TOTAL PRODUCTS</strong></td>
-                                                    <td>${{number_format($mg_order->subtotal, 2)}}</td>
+                                                    <td><strong>SUB TOTAL</strong></td>
+                                                    <td>${{number_format($order->total, 2)}}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td><strong>TOTAL SHIPPING</strong></td>
-                                                    <td>${{number_format($mg_order->shipping_amount, 2)}}</td>
+                                                    <td><strong>SHIPPING & HANDLING</strong></td>
+                                                    <td>${{number_format($order->shipping_price, 2)}}</td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>SHIPPING METHOD</strong></td>
                                                     <td>{{($order->shipping_title == null?'N/A':$order->shipping_title)}}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td><strong>SHIPPING & HANDLING</strong></td>
-                                                    <td>${{number_format($mg_order->grand_total - $mg_order->subtotal - $mg_order->shipping_amount, 2)}}</td>
+                                                    <td><strong>STORE CREDIT</strong></td>
+                                                    <td>${{$mg_order ? number_format($mg_order->grand_total - $mg_order->subtotal - $mg_order->shipping_amount, 2) : 0}}</td>
                                                 </tr>
                                                 <tr>
                                                     <td><strong>GRAND TOTAL</strong></td>
-                                                    <td>${{number_format($mg_order->grand_total, 2)}}</td>
+                                                    <td>${{$mg_order ? number_format($mg_order->grand_total, 2) : $order->total + $order->shipping_price}}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -249,10 +249,10 @@
                                     <button class="payments" id="checkout-button" data-id="{{$order->id}}">Pay Order</button>
                                     @endif
                                     @if($order->fulfillment_status== 4)
-                                    <button class="cancel" id="cancel-button" data-id="{{$order->id}}">Cancel Order</button>
+                                    <button class="cancel" id="cancel-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Order</button>
                                     @endif
                                     @if($order->financial_status== 2 && $order->fulfillment_status== 5)
-                                    <button class="cancel" id="cancel-req-button" data-id="{{$order->id}}">Cancel Request</button>
+                                    <button class="cancel" id="cancel-req-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Request</button>
                                     @endif
                                 </div>
                             </div>
@@ -273,6 +273,7 @@
         </div>
     </div>
 </div>
+<input type="text" value="" id="request_type" hidden>
 
 <script type="text/javascript">
     $(document).ready(function() {
@@ -322,18 +323,21 @@
         });
 
         $("#cancel-button").click(function() {
-            if (confirm('Do you really want to cancel the order?')) {
-                window.location.href = "{{url('orders/cancel/')}}/" + $(this).attr('data-id');
-            }
-
+            $('#modal-body').html('<h5>Do you really want to cancel the order?</h5>');
+            $('#request_type').val('cancel');
         });
 
         $("#cancel-req-button").click(function() {
-            if (confirm('Do you really want to cancel the order?')) {
-                window.location.href = "{{url('orders/cancel-request/')}}/" + $(this).attr('data-id');
-            }
-
+            $('#modal-body').html('<h5>Do you really want to cancel the order?</h5>');
+            $('#request_type').val('cancel_req');
         });
+
+        $('#confirm').click(function() {
+            if ($('#request_type').val() === 'cancel')
+                window.location.href = "{{url('orders/cancel/')}}/" + $('#cancel-button').attr('data-id');
+            else if ($('#request_type').val() === 'cancel_req')
+                window.location.href = "{{url('orders/cancel-request/')}}/" + $('#cancel-req-button').attr('data-id');
+        })
     });
 </script>
 

@@ -157,7 +157,7 @@ class OrdersController extends Controller
 
 		return view('order_detail', array(
 			'order' => $orders,
-			'mg_order' => json_decode($mg_order)->items[0],
+			'mg_order' => json_decode($mg_order)->total_count ? json_decode($mg_order)->items[0] : '',
 			'osa' => $osa,
 			'fs' => $fs,
 			'os' => $os,

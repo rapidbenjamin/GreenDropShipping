@@ -12,9 +12,7 @@
 
                 <div class="agrid">
 
-                    <img src="/img/infogray.png" srcset="/img/infogray@2x.png 2x,
-
-                         /img/infogray@3x.png 3x" style="margin:0.6rem;">
+                    <img src="/img/infogray.png" srcset="/img/infogray@2x.png 2x,/img/infogray@3x.png 3x" style="margin:0.6rem;">
 
                     <p>You have a free plan. <a href="/plans#planBottom">Click here to upgrade your plan.</a></p>
 
@@ -31,9 +29,7 @@
 
                 <div class="agrid">
 
-                    <img src="/img/infogray.png" srcset="/img/infogray@2x.png 2x,
-
-                        /img/infogray@3x.png 3x" style="margin:0.6rem;">
+                    <img src="/img/infogray.png" srcset="/img/infogray@2x.png 2x,/img/infogray@3x.png 3x" style="margin:0.6rem;">
 
                     <p>You have done an upgrade request to BASIC plan. It will be in pending status while the current payment in shopify is approved! Please try again!</a></p>
 
@@ -181,7 +177,7 @@
 
                         @if(Auth::user()->plan != 'free' && Auth::user()->membership_token != '')
 
-                        <button data-plan="free" class="bgVO colorBL greenbutton update">Downgrade</button>
+                        <button data-plan="free" data-toggle="modal" data-target="#delete-product-modal" class="bgVO colorBL greenbutton update downgrade">Downgrade</button>
 
                         @elseif(Auth::user()->plan == 'free' && Auth::user()->membership_token != '')
 
@@ -233,7 +229,7 @@
 
                         @if(Auth::user()->plan != 'basic' && Auth::user()->membership_token != '')
 
-                        <button data-plan="basic" class="bgVO colorBL update">Upgrade</button>
+                        <button data-plan="basic" class="bgVO colorBL update upgrade">Upgrade</button>
 
                         @elseif(Auth::user()->plan == 'basic' && Auth::user()->membership_token != '')
 
@@ -324,34 +320,34 @@
             });
         });
 
-        $('.update').click(function() {
+        $('.upgrade').click(function() {
+            $.post('{{url("/plans/update")}}', {
+                "_token": "{{ csrf_token() }}",
+                'plan': $(this).data('plan')
+            }, function(data) {
+                $('.token-error').hide();
+                window.location.href = data;
+            }).fail(function(data) {
+                $('.token-error').show();
+                window.location.href = "{{url('/plans/update-failure')}}";
+            });
+        });
 
-            var plan = $(this).data('plan');
-            if (plan == 'free') {
-                if (confirm('Do you really want to downgrade this app?')) {
-                    $.post('{{url("/plans/update")}}', {
-                        "_token": "{{ csrf_token() }}",
-                        'plan': plan
-                    }, function(data) {
-                        $('.token-error').hide();
-                        window.location.href = "{{url('/plans/update-success')}}";
-                    }).fail(function(data) {
-                        $('.token-error').show();
-                        window.location.href = "{{url('/plans/update-failure')}}";
-                    });
-                }
-            } else {
-                $.post('{{url("/plans/update")}}', {
-                    "_token": "{{ csrf_token() }}",
-                    'plan': plan
-                }, function(data) {
-                    $('.token-error').hide();
-                    window.location.href = data;
-                }).fail(function(data) {
-                    $('.token-error').show();
-                    window.location.href = "{{url('/plans/update-failure')}}";
-                });
-            }
+        $('.downgrade').click(function() {
+            $('#modal-body').html('<h5>Do you really want to downgrade this app?</h5>');
+        });
+
+        $('#confirm').click(function() {
+            $.post('{{url("/plans/update")}}', {
+                "_token": "{{ csrf_token() }}",
+                'plan': $('.downgrade').data('plan')
+            }, function(data) {
+                $('.token-error').hide();
+                window.location.href = "{{url('/plans/update-success')}}";
+            }).fail(function(data) {
+                $('.token-error').show();
+                window.location.href = "{{url('/plans/update-failure')}}";
+            });
         });
 
         $("div.alert button.close").click(function() {

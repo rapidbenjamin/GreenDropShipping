@@ -159,7 +159,7 @@ $(document).ready(function () {
     }
 
     var empty_msg = '*Please fill out this field.';
-    var pass_msg = 'more than 12 characters, lowercase, uppercase, number, symbol';
+    var pass_msg = '*more than 12 characters, lowercase, uppercase, number, symbol';
     $('#btn-save-user').click(function (event) {
         //validation
         var flag = true;
@@ -737,8 +737,8 @@ $(document).ready(function () {
                     <div id="migrate-actions">
                         <button class="btn-delete-products alldeletebutton redbutton mx-1">Delete</button>
                         <button class="btn-confirm-products allconfirmbutton greenbutton mx-1">Confirm</button>
-                        <button class="btn-set-profit profit mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
-                        <button class="btn-setting-profit profit mx-1" style="display: none;">Setting...</button>
+                        <button class="btn-set-profit profit greenbutton mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
+                        <button class="btn-setting-profit profit greenbutton mx-1" style="display: none;">Setting...</button>
                     </div>
                 </div>
                 <div class="pagesize">

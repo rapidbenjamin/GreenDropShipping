@@ -161,19 +161,19 @@
                                             </tr>
                                             <tr>
                                                 <td><strong>SUB TOTAL</strong></td>
-                                                <td>${{$mg_order->subtotal}}</td>
+                                                <td>${{$order->total}}</td>
                                             </tr>
                                             <tr>
                                                 <td><strong>SHIPPING & HANDLING</strong></td>
-                                                <td>${{$mg_order->shipping_amount}}</td>
+                                                <td>${{$order->shipping_price}}</td>
                                             </tr>
                                             <tr>
                                                 <td><strong>STORE CREDIT</strong></td>
-                                                <td>${{number_format($mg_order->grand_total - $mg_order->subtotal - $mg_order->shipping_amount, 2, '.', '')}}</td>
+                                                <td>${{$mg_order ? number_format($mg_order->grand_total - $mg_order->subtotal - $mg_order->shipping_amount, 2, '.', '') : 0}}</td>
                                             </tr>
                                             <tr>
                                                 <td><strong>GRAND TOTAL</strong></td>
-                                                <td>${{$mg_order->grand_total}}</td>
+                                                <td>${{$mg_order ? $mg_order->grand_total : $order->total + $order->shipping_price}}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -183,7 +183,7 @@
                                         <div class="btns">
                                             <button id='btnNotes' data-id="{{$order->id}}" class="btn bgVO colorBL">Update Notes</button>
                                             @if($order->fulfillment_status== 4)
-                                            <button class="btn bgVC bgRED colorBL" id="cancel-button" data-id="{{$order->id}}">Cancel Order</button>
+                                            <button class="btn bgVC bgRED colorBL" id="cancel-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Order</button>
                                             @endif
                                         </div>
                                     </div>
@@ -200,9 +200,11 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $("#cancel-button").click(function() {
-            if (confirm('Do you really want to cancel the order?')) {
-                window.location.href = "{{url('admin/orders/cancel')}}/" + $(this).attr('data-id');
-            }
+            $('#modal-body').html('<h5>Do you really want to cancel the order?</h5>');
+        });
+        
+        $('#confirm').click(function() {
+            window.location.href = "{{url('admin/orders/cancel')}}/" + $('#cancel-button').attr('data-id');
         });
     });
 </script>
