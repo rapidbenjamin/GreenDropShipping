@@ -630,20 +630,24 @@ svg {
 .wrapcontent .maincontent .alertan {
     background-color: #ffffff;
     min-height: 60px;
-    display: grid;
-    justify-content: center;
+    /* display: grid; */
+    /* justify-content: center; */
     border: solid 1px #dee2e6;
     margin-bottom: 30px;
 }
 .wrapcontent .maincontent .alertan.level2 {
   background-color: #fff;
   min-height: unset;
+  display: grid;
+  grid-template-columns: auto 25px;
+  align-items: center;
 }
 .wrapcontent .maincontent .alertan.level2 .agrid {
   grid-template-columns: auto;
   padding: 10px;
   font-size: 16px;
   font-weight: normal;
+  text-align: center;
 }
 .wrapcontent .maincontent .alertan.level2 .agrid span {
   color: #44b955;
@@ -1593,7 +1597,7 @@ svg {
     font-size: 23px;
   }
 }
-.greentable {
+.greentable, .resumetable {
   width: 100%;
   border: solid 1px #d7e0f1;
   background-color: #ffffff;
@@ -1665,6 +1669,9 @@ svg {
 .greentable tbody tr.productdatarow.showp td {
   border-bottom: none;
 }
+.greentable tr .nowrap {
+  white-space: nowrap;
+}
 @media (max-width: 1200px) {
   .greentable tbody tr {
     display: block;
@@ -1676,7 +1683,7 @@ svg {
     margin-top: 0;
   }
 }
-.greentable tbody tr td {
+.greentable tbody tr td, .resumetable tbody tr td {
   padding: 20px;
   border-bottom: solid 1px #d7e0f1;
   font-family: Roboto;
@@ -1694,12 +1701,12 @@ svg {
   width: 97px;
 }
 @media (max-width: 1600px) {
-  .greentable tbody tr td {
+  .greentable tbody tr td, .resumetable tbody tr td {
     font-size: 13px;
   }
 }
 @media (max-width: 1560px) {
-  .greentable tbody tr td {
+  .greentable tbody tr td, .resumetable tbody tr td {
     padding: 10px;
   }
 }
@@ -1714,7 +1721,7 @@ svg {
     display: flex;
     justify-content: center;
   }
-  .greentable tbody tr td::before {
+  .greentable tbody tr td::before, .resumetable tbody tr td::before {
     content: attr(data-label);
     float: left;
     font-weight: bold;
@@ -2856,16 +2863,22 @@ svg {
 }
 .actions {
   display: grid;
-  grid-auto-flow: column;
+  /* grid-auto-flow: column; */
+  grid-template-columns: 1fr;
   column-gap: 20px;
+  
 }
 @media (max-width: 1100px) {
   .actions {
     grid-auto-flow: dense;
-    grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     grid-row-gap: 10px;
     justify-items: center;
+  }
+}
+@media (max-width: 768px) {
+  .actions {
+    grid-template-columns: 1fr;
   }
 }
 .actions .pays {
@@ -2917,16 +2930,17 @@ svg {
 }
 .actions .pendingpay {
   color: #fff;
-  background-color: #545b62;
+  background-color: #f34c4c;
   border: none;
-  height: 36px;
+  height: 60px;
   font-weight: 700;
   letter-spacing: 1px;
   border-radius: 10px;
   cursor: pointer;
+  font-size: 21px;
 }
 .actions .pendingpay:hover {
-  background-color: #444a50;
+  background-color: #d84040;
 }
 .actions .pendingpay:focus {
   border: none;
@@ -2937,17 +2951,23 @@ svg {
     width: 100%;
   }
 }
+.actions .pendingpay span {
+  background-color: #fff;
+  color: #f34c4c;
+  border-radius: 50%;
+  padding: 3px;
+  text-align: center;
+  font-size: 24px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
 @media (max-width: 900px) {
   .actions .pendingpay {
     font-size: 13px;
   }
-}
-.actions .pendingpay span {
-  background-color: #fff;
-  color: #545b62;
-  border-radius: 10px;
-  padding: 3px;
-  text-align: center;
+  .actions .pendingpay span {
+    font-size: 16px;
+  }
 }
 .orders {
   margin-top: 10px;
@@ -3051,13 +3071,13 @@ svg {
     font-size: 12px;
   }
 }
-.tableorders .buttonge {
+/* .tableorders .buttonge {
   color: #000;
   border: none;
-  font-size: 14px;
+  font-size: 16px;
   padding: 5px;
   text-align: center;
-}
+} */
 @media (max-width: 900px) {
   .tableorders .buttonge {
     font-size: 12px;
@@ -3094,7 +3114,7 @@ svg {
 }
 .tableorders .payorder {
   color: #fff;
-  background-color: #96bf46;
+  background-color: #f34c4c;
   border: none;
   border-radius: 10px;
   font-size: 16px;
@@ -3109,7 +3129,7 @@ svg {
   outline: none;
 }
 .tableorders .payorder:hover {
-  background-color: #93b947;
+  background-color: #d84040;
 }
 @media (max-width: 1200px) {
   .tableorders .payorder {
@@ -3124,10 +3144,16 @@ svg {
 .tableorders .payorder.bgGM {
   background-color: #6c757d;
 }
-.tableorders .payorder.disabled {
+.tableorders .payorder.paid {
   background-color: #fff;
   color: #1A6E33;
-  border: 1px solid #1A6E33;
+  /* border: 1px solid #1A6E33; */
+  font-weight: bolder;
+}
+.tableorders .payorder.canceled {
+  background-color: #fff;
+  color: #929292;
+  /* border: 1px solid #929292; */
 }
 .ordertable {
   border: solid 1px #d7e0f1;
@@ -3137,49 +3163,22 @@ svg {
 .ordertable .headerorder {
   display: grid;
   grid-auto-flow: column;
-  font-size: 18px;
+  font-size: 21px;
   color: #6a6c6f;
   align-content: center;
-  justify-content: flex-start;
-  border-bottom: 1px solid #d7e0f1;
-}
-@media (max-width: 1200px) {
-  .ordertable .headerorder {
-    grid-template-columns: 1fr 1fr;
-    grid-auto-flow: dense;
-  }
-}
-@media (max-width: 1600px) {
-  .ordertable .headerorder {
-    font-size: 14px;
-  }
-}
-.ordertable .headerorder .norder {
-  padding-left: 25px;
-  font-weight: 700;
-  background-color: #ededed;
-}
-@media (max-width: 1200px) {
-  .ordertable .headerorder .norder {
-    padding-left: 20px;
-  }
-}
-.ordertable .headerorder .date {
-  font-weight: 700;
-  background-color: #ededed;
-}
-.ordertable .headerorder div {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  padding-left: 20px;
-  padding-right: 20px;
-  border-right: 1px solid #d7e0f1;
   text-align: center;
 }
-@media (max-width: 1200px) {
+.ordertable .headerorder .date div {
+  padding: 5px;
+  color: #000;
+}
+.ordertable .headerorder .date p {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+@media (max-width: 1600px) {
   .ordertable .headerorder div {
-    text-align: left;
-    border-bottom: 1px solid #d7e0f1;
+    font-size: 15px;
   }
 }
 .ordertable .otawrap {
@@ -3200,7 +3199,7 @@ svg {
   }
 }
 .ordertable .box {
-  border: solid 1px #d7e0f1;
+  /* border: solid 1px #d7e0f1; */
   margin-bottom: 23px;
   margin-top: 20px;
 }
@@ -3267,6 +3266,7 @@ svg {
   column-gap: 10px;
   grid-row-gap: 15px;
   margin-bottom: 20px;
+  margin-top: 20px;
 }
 .ordertable .box .formg label {
   color: #6a6c6f;
@@ -3292,6 +3292,12 @@ svg {
     font-size: 14px;
   }
 }
+/* @media (max-width: 1200px) {
+  .ordertable .box .resume tbody tr {
+    display: grid;
+    grid-auto-flow: column;
+  }
+} */
 .ordertable .box .resume .header {
   text-align: center;
   font-weight: 700;
@@ -3299,6 +3305,12 @@ svg {
 }
 .ordertable .box .resume tbody tr td {
   text-align: right;
+}
+.ordertable .box .resume tbody tr td:first-child {
+  text-align: left;
+}
+.ordertable .box .resume tbody tr:first-child td:first-child {
+  text-align: center;
 }
 @media (max-width: 1600px) {
   .ordertable .box .greentable thead tr th {
@@ -3436,14 +3448,9 @@ svg {
 }
 .ordertable .productbtn {
   display: grid;
-  grid-template-columns: 200px 200px;
-  justify-content: space-evenly;
+  grid-template-columns: 200px;
+  justify-content: flex-end;
   column-gap: 20px;
-}
-@media (max-width: 1300px) {
-  .ordertable .productbtn {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 @media (max-width: 600px) {
   .ordertable .productbtn {
@@ -3467,29 +3474,32 @@ svg {
 .ordertable .productbtn .payments {
   background-color: #44b955;
   color: #fff;
-  border: solid 1px #44b955;
-    padding: 10px;
-    border-radius: 15px;
-    font-weight: bold;
+  border: #44b955;
+  padding: 10px;
+  border-radius: 15px;
+  font-weight: bold;
+  font-size: 16px;
   }
   .ordertable .productbtn .payments:hover {
-    background-color: #42b253;
+    background-color: #41a14f;
+    border: #41a14f;
   }
   .ordertable .productbtn .payments:focus {
     border: none;
     outline: none;
   }
   .ordertable .productbtn .cancel {
-  background-color: #e30613;
+  background-color: #b2b2b2;
   color: #fff;
-  border: solid 1px #e30613;
+  border: solid 1px #b2b2b2;
   padding: 10px;
   border-radius: 15px;
   font-weight: bold;
+  font-size: 16px;
 }
 .ordertable .productbtn .cancel:hover {
-  background: #d30715;
-  border: solid 1px #d30715;
+  background: #929292;
+  border: solid 1px #929292;
 }
 .ordertable .productbtn .cancel:focus {
   border: none;
@@ -3821,15 +3831,25 @@ ul.subcategories-content li.hide {
   padding-left: 40px;
   font-weight: 700;
 }
+button.back {
+  color: #fff;
+  background-color: #44b955;
+}
 #save-address {
   background-color: #44b955;
   padding: 8px;
   color: #fff;
   text-align: center;
   border: none;
-  width: 30%;
+  min-width: 200px;
   margin-bottom: 13px;
   border-radius: 10px;
+  font-size: 16px;
+}
+@media (max-width: 600px) {
+  #save-address {
+    width: 100%;
+  }
 }
 #save-address:hover {
   background-color: #42b253;

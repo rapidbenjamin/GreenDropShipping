@@ -3,11 +3,7 @@
 @section('content')
 <div class="indexContent orderDetailContent" data-page_name="ORDER DETAIL">
     <div class="maincontent">
-        <p class="back" data-url='{{ url()->previous() }}'>
-            <a href="{{ url()->previous() }}">
-                < BACK
-            </a>
-        </p>
+        <a href="{{ url()->previous() }}"><button class="btn btn-lg mx-3 my-2 back">< BACK</button></a>
         <div class="wrapinsidecontent">
             @if(Auth::user()->plan == 'free')
             <div class="alertan">
@@ -28,33 +24,33 @@
 
             <div class="screen-order-detail">
                 <div class="ordertable">
-                    <div class="headerorder">
-                        <div class="norder">
-                            Shopify Order
-                        </div>
-                        <div>
-                            {{$order->order_number_shopify}}
-                        </div>
-
-                        @if($order->magento_order_id)
-                        <div class="date">
-                            GDS Order
-                        </div>
-                        <div>
-                            #{{$order->magento_order_id}}
-                        </div>
-                        @endif
-
-                        <div class="date">
-                            Date
-                        </div>
-                        <div>
-                            {{$order->created_at}}
-                        </div>
-                    </div>
                     <div class="otawrap">
                         <div class="twocols2">
                             <div>
+                                <div class="headerorder">
+                                    <div class="date">
+                                        <p>Shopify Order</p>
+                                        <div>
+                                            {{$order->order_number_shopify}}
+                                        </div>
+                                    </div>
+            
+                                    @if($order->magento_order_id)
+                                    <div class="date">
+                                        <p>GDS Order</p>
+                                        <div>
+                                            #{{$order->magento_order_id}}
+                                        </div>
+                                    </div>
+                                    @endif
+            
+                                    <div class="date">
+                                        <p>Date</p>
+                                        <div>
+                                            {{$order->created_at}}
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="box">
                                     <h3>Customer's Information</h3>
                                     <div class="cwrap">
@@ -69,17 +65,17 @@
                                                 <strong>Shipping Information</strong>
                                             </a><br>
                                             @if($order->shipping_title)
-                                            <div class="sod-row">
-                                                <label>Shipping</label>
-                                                <value>{{$order->shipping_title}}</value>
-                                            </div>
-                                            @if($order->tracking_code)
-                                            <div class="sod-row">
-                                                <label>Tracking Number</label>
-                                                <value>{{$order->tracking_code}}</value>
-                                            </div>
-                                            @endif
-                                            @endif
+                                        <div class="sod-row">
+                                            <label>Shipping</label>
+                                            <value>{{$order->shipping_title}}</value>
+                                        </div>
+                                        @if($order->tracking_code)
+                                        <div class="sod-row">
+                                            <label>Tracking Number</label>
+                                            <value>{{$order->tracking_code}}</value>
+                                        </div>
+                                        @endif
+                                        @endif
                                         </p>
                                         <div class="box addres">
                                             <form action="{{url('/save-address')}}" method="post">
@@ -98,21 +94,23 @@
 
                                                         <label for="">City</label>
                                                         <input name="city" type="text" value="{{$osa->city}}">
-
+                                                        
                                                         <label for="">State</label>
                                                         <select name="state">
                                                             @foreach ($states as $key=>$value)
-
+                                                            
                                                             @if($key==$state_key)
                                                             <option value="{{$key}}" selected>{{$value}}</option>
                                                             @else
                                                             <option value="{{$key}}">{{$value}}</option>
-
+                                                            
                                                             @endif
                                                             @endforeach
                                                         </select>
+                                                        <label>Country</label>
+                                                        <span>{{$osa->country}}</span>
                                                     </div>
-                                                    <p><strong>Country:</strong> <br> {{$osa->country}}</p>
+                                                    <!-- <p><strong>Country:</strong> <br> {{$osa->country}}</p> -->
 
                                                     @if($order->fulfillment_status== 4)
                                                     <button class="" id="save-address">Save</button>
@@ -148,13 +146,13 @@
                                 <div class="states">
                                     <div>
                                         <p>Order Status</p>
-                                        <div class="paid" style="background-color: {{$fs->color}};">
+                                        <div class="paid" style="background-color: transparent;">
                                             <span>{{$fs->name}}</span>
                                         </div>
                                     </div>
                                     <div>
                                         <p>Payment Status</p>
-                                        <div class="inprocess" style="background-color: {{$os->color}};">
+                                        <div class="inprocess" style="background-color: transparent;">
                                             <span>{{$os->name}}</span>
                                         </div>
                                     </div>
@@ -212,12 +210,11 @@
                                             @endforeach
                                         </tbody>
                                     </table>
-                                    <div class="cwrap">
-                                        <table class="greentable resume" cellspacing="0">
+                                        <table class="resumetable resume my-5" cellspacing="0">
                                             <tbody>
                                                 <tr>
                                                     <td colspan="2" class="header">
-                                                        ORDER RESUME
+                                                        ORDER SUMMARY
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -242,17 +239,16 @@
                                                 </tr>
                                             </tbody>
                                         </table>
-                                    </div>
                                 </div>
                                 <div class="productbtn">
                                     @if($order->financial_status== App\Libraries\OrderStatus::Outstanding && ($order->fulfillment_status != 9 && $order->fulfillment_status != 12))
-                                    <button class="payments" id="checkout-button" data-id="{{$order->id}}">Pay Order</button>
+                                    <button class="payments my-1" id="checkout-button" data-id="{{$order->id}}">Pay Order</button>
                                     @endif
                                     @if($order->fulfillment_status== 4)
-                                    <button class="cancel" id="cancel-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Order</button>
+                                    <button class="cancel my-1" id="cancel-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Order</button>
                                     @endif
                                     @if($order->financial_status== 2 && $order->fulfillment_status== 5)
-                                    <button class="cancel" id="cancel-req-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Request</button>
+                                    <button class="cancel my-1" id="cancel-req-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Request</button>
                                     @endif
                                 </div>
                             </div>
@@ -324,11 +320,15 @@
 
         $("#cancel-button").click(function() {
             $('#modal-body').html('<h5>Do you really want to cancel the order?</h5>');
+            $('#confirm').text('Cancel Order');
+            $('#cancel').text('Do Not Cancel');
             $('#request_type').val('cancel');
         });
 
         $("#cancel-req-button").click(function() {
             $('#modal-body').html('<h5>Do you really want to cancel the order?</h5>');
+            $('#confirm').text('Cancel Order');
+            $('#cancel').text('Do Not Cancel');
             $('#request_type').val('cancel_req');
         });
 

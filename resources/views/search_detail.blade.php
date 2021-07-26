@@ -46,10 +46,11 @@
                 <div>
                     <div class="productinfo">
                         <h2>{{ $product->name }}</h2>
-                        <p class="price">$ {{ $product->price }} USD</p>
+                        <p class="price">Price US$ {{ $product->price }}</p>
                         <p>Stock: {{ $product->stock }}</p>
                         <p>Brand: {{ $product->brand }}</p>
                         <p>SKU: {{ $product->sku }}</p>
+                        <p>Storage: {{ $product->stock_info == 'null' ? '' : $product->stock_info }}</p>
                     </div>
                     <div class="description">
                         <h3>Description</h3>

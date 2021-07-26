@@ -51,57 +51,39 @@ class OrdersController extends Controller
 			->join('status as st2', 'st2.id', 'orders.fulfillment_status')
 			->where('orders.id_customer', Auth::user()->id);
 
-		$searchBy = 'Search By';
-		if ($request->order != '' && $request->order > 0) {
-			$order_list = $order_list->where('order_number_shopify', '#' . $request->order);
-			$searchBy .= ' order number => ' . $request->order;
-		} else {
-			if ($request->from != '' && $request->to != '') {
-				$searchBy .= ' dates => ' . $request->from  . '-' . $request->to;
-				$order_list = $order_list->whereDate('created_at', '>=', $request->from)
-					->whereDate('created_at', '<=', $request->to);
-			}
-		}
-
-		$current_period = MonthlyRecurringPlan::where('current', 1)->where('merchant_id', Auth::user()->id)->first();
-		$total_period_orders = 0;
-		$basic_period_orders = '';
-		if (Auth::user()->plan == 'basic' && $current_period != null) {
-			$period_orders = MonthlyRecurringPlanOrders::where('period_id', $current_period->id)->Join('orders', 'orders.id', '=', 'monthly_recurring_plan_orders.order_id')->get();
-			$total_period_orders = $period_orders->filter(function ($value, $key) {
-				return $value->role != 'admin';
-			})->count();
-			$basic_period_orders = $current_period->start_date . ' - ' . $current_period->end_date;
-		}
-
-		$notifications = Order::where('financial_status', OrderStatus::Outstanding)->where('fulfillment_status', OrderStatus::NewOrder)->where('orders.id_customer', Auth::user()->id)->count();
+		$notifications = Order::select(
+			'orders.*',
+			'osa.first_name',
+			'osa.last_name',
+			'st1.name as status1',
+			'st1.color as color1',
+			'st2.name as status2',
+			'st2.color as color2',
+			'st1.id as financial_status',
+			'st2.id as fulfillment_status'
+		)
+			->join('order_shipping_address as osa', 'orders.id', 'osa.id_order')
+			->join('status as st1', 'st1.id', 'orders.financial_status')
+			->join('status as st2', 'st2.id', 'orders.fulfillment_status')
+			->where('orders.id_customer', Auth::user()->id)
+			->where('financial_status', OrderStatus::Outstanding)
+			->where('fulfillment_status', OrderStatus::NewOrder)
+			->where('orders.id_customer', Auth::user()->id)
+			->count();
+		$is_notification = false;
 		if ($request->notifications != '' && $request->notifications) {
-			$searchBy .= ' pending payments';
+			$is_notification = true;
 			$order_list = $order_list->where('financial_status', OrderStatus::Outstanding)->where('fulfillment_status', OrderStatus::NewOrder);
 		}
-		if ($request->st1 > 0) {
-			$searchBy .= ' financial state => ' . $request->st1;
-			$order_list = $order_list->where('orders.financial_status', $request->st1);
-		}
 
-		if ($request->st2 > 0) {
-			$searchBy .= ' order state => ' . $request->st2;
-			$order_list = $order_list->where('orders.fulfillment_status', $request->st2);
-		}
-
-
-		self::GDSLOG('Search Orders', ($searchBy == 'Search By' ? 'View Orders' : $searchBy));
+		$total_count = $order_list->count();
 
 		return view('orders', array(
-			'order_list' => $order_list->orderBy('orders.id_shopify', 'desc')->paginate(50),
-			'from' => $request->from,
-			'to' => $request->to,
-			'order' => $request->order,
-			'total_period_orders' => $total_period_orders,
-			'basic_period_orders' => $basic_period_orders,
-			'order_limit' => env('LIMIT_ORDERS', 1),
+			'order_list' => $order_list->orderBy('orders.id', 'desc')->paginate(10),
 			'notifications' => $notifications,
-			'status' => Status::get()
+			'is_notification' => $is_notification,
+			'status' => Status::get(),
+			'total_count' => $total_count
 		));
 	}
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="https://cdn.shortpixel.ai/spai/q_lossy+ret_img/https://greendropship.com/wp-content/uploads/2017/06/Allen-favicon1-1-e1497849113735.png" data-spai-eager="1" sizes="32x32">
+    <link rel="icon" href="https://greendropship.com/wp-content/uploads/2017/06/Allen-favicon1-1-e1497849113735.png" data-spai-eager="1" sizes="32x32">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -384,7 +384,7 @@
         </div>
         <div class="modal-footer" id="modal-footer" style="display:flex">
             <button class="btn btn-success" id="confirm" data-dismiss="modal">Ok</button>
-            <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button class="btn btn-secondary" id="cancel" data-dismiss="modal">Cancel</button>
         </div>
     </div>
 

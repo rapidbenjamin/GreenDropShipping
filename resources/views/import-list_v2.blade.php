@@ -197,7 +197,7 @@
                                         </td>
                                         <td data-label="COST" class="w100">
                                             <div class="costgrid">
-                                                $<span id="cost{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}">{{$ap->price}}</span>
+                                                US$<span id="cost{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}">{{$ap->price}}</span>
                                             </div>
                                         </td>
                                         <td data-label="PROFIT (%) " class="w100">
@@ -208,7 +208,7 @@
                                         </td>
                                         <td data-label="PRICE" class="w100">
                                             <div class="inputprice">
-                                                $<input type="text" style="width: 50%; text-align:center;" class="box-price" id="price{{$ap->id_import_list}}" data-price="{{$ap->price}}" data-id="{{$ap->id_import_list}}" value="{{number_format($ap->price * (100 + $profit) / 100, 2,'.','')}}">
+                                                US$<input type="text" style="width: 50%; text-align:center;" class="box-price" id="price{{$ap->id_import_list}}" data-price="{{$ap->price}}" data-id="{{$ap->id_import_list}}" value="{{number_format($ap->price * (100 + $profit) / 100, 2,'.','')}}">
                                             </div>
                                         </td>
                                     </tr>
@@ -419,7 +419,6 @@
                             $('.btn-import-list-delete-all').prop('disabled', false);
                             $('#btn-import-list-sending').hide();
                             $('#btn-import-list-send-all').show();
-                            console.log(data);
                             for (const key in data.id_shopify) {
                                 $(`.btn-import-list-send-${data.id_shopify[key]}`).hide();
                                 $(`.btn-import-list-send2-${data.id_shopify[key]}`).show();

@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <div class="pagesize">
-                    <span class="font-weight-bold">Size:</span>
+                    <span>Show</span>
                     <select name="PageSize" id="page_size">
                         <option value="10">10</option>
                         <option value="20">20</option>
@@ -88,7 +88,7 @@
                             </td>
                             <td data-label="COST GDS">
                                 @if($product->type == 'migration')
-                                <span id="cost-{{$product->id_shopify}}">${{number_format($product->cost,2,'.','')}}</span>
+                                <span id="cost-{{$product->id_shopify}}" class="nowrap">US$ {{number_format($product->cost,2,'.','')}}</span>
                                 @endif
                             </td>
                             <td data-label="PROFIT">
@@ -99,7 +99,7 @@
                                 @endif
                             </td>
                             <td data-label="RETAIL PRICE">
-                                <span id="price-{{$product->id_shopify}}">${{number_format($product->price,2,'.','')}}</span>
+                                <span id="price-{{$product->id_shopify}}" class="nowrap">US$ {{number_format($product->price,2,'.','')}}</span>
                             </td>
                             <td data-label="SKU">
                                 {{$product->sku}}
@@ -414,7 +414,7 @@
                     profit_str = `<div id="profit">
                         <input type="text" style="text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
                         %</div>`;
-                    cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(product.cost).toFixed(2)}</span>`;
+                    cost_str = `<span id="cost-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.cost).toFixed(2)}</span>`;
                 } else {
                     button_str = `<button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
                                     <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
@@ -440,7 +440,7 @@
                         ${profit_str}
                     </td>
                     <td data-label="RETAIL PRICE">
-                        <span id="price-${product.id_shopify}">$${parseFloat(product.price).toFixed(2)}</span>
+                        <span id="price-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.price).toFixed(2)}</span>
                     </td>
                     <td data-label="SKU">
                         ${product.sku}
@@ -458,16 +458,16 @@
         var id_product = $(this).data('id');
         var cost = $('#cost-' + id_product).text();
         var profit = $(this).val();
-        var value = cost.substr(1);
+        var value = cost.substr(4);
         if (profit > 0) {
-            value = parseFloat((cost.substr(1) * (100 + profit * 1)) / 100).toFixed(2);
+            value = parseFloat((cost.substr(4) * (100 + profit * 1)) / 100).toFixed(2);
         }
         $.getJSON(ajax_link, {
             action: 'change-profit',
             sku: $(this).data('sku'),
             profit: profit
         }, function (res) {
-            $('#price-' + id_product).text(`$${value}`);
+            $('#price-' + id_product).text(`US$ ${value}`);
         })
     });
 </script>

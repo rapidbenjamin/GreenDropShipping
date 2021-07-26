@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\DashboardSteps;
 use App\ImportList;
+use App\Libraries\OrderStatus;
 use App\Libraries\Shopify\ShopifyAdminApi;
 use App\MyProducts;
 use App\Settings;
@@ -453,7 +454,7 @@ class AjaxController extends Controller
             if ($parameters['active'] != '')
                 $merchants_list = $merchants_list->where('active', $parameters['active']);
             $total_count = $merchants_list->count();
-            $merchants_list = $merchants_list->orderBy('users.id', 'asc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
+            $merchants_list = $merchants_list->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             return json_encode([
                 'merchants' => $merchants_list,
                 'page_number' => $page_number,
@@ -484,6 +485,82 @@ class AjaxController extends Controller
                 ->where('shopify_url', 'like', '%' . $parameters['shopify_url'] . '%')
                 ->orderBy('shopify_url')->pluck('shopify_url');
             return json_encode(['urls' => $urls]);
+        }
+
+        if ($parameters['action'] == 'my-orders') {
+            $page_number = $parameters['page_number'];
+            $page_size = $parameters['page_size'];
+            $order_list = Order::select(
+                'orders.*',
+                'osa.first_name',
+                'osa.last_name',
+                'st1.name as status1',
+                'st1.color as color1',
+                'st2.name as status2',
+                'st2.color as color2',
+                'st1.id as financial_status',
+                'st2.id as fulfillment_status'
+            )
+                ->join('order_shipping_address as osa', 'orders.id', 'osa.id_order')
+                ->join('status as st1', 'st1.id', 'orders.financial_status')
+                ->join('status as st2', 'st2.id', 'orders.fulfillment_status')
+                ->where('orders.id_customer', Auth::user()->id);
+    
+            if ($parameters['order_number'] != '' && $parameters['order_number'] > 0) {
+                $order_list = $order_list->where('order_number_shopify', '#' . $parameters['order_number']);
+            }
+
+            if ($parameters['from'] != '' && $parameters['to'] != '') {
+                $order_list = $order_list->whereDate('created_at', '>=', $parameters['from'])
+                    ->whereDate('created_at', '<=', $parameters['to']);
+            }
+
+            
+            if ($parameters['notifications'] != '' && $parameters['notifications']) {
+                $order_list = $order_list->where('financial_status', OrderStatus::Outstanding)
+                    ->where('fulfillment_status', OrderStatus::NewOrder);
+            }
+
+            if ($parameters['payment_status'] > 0) {
+                $order_list = $order_list->where('orders.financial_status', $parameters['payment_status']);
+            }
+    
+            if ($parameters['order_state'] > 0) {
+                $order_list = $order_list->where('orders.fulfillment_status', $parameters['order_state']);
+            }
+            $notifications = Order::select(
+                'orders.*',
+                'osa.first_name',
+                'osa.last_name',
+                'st1.name as status1',
+                'st1.color as color1',
+                'st2.name as status2',
+                'st2.color as color2',
+                'st1.id as financial_status',
+                'st2.id as fulfillment_status'
+            )
+                ->join('order_shipping_address as osa', 'orders.id', 'osa.id_order')
+                ->join('status as st1', 'st1.id', 'orders.financial_status')
+                ->join('status as st2', 'st2.id', 'orders.fulfillment_status')
+                ->where('orders.id_customer', Auth::user()->id)
+                ->where('financial_status', OrderStatus::Outstanding)
+                ->where('fulfillment_status', OrderStatus::NewOrder)
+                ->where('orders.id_customer', Auth::user()->id)
+                ->count();
+            if ($parameters['notifications'] != '' && $parameters['notifications']) {
+                $order_list = $order_list->where('financial_status', OrderStatus::Outstanding)->where('fulfillment_status', OrderStatus::NewOrder);
+            }
+            $total_count = $order_list->count();
+            $orders = $order_list->orderBy('orders.id', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size);
+            return json_encode([
+                'my_orders' => [
+                    'orders' => $orders->get(),
+                    'notifications' => $notifications,
+                ],
+                'total_count' => $total_count,
+                'page_size' => $page_size,
+                'page_number' => $page_number,
+            ]);
         }
     }
 

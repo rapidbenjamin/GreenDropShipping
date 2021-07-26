@@ -307,7 +307,12 @@ $(document).ready(function () {
     $('#mainlogo').click(function () {
         if($('#role').val() == 'admin') window.location.href = '/admin/dashboard';
         else window.location.href = '/';
-    })
+    });
+
+    $('.fa-close').click(function(e) {
+        e.target.parentElement.remove();
+    });
+
     let pathname = window.location.pathname;
     function getAction() {
         var action = '';
@@ -329,10 +334,13 @@ $(document).ready(function () {
         if (pathname == '/admin/users') {
             action = 'admin-users';
         }
+        if (pathname == '/orders') {
+            action = 'my-orders';
+        }
         return action;
     }
 
-    if (pathname == '/my-products' || pathname == '/import-list' || pathname == '/migrate-products' || pathname == '/admin/orders' || pathname == '/admin/merchants' || pathname == '/admin/users') {
+    if (pathname == '/my-products' || pathname == '/import-list' || pathname == '/migrate-products' || pathname == '/admin/orders' || pathname == '/admin/merchants' || pathname == '/admin/users'|| pathname == '/orders') {
         $('#pagination').html(`<div class="pagination">
             <ul class="pagination" role="navigation">
                 <li class="page-item" id="prev">
@@ -381,7 +389,7 @@ $(document).ready(function () {
         var flag = true;
         var action = getAction();
         if (action == 'admin-orders') {
-            flag = orderSearchPermission();
+            flag = adminOrderSearchPermission();
             if (flag)
                 Object.assign(parameters, {
                     from: $('#dateFrom').val(),
@@ -390,6 +398,20 @@ $(document).ready(function () {
                     merchant_name: $('#merchant').val().trim(),
                     payment_status: $('#paymentstatus').val(),
                     order_state: $('#orderstate').val(),
+                });
+        }
+        if (action == 'my-orders') {
+            flag = orderSearchPermission();
+            if (flag)
+                var urlParams = new URLSearchParams(window.location.search);
+                var notifications = urlParams.getAll('notifications');
+                Object.assign(parameters, {
+                    from: $('#date_from').val(),
+                    to: $('#date_to').val(),
+                    order_number: $('#order_id').val().trim(),
+                    payment_status: $('#payment_status').val(),
+                    order_state: $('#order_state').val(),
+                    notifications: notifications[0]
                 });
         }
         if (action == 'admin-merchants') {
@@ -423,6 +445,8 @@ $(document).ready(function () {
                     showMerchants(res.merchants);
                 } else if(res.users) {
                     showUsers(res.users);
+                } else if(res.my_orders) {
+                    showMyOrders(res.my_orders);
                 }
             })
     }
@@ -465,14 +489,14 @@ $(document).ready(function () {
                 <td data-label="PRODUCT NAME">
                     <a href="search-products/${product.id}" target="_blank" id="name-${product.id_shopify}">${product.name }</a>
                 </td>
-                <td data-label="COST GDS">
-                    $${parseFloat(product.price).toFixed(2)}
+                <td data-label="COST GDS" class="nowrap">
+                    US$ ${parseFloat(product.price).toFixed(2)}
                 </td>
                 <td data-label="PROFIT">
                     ${product.profit}%
                 </td>
-                <td data-label="RETAIL PRICE">
-                    $${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}
+                <td data-label="RETAIL PRICE" class="nowrap">
+                    US$ ${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}
                 </td>
                 <td data-label="SKU">
                     ${product.sku}
@@ -495,12 +519,12 @@ $(document).ready(function () {
                         </div>
                         <div class="productdata">
                             <h3>${product.name}</h3>
-                            <p class="price">Price $${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}</p>
+                            <p class="price">Price US$ ${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}</p>
                             <p>
                                 Stock: ${product.stock}
                             </p>
                             <p>
-                                Cost: $${parseFloat(product.price).toFixed(2)}
+                                Cost: US$ ${parseFloat(product.price).toFixed(2)}
                             </p>
                             <p>
                                 Profit: ${product.profit}%
@@ -555,7 +579,7 @@ $(document).ready(function () {
                 <div class="producttabs">
                     <div class="headertabs">
                         <div class="checkt">
-                            <input type="checkbox" id="check-${product.id_import_list}" class="checkbox" style="display: block;">
+                            <input type="checkbox" id="check-${product.id_import_list}" class="checkbox" style="display: block; width: 20px; height: 20px;">
                         </div>
                         <div class="tabs">
 
@@ -666,7 +690,7 @@ $(document).ready(function () {
                                         </td>
                                         <td data-label="COST" class="w100">
                                             <div class="costgrid">
-                                                $<span id="cost${product.id_import_list}" data-id="${product.id_import_list}">${parseFloat(product.price).toFixed(2)}</span>
+                                                US$<span id="cost${product.id_import_list}" data-id="${product.id_import_list}">${parseFloat(product.price).toFixed(2)}</span>
                                             </div>
                                         </td>
                                         <td data-label="PROFIT (%) " class="w100">
@@ -677,7 +701,7 @@ $(document).ready(function () {
                                         </td>
                                         <td data-label="PRICE" class="w100">
                                             <div class="inputprice">
-                                                $<input type="text" style="width: 50%; text-align:center;" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat(product.price * (100 + data.profit) / 100).toFixed(2)}">
+                                                US$<input type="text" style="width: 50%; text-align:center;" class="box-price" id="price${product.id_import_list}" data-price="${product.price}" data-id="${product.id_import_list}" value="${parseFloat(product.price * (100 + data.profit) / 100).toFixed(2)}">
                                             </div>
                                         </td>
                                     </tr>
@@ -806,7 +830,7 @@ $(document).ready(function () {
                 profit_str = `<div id="profit">
                     <input type="text" style="text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
                     %</div>`;
-                cost_str = `<span id="cost-${product.id_shopify}">$${parseFloat(product.cost).toFixed(2)}</span>`;
+                cost_str = `<span id="cost-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.cost).toFixed(2)}</span>`;
             } else {
                 button_str = `<button class="btn-mp-delete deletebutton redbutton" id="delete-${product.id_shopify}" data-migproductid="${product.id_shopify}">Delete</button>
                                 <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
@@ -832,7 +856,7 @@ $(document).ready(function () {
                     ${profit_str}
                 </td>
                 <td data-label="RETAIL PRICE">
-                    <span id="price-${product.id_shopify}">$${parseFloat(product.price).toFixed(2)}</span>
+                    <span id="price-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.price).toFixed(2)}</span>
                 </td>
                 <td data-label="SKU">
                     ${product.sku}
@@ -846,7 +870,7 @@ $(document).ready(function () {
     }
 
     $("#search").click(function(e) {
-        var flag = orderSearchPermission();
+        var flag = adminOrderSearchPermission();
         if (flag) {
             var parameters = {
                 action: getAction(),
@@ -867,13 +891,9 @@ $(document).ready(function () {
 
     });
 
-    function orderSearchPermission() {
+    function adminOrderSearchPermission() {
         var from = $('#dateFrom').val();
         var to = $('#dateTo').val();
-        var order_number = $('#idOrder').val().trim();
-        var merchant_name = $('#merchant').val().trim();
-        var payment_status = $('#paymentstatus').val();
-        var order_state = $('#orderstate').val();
         var flag = true;
         if (from != '' && to != '')
             if (moment(from).isAfter(moment(to).format('YYYY-MM-DD'))) {
@@ -942,10 +962,8 @@ $(document).ready(function () {
                     <input type="checkbox" name="switch-button" id="switch-label${merchant.id}" data-merchantid="${merchant.id}" data-toggle="modal" data-target="#delete-product-modal" class="switch-button__checkbox change-status" ${merchant.active && 'checked'}>
                 </td>
                 <td class="btngroup">
-
                     <button class="view greenbutton detail-merchants" data-merchantid="${merchant.id}">View</button>
                     <button class="payorder orders-customers" data-merchantid="${merchant.id}">Orders</button>
-
                 </td>
             </tr>`;
         });
@@ -1098,4 +1116,90 @@ $(document).ready(function () {
         getMerchantData();
     });
 
+    $(".btn-order-search").click(function() {
+        var flag = orderSearchPermission();
+        if (flag) {
+            var urlParams = new URLSearchParams(window.location.search);
+            var notifications = urlParams.getAll('notifications');
+            var parameters = {
+                action: getAction(),
+                page_size: $('#page_size').val(),
+                page_number: 1,
+                from: $('#date_from').val(),
+                to: $('#date_to').val(),
+                order_number: $('#order_id').val().trim(),
+                payment_status: $('#payment_status').val(),
+                order_state: $('#order_state').val(),
+                notifications: notifications[0]
+            }
+            $.getJSON(ajax_link, parameters, function(res) {
+                console.log(res);
+                pagination(res);
+                showMyOrders(res.my_orders);
+            });
+        }
+
+    });
+
+    function orderSearchPermission() {
+        var from = $('#date_from').val();
+        var to = $('#date_to').val();
+        var flag = true;
+        if (from != '' && to != '')
+            if (moment(from).isAfter(moment(to).format('YYYY-MM-DD'))) {
+                flag = false;
+                $('#modal-body').html(`<h5>Invalid date range</h5>`);
+                $('#modal-footer').hide();
+                $('.btn-order-search').attr('data-toggle', 'modal');
+                $('.btn-order-search').attr('data-target', '#delete-product-modal');
+            } else $('.btn-order-search').attr('data-toggle', '');
+        return flag;
+    }
+
+    function showMyOrders (data) {
+        let str = '';
+        data.orders.forEach(order => {
+            let button_str = '';
+            if (order.financial_status == 1 && order.fulfillment_status != 9 && order.fulfillment_status != 12)
+                button_str = `<button class="payorder pay-button checkout-button" data-id="${order.id}" data-toggle="modal" data-target="#delete-product-modal">PAY ORDER</button>`;
+            else if (order.fulfillment_status == 9)
+                button_str = `<button class="payorder payorderoff canceled" data-id="${order.id}">Canceled</button>`;
+            else
+                button_str = `<button class="payorder payorderoff paid" data-id="${order.id}">Paid</button>`;
+
+            str += `<tr class="productdatarow">
+                <td data-label="ORDER #">
+                    ${order.order_number_shopify}
+                </td>
+                <td data-label="DATE">
+                    ${order.created_at}
+                </td>
+                <td data-label="CUSTOMER NAME">
+                    ${order.first_name} ${order.last_name}
+                </td>
+                <td data-label="TOTAL TO PAY">
+                    $${parseFloat(order.total + order.shipping_price).toFixed(2)}
+                </td>
+                <td>
+                    <div class="buttonge">
+                        ${order.status1}
+                    </div>
+                </td>
+                <td>
+                    <div class="buttonge">
+                        ${order.status2}
+                    </div>
+                </td>
+                <td>
+                    ${button_str}
+                </td>
+                <td>
+                    <a href="/orders/${order.id}"><button class="view greenbutton">VIEW</button></a>
+                </td>
+            </tr>`;
+        });
+        $('.productdatarow').remove();
+        $('#order_data').html(str);
+        $('.badge').text(data.notifications);
+    }
 })

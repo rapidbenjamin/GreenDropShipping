@@ -2,40 +2,36 @@
 @section('content')
 <div class="orderDetailContent" data-page_name="ADMIN ORDER DETAIL">
     <div class="maincontent">
-        <p class="back" data-url='{{ url()->previous() }}'>
-            <a href="{{ url()->previous() }}">
-                < BACK
-            </a>
-        </p>
+        <a href="{{ url()->previous() }}"><button class="btn btn-lg mx-3 my-2 back">< BACK</button></a>
         <div class="wrapinsidecontent">
             <div class="ordertable">
-                <div class="headerorder">
-                    <div class="norder">
-                        Order
-                    </div>
-                    <div>
-                        {{$order->order_number_shopify}}
-                    </div>
-
-                    @if($order->magento_order_id)
-                    <div class="date">
-                        GDS Order
-                    </div>
-                    <div>
-                        #{{$order->magento_order_id}}
-                    </div>
-                    @endif
-
-                    <div class="date">
-                        Date
-                    </div>
-                    <div>
-                        {{$order->created_at}}
-                    </div>
-                </div>
                 <div class="otawrap">
                     <div class="twocols2">
                         <div>
+                            <div class="headerorder">
+                                <div class="date">
+                                    <p>Order</p>
+                                    <div>
+                                        {{$order->order_number_shopify}}
+                                    </div>
+                                </div>
+            
+                                @if($order->magento_order_id)
+                                <div class="date">
+                                    <p>GDS Order</p>
+                                    <div>
+                                        #{{$order->magento_order_id}}
+                                    </div>
+                                </div>
+                                @endif
+            
+                                <div class="date">
+                                    <p>Date</p>
+                                    <div>
+                                        {{$order->created_at}}
+                                    </div>
+                                </div>
+                            </div>
                             <div class="box">
                                 <h3>Merchant Information</h3>
                                 <div class="cwrap">
@@ -56,13 +52,13 @@
 
                                     <div class="box addres">
                                         <h3>Customer Address</h3>
-                                        <div class="cwrap">
-                                            <p><strong>Name</strong> <br>{{$osa->first_name}} {{$osa->last_name}}</p>
-                                            <p><strong>Address</strong> <br>{{$osa->address1}} {{$osa->address2}}</p>
-                                            <p><strong>Zip Code</strong> <br>{{$osa->zip}}</p>
-                                            <p><strong>City</strong> <br> {{$osa->city}}</p>
-                                            <p><strong>State</strong> <br> {{$osa->province}}</p>
-                                            <p><strong>Country</strong> <br> {{$osa->country}}</p>
+                                        <div class="formg">
+                                            <label>Name</label><span>{{$osa->first_name}} {{$osa->last_name}}</span>
+                                            <label>Address</label><span>{{$osa->address1}} {{$osa->address2}}</span>
+                                            <label>Zip Code</label><span>{{$osa->zip}}</span>
+                                            <label>City</label><span>{{$osa->city}}</span>
+                                            <label>State</label><span>{{$osa->province}}</span>
+                                            <label>Country</label><span>{{$osa->country}}</span>
                                         </div>
                                     </div>
 
@@ -151,8 +147,7 @@
                                         @endforeach
                                     </tbody>
                                 </table>
-                                <div class="cwrap">
-                                    <table class="greentable resume" cellspacing="0">
+                                    <table class="resumetable resume my-5" cellspacing="0">
                                         <tbody>
                                             <tr>
                                                 <td colspan="2" class="header">
@@ -181,13 +176,12 @@
                                     <div class="notes">
                                         <textarea class="ta{{$order->id}}">{{$order->notes}}</textarea>
                                         <div class="btns">
-                                            <button id='btnNotes' data-id="{{$order->id}}" class="btn bgVO colorBL">Update Notes</button>
+                                            <button id='btnNotes' data-id="{{$order->id}}" class="btn bgVO colorBL my-1">Update Notes</button>
                                             @if($order->fulfillment_status== 4)
-                                            <button class="btn bgVC bgRED colorBL" id="cancel-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Order</button>
+                                            <button class="btn bgVC bgRED colorBL my-1" id="cancel-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Order</button>
                                             @endif
                                         </div>
                                     </div>
-                                </div>
                             </div>
                         </div>
                     </div>

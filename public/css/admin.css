@@ -343,7 +343,9 @@ body.bodyAdmin .notes textarea {
 }
 body.bodyAdmin .notes .btns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* grid-template-columns: 1fr 1fr; */
+  grid-template-columns: 200px;
+  justify-content: flex-end;
   column-gap: 15px;
 }
 @media (max-width: 500px) {
@@ -366,13 +368,20 @@ body.bodyAdmin .notes #btnNotes {
 body.bodyAdmin .notes .bgRED {
   font-size: 16px;
   color: #fff;
-  background-color: red;
+  background-color: #b2b2b2;
   border: none;
   box-sizing: border-box;
   padding-left: 15px;
   padding-right: 15px;
   border-radius: 10px;
   cursor: pointer;
+}
+body.bodyAdmin .notes .bgRED:hover {
+  background-color: #929292;
+}
+body.bodyAdmin .notes .bgRED:focus {
+  border: none;
+  outline: none;
 }
 .merchants {
   margin-top: 10px;

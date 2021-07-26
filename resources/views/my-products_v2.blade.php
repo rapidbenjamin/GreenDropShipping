@@ -92,14 +92,14 @@
                         <td data-label="PRODUCT NAME">
                             <a href="search-products/{{$pr->id}}" target="_blank" id="name-{{$pr->id_shopify}}">{{ $pr->name }}</a>
                         </td>
-                        <td data-label="COST GDS">
-                            ${{$pr->price}}
+                        <td data-label="COST GDS" class="nowrap">
+                            US$ {{$pr->price}}
                         </td>
                         <td data-label="PROFIT">
                             {{ $pr->profit }}%
                         </td>
-                        <td data-label="RETAIL PRICE">
-                            ${{number_format($pr->price * (100 + $pr->profit) / 100, 2,'.','')}}
+                        <td data-label="RETAIL PRICE" class="nowrap">
+                            US$ {{number_format($pr->price * (100 + $pr->profit) / 100, 2,'.','')}}
                         </td>
                         <td data-label="SKU">
                             {{$pr->sku}}
@@ -122,12 +122,12 @@
                                 </div>
                                 <div class="productdata">
                                     <h3>{{ $pr->name }}</h3>
-                                    <p class="price">Price ${{number_format($pr->price * (100 + $pr->profit) / 100, 2,'.','')}}</p>
+                                    <p class="price">Price US$ {{number_format($pr->price * (100 + $pr->profit) / 100, 2,'.','')}}</p>
                                     <p>
                                         Stock: {{ $pr->stock }}
                                     </p>
                                     <p>
-                                        Cost: ${{ $pr->price }}
+                                        Cost: US$ {{ $pr->price }}
                                     </p>
                                     <p>
                                         Profit: {{ $pr->profit }}%
