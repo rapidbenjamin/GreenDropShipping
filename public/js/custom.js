@@ -110,15 +110,21 @@ $(document).ready(function () {
 
     /* ADMIN USERS */
     $('.account').click(function () {
-        if ($('.items').css('display') == 'none') $('.items').show();
-        else $('.items').hide();
+        if ($('.items').css('display') == 'none') {
+            $('.items').show();
+        } else {
+            $('.items').hide();
+        }
     });
 
     $('.fa-eye').click(function (event) {
         $(this).toggleClass('fa-eye fa-eye-slash');
         let input = $($(this).data("id"));
-        if (input.attr("type") == "password") input.attr("type", "text");
-        else input.attr("type", "password");
+        if (input.attr("type") == "password") {
+            input.attr("type", "text");
+        } else {
+            input.attr("type", "password");
+        }
     })
     
     function passProgress(value) {
@@ -170,17 +176,27 @@ $(document).ready(function () {
         var confirm_password = $('#txt-confirm-password').val();
         if (name.length < 3) {
             flag = false;
-            if (name.length == 0) $('#name-error').text(empty_msg);
-            else $('#name-error').text(`*Plase lengthen this text to 3 characters or more (you are currently using ${name.length} characters).`);
+            if (name.length == 0) {
+                $('#name-error').text(empty_msg);
+            } else {
+                $('#name-error').text(`*Plase lengthen this text to 3 characters or more (you are currently using ${name.length} characters).`);
+            }
             $('#name-error').show();
-        } else $('#name-error').hide();
+        } else {
+            $('#name-error').hide();
+        }
 
         if (!email.match(reg)) {
             flag = false;
-            if (email.length == 0) $('#email-error').text(empty_msg);
-            else $('#email-error').text('*Please input valid email.');
+            if (email.length == 0) {
+                $('#email-error').text(empty_msg);
+            } else {
+                $('#email-error').text('*Please input valid email.');
+            }
             $('#email-error').show();
-        } else $('#email-error').hide();
+        } else {
+            $('#email-error').hide();
+        }
 
         flag = passProgress(password);
 
@@ -193,7 +209,9 @@ $(document).ready(function () {
                 flag = false;
                 $('#confirm-error').text("*Confirm Password doesn't match");
                 $('#confirm-error').show();
-            } else $('#confirm-error').hide();
+            } else {
+                $('#confirm-error').hide();
+            }
         }
         
         if (flag) {
@@ -257,7 +275,9 @@ $(document).ready(function () {
             flag = false;
             $('#old-error').text(empty_msg);
             $('#old-error').show();
-        } else $('#old-error').hide();
+        } else {
+            $('#old-error').hide();
+        }
 
         flag = passProgress(new_password);
 
@@ -270,7 +290,9 @@ $(document).ready(function () {
                 flag = false;
                 $('#confirm-error').text("*Confirm Password doesn't match");
                 $('#confirm-error').show();
-            } else $('#confirm-error').hide();
+            } else {
+                $('#confirm-error').hide();
+            }
         }
 
         if (flag) {
@@ -305,8 +327,11 @@ $(document).ready(function () {
     });
 
     $('#mainlogo').click(function () {
-        if($('#role').val() == 'admin') window.location.href = '/admin/dashboard';
-        else window.location.href = '/';
+        if($('#role').val() == 'admin') {
+            window.location.href = '/admin/dashboard';
+        } else {
+            window.location.href = '/';
+        }
     });
 
     $('.fa-close').click(function(e) {
@@ -353,6 +378,7 @@ $(document).ready(function () {
             </ul>
         </div>`);
     }
+
     $('#page_size').change(function (event) {
         var parameters = {
             action: getAction(),
@@ -371,8 +397,9 @@ $(document).ready(function () {
             page_size: page_size,
             page_number: page_number * 1 + 1
         }
-        if (total_count > page_size * page_number)
+        if (total_count > page_size * page_number) {
             getData(parameters);
+        }
     })
 
     $('#prev').click(function () {
@@ -381,8 +408,9 @@ $(document).ready(function () {
             page_size: $('#page_size').val(),
             page_number: $('#page_number').text().split('/')[0] - 1
         }
-        if ($('#page_number').text().split('/')[0] > 1)
+        if ($('#page_number').text().split('/')[0] > 1) {
             getData(parameters);
+        }
     })
 
     function getData(parameters) {
@@ -390,7 +418,7 @@ $(document).ready(function () {
         var action = getAction();
         if (action == 'admin-orders') {
             flag = adminOrderSearchPermission();
-            if (flag)
+            if (flag) {
                 Object.assign(parameters, {
                     from: $('#dateFrom').val(),
                     to: $('#dateTo').val(),
@@ -399,10 +427,11 @@ $(document).ready(function () {
                     payment_status: $('#paymentstatus').val(),
                     order_state: $('#orderstate').val(),
                 });
+            }
         }
         if (action == 'my-orders') {
             flag = orderSearchPermission();
-            if (flag)
+            if (flag) {
                 var urlParams = new URLSearchParams(window.location.search);
                 var notifications = urlParams.getAll('notifications');
                 Object.assign(parameters, {
@@ -413,6 +442,7 @@ $(document).ready(function () {
                     order_state: $('#order_state').val(),
                     notifications: notifications[0]
                 });
+            }
         }
         if (action == 'admin-merchants') {
             Object.assign(parameters, {
@@ -430,7 +460,7 @@ $(document).ready(function () {
                 active: $('#user_active').val()
             })
         }
-        if (flag)
+        if (flag) {
             $.getJSON(ajax_link, parameters, function (res) {
                 pagination(res);
                 if (res.improds) {
@@ -449,6 +479,7 @@ $(document).ready(function () {
                     showMyOrders(res.my_orders);
                 }
             })
+        }
     }
 
     function pagination (data) {
@@ -748,6 +779,11 @@ $(document).ready(function () {
             if (res.count == res.total_count) {
                 pagination(res);
                 showMigrationPage(res.mig_products);
+                setTimeout(() => {
+                    $('#migrate-products-modal').removeClass('show');
+                    $('#migrate-products-modal').css('display', 'none');
+                    $('.modal-backdrop.fade.show').remove();
+                }, 1000);
             } else {
                 bringProducts(params);
             }
@@ -828,7 +864,7 @@ $(document).ready(function () {
                                 <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                                 <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
                 profit_str = `<div id="profit">
-                    <input type="text" style="text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
+                    <input type="text" class="box-profit text-center border" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
                     %</div>`;
                 cost_str = `<span id="cost-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.cost).toFixed(2)}</span>`;
             } else {
@@ -895,14 +931,17 @@ $(document).ready(function () {
         var from = $('#dateFrom').val();
         var to = $('#dateTo').val();
         var flag = true;
-        if (from != '' && to != '')
+        if (from != '' && to != '') {
             if (moment(from).isAfter(moment(to).format('YYYY-MM-DD'))) {
                 flag = false;
                 $('#modal-body').html(`<h5>Invalid date range</h5>`);
                 $('#modal-footer').hide();
                 $('#search').attr('data-toggle', 'modal');
                 $('#search').attr('data-target', '#delete-product-modal');
-            } else $('#search').attr('data-toggle', '');
+            } else {
+                $('#search').attr('data-toggle', '');
+            }
+        }
         return flag;
     }
 
@@ -963,7 +1002,7 @@ $(document).ready(function () {
                 </td>
                 <td class="btngroup">
                     <button class="view greenbutton detail-merchants" data-merchantid="${merchant.id}">View</button>
-                    <button class="payorder orders-customers" data-merchantid="${merchant.id}">Orders</button>
+                    <button class="vieworder orders-customers" data-merchantid="${merchant.id}">Orders</button>
                 </td>
             </tr>`;
         });
@@ -971,53 +1010,89 @@ $(document).ready(function () {
         $('#merchant_data').html(str);
     }
 
-    $('#merchant_name').keypress(function(e) {
-        if ($('#merchant_name').val().trim().length >= 2) {
-            $.getJSON(ajax_link, {
-                action: 'admin-merchant-name',
-                name: $('#merchant_name').val().trim()
-            }, function(res) {
-                var str = '<div id="name_data">';
-                res.names.forEach(name => {
-                    str += `<option value="${name}">`;
-                });
-                str += '</div>';
+    $('#merchant_name').keydown(function(e) {
+        let length = e.target.value.length;
+        if (e.key) {
+            if (e.key.length == 1) {
+                length += 1;
+            } else {
+                if (e.code == 'Backspace') {
+                    length -= 1;
+                }
+            }
+            if (length > 2) {
+                $.getJSON(ajax_link, {
+                    action: 'admin-merchant-name',
+                    name: $('#merchant_name').val()
+                }, function(res) {
+                    var str = '<div id="name_data">';
+                    res.names.forEach(name => {
+                        str += `<option value="${name}">`;
+                    });
+                    str += '</div>';
+                    $('#name_data').remove();
+                    $('#names').html(str);
+                })
+            } else {
                 $('#name_data').remove();
-                $('#names').html(str);
-            })
-        } else $('#name_data').remove();
+            }
+        }
     });
-    $('#merchant_email').keypress(function(e) {
-        if ($('#merchant_email').val().trim().length >= 2) {
-            $.getJSON(ajax_link, {
-                action: 'admin-merchant-email',
-                email: $('#merchant_email').val().trim()
-            }, function(res) {
-                var str = '<div id="email_data">';
-                res.emails.forEach(email => {
-                    str += `<option value="${email}">`;
-                });
-                str += '</div>';
+    $('#merchant_email').keydown(function(e) {
+        let length = e.target.value.length;
+        if (e.key) {
+            if (e.key.length == 1) {
+                length += 1;
+            } else {
+                if (e.code == 'Backspace') {
+                    length -= 1;
+                }
+            }
+            if (length > 2) {
+                $.getJSON(ajax_link, {
+                    action: 'admin-merchant-email',
+                    email: $('#merchant_email').val()
+                }, function(res) {
+                    var str = '<div id="email_data">';
+                    res.emails.forEach(email => {
+                        str += `<option value="${email}">`;
+                    });
+                    str += '</div>';
+                    $('#email_data').remove();
+                    $('#emails').html(str);
+                })
+            } else {
                 $('#email_data').remove();
-                $('#emails').html(str);
-            })
-        } else $('#email_data').remove();
+            }
+        }
     });
-    $('#merchant_url').keypress(function(e) {
-        if ($('#merchant_url').val().trim().length >= 2) {
-            $.getJSON(ajax_link, {
-                action: 'admin-merchant-url',
-                url: $('#merchant_url').val().trim()
-            }, function(res) {
-                var str = '<div id="url_data">';
-                res.urls.forEach(url => {
-                    str += `<option value="${url}">`;
-                });
-                str += '</div>';
+    $('#merchant_url').keydown(function(e) {
+        let length = e.target.value.length;
+        if (e.key) {
+            if (e.key.length == 1) {
+                length += 1;
+            } else {
+                if (e.code == 'Backspace') {
+                    length -= 1;
+                }
+            }
+            if (length > 2) {
+                $.getJSON(ajax_link, {
+                    action: 'admin-merchant-url',
+                    url: $('#merchant_url').val()
+                }, function(res) {
+                    var str = '<div id="url_data">';
+                    res.urls.forEach(url => {
+                        str += `<option value="${url}">`;
+                    });
+                    str += '</div>';
+                    $('#url_data').remove();
+                    $('#urls').html(str);
+                })
+            } else {
                 $('#url_data').remove();
-                $('#urls').html(str);
-            })
-        } else $('#url_data').remove();
+            }
+        }
     });
     $('#merchant_name').change(function(e) {
         getMerchantData();
@@ -1048,7 +1123,9 @@ $(document).ready(function () {
         var str = '';
         users.forEach(user => {
             var active_str = `<input type="checkbox" name="switch-button" id="switch-label${user.id}" class="switch-button__checkbox">`;
-            if (user.active) active_str = `<input type="checkbox" name="switch-button" id="switch-label${user.id}" class="switch-button__checkbox" checked>`;
+            if (user.active) {
+                active_str = `<input type="checkbox" name="switch-button" id="switch-label${user.id}" class="switch-button__checkbox" checked>`;
+            }
             str += `<tr class="userdatarow">
                 <td data-label="USER NAME">
                     ${user.name}
@@ -1068,47 +1145,75 @@ $(document).ready(function () {
         $('#user_data').html(str);
     }
 
-    $('#user_name').keypress(function(e) {
-        if ($('#user_name').val().trim().length >= 2) {
-            $.getJSON(ajax_link, {
-                action: 'admin-user-name',
-                name: $('#user_name').val().trim()
-            }, function(res) {
-                var str = '<div id="name_data">';
-                res.names.forEach(name => {
-                    str += `<option value="${name}">`;
-                });
-                str += '</div>';
+    $('#user_name').keydown(function(e) {
+        let length = e.target.value.length;
+        if (e.key) {
+            if (e.key.length == 1) {
+                length += 1;
+            } else {
+                if (e.code == 'Backspace') {
+                    length -= 1;
+                }
+            }
+            if (length > 2) {
+                $.getJSON(ajax_link, {
+                    action: 'admin-user-name',
+                    name: $('#user_name').val()
+                }, function(res) {
+                    var str = '<div id="name_data">';
+                    res.names.forEach(name => {
+                        str += `<option value="${name}">`;
+                    });
+                    str += '</div>';
+                    $('#name_data').remove();
+                    $('#names').html(str);
+                })
+            } else {
                 $('#name_data').remove();
-                $('#names').html(str);
-            })
-        } else $('#name_data').remove();
+            }
+        }
     });
 
-    $('#user_email').keypress(function(e) {
-        if ($('#user_email').val().trim().length >= 2) {
-            $.getJSON(ajax_link, {
-                action: 'admin-user-email',
-                email: $('#user_email').val().trim()
-            }, function(res) {
-                var str = '<div id="email_data">';
-                res.emails.forEach(email => {
-                    str += `<option value="${email}">`;
-                });
-                str += '</div>';
+    $('#user_email').keydown(function(e) {
+        let length = e.target.value.length;
+        if (e.key) {
+            if (e.key.length == 1) {
+                length += 1;
+            } else {
+                if (e.code == 'Backspace') {
+                    length -= 1;
+                }
+            }
+            if (length > 2) {
+                $.getJSON(ajax_link, {
+                    action: 'admin-user-email',
+                    email: $('#user_email').val()
+                }, function(res) {
+                    var str = '<div id="email_data">';
+                    res.emails.forEach(email => {
+                        str += `<option value="${email}">`;
+                    });
+                    str += '</div>';
+                    $('#email_data').remove();
+                    $('#emails').html(str);
+                })
+            } else {
                 $('#email_data').remove();
-                $('#emails').html(str);
-            })
-        } else $('#email_data').remove();
+            }
+        }
     });
 
     $('#user_name').change(function(e) {
-        if ($('#user_name').val().length == 0) $('name_data').remove();
+        if ($('#user_name').val().length == 0) {
+            $('name_data').remove();
+        }
         getMerchantData();
     });
 
     $('#user_email').change(function(e) {
-        if ($('#user_email').val().length == 0) $('email_data').remove();
+        if ($('#user_email').val().length == 0) {
+            $('email_data').remove();
+        }
         getMerchantData();
     });
 
@@ -1145,31 +1250,44 @@ $(document).ready(function () {
         var from = $('#date_from').val();
         var to = $('#date_to').val();
         var flag = true;
-        if (from != '' && to != '')
+        if (from != '' && to != '') {
             if (moment(from).isAfter(moment(to).format('YYYY-MM-DD'))) {
                 flag = false;
                 $('#modal-body').html(`<h5>Invalid date range</h5>`);
                 $('#modal-footer').hide();
                 $('.btn-order-search').attr('data-toggle', 'modal');
                 $('.btn-order-search').attr('data-target', '#delete-product-modal');
-            } else $('.btn-order-search').attr('data-toggle', '');
+            } else {
+                $('.btn-order-search').attr('data-toggle', '');
+            }
+        }
         return flag;
     }
 
     function showMyOrders (data) {
         let str = '';
+        console.log(data);
+        if (data.from && data.to) {
+            $('#period').text(`${data.from} - ${data.to}`);
+        } else {
+            $('#period').text(data.basic_period);
+        }
+
+        $('#total_period_orders').text(data.total_period_orders);
+        $('#total_orders').text(data.order_count);
         data.orders.forEach(order => {
             let button_str = '';
-            if (order.financial_status == 1 && order.fulfillment_status != 9 && order.fulfillment_status != 12)
+            if (order.financial_status == 1 && order.fulfillment_status != 9 && order.fulfillment_status != 12) {
                 button_str = `<button class="payorder pay-button checkout-button" data-id="${order.id}" data-toggle="modal" data-target="#delete-product-modal">PAY ORDER</button>`;
-            else if (order.fulfillment_status == 9)
+            } else if (order.fulfillment_status == 9) {
                 button_str = `<button class="payorder payorderoff canceled" data-id="${order.id}">Canceled</button>`;
-            else
+            } else {
                 button_str = `<button class="payorder payorderoff paid" data-id="${order.id}">Paid</button>`;
+            }
 
             str += `<tr class="productdatarow">
                 <td data-label="ORDER #">
-                    ${order.order_number_shopify}
+                    ${order.order_number_shopify.substr(1)}
                 </td>
                 <td data-label="DATE">
                     ${order.created_at}
@@ -1200,6 +1318,22 @@ $(document).ready(function () {
         });
         $('.productdatarow').remove();
         $('#order_data').html(str);
-        $('.badge').text(data.notifications);
+        $('#notifications').text(data.notifications);
     }
+    $(window).scroll(function () {
+        if ($(this).scrollTop() > 1000) {
+            $('.back-to-top').fadeIn();
+            $('#product-top-menu').addClass('product-top-menu');
+        } else {
+            $('.back-to-top').fadeOut();
+            $('#product-top-menu').removeClass('product-top-menu');
+        }
+    });
+    // scroll body to 0px on click
+    $('.back-to-top').click(function () {
+        $('body,html').animate({
+            scrollTop: 0
+        }, 1000);
+        return false;
+    });
 })

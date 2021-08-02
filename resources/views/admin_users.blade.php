@@ -143,8 +143,11 @@
 	});
 	$('#user_data').on('click', 'input.change-status', function() {
         let status = $(this).is(':checked')
-        if ($(this).is(':checked')) $(this).prop('checked', false);
-        else $(this).prop('checked', true);
+        if ($(this).is(':checked')) {
+			$(this).prop('checked', false);
+		} else {
+			$(this).prop('checked', true);
+		}
         $('#user_id').val($(this).data('userid'));
         $('#modal-body').html(`<h5>Are your sure to ${$(this).is(':checked') ? 'disable' : 'enable'} this user?</h5>`);
     });

@@ -51,12 +51,11 @@ class LoginController extends Controller
         if (\Auth::attempt(['email' => $request->email, 'password' => $request->password, 'role' => 'admin'])) {
             // Authentication passed...
             return redirect('admin/dashboard');
-        }
-        else if (\Auth::attempt(['email' => $request->email, 'password' => $request->password, 'role' => 'merchant'])) {
+        } else if (\Auth::attempt(['email' => $request->email, 'password' => $request->password, 'role' => 'merchant'])) {
             // Authentication passed...
 
             return redirect('/');
-        }else{
+        } else {
             return redirect('/login')->withInput(Input::except('password'))->withErrors(['email' => 'The credentials do not match our records']);
         }
     }

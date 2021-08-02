@@ -43,7 +43,9 @@ class PlansController extends Controller
         $tokenStatus = 0;
         $msg = 'Invalid Token';
 
-        if ($request->token == env('APP_UNIVERSAL_TOKEN')) $tokenStatus = 1;
+        if ($request->token == env('APP_UNIVERSAL_TOKEN')) {
+            $tokenStatus = 1;    
+        }
 
         if ($token = Token::where("token.token", $request->token)->first()) {
             if ($token['status'] == 'active') {

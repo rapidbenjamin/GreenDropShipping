@@ -10,39 +10,41 @@
             @if(Auth::user()->plan == 'free')
             <div class="alertan">
                 <div class="agrid">
-                    <img src="img/infogray.png" srcset="img/infogray@2x.png 2x,
-                         img/infogray@3x.png 3x">
+                    <img src="img/infogray.png" srcset="img/infogray@2x.png 2x,img/infogray@3x.png 3x">
                     <p>You have a free plan. <a href="/plans">Click here to upgrade your plan.</a></p>
                 </div>
             </div>
             @endif
 
-            <div class="alertan level2 alert-publish-all">
+            <div class="alertan level2">
                 <div class="agrid">
                     <p>You can view here all the products to migrate from your Shopify store.</p>
                 </div>
+                <i class="fa fa-close text-secondary" aria-hidden="true"></i>
             </div>
             <div class="migrate-products" style="display: block;">
                 @if($total_count == 0)
                 <button class="btn-migration migration greenbutton" data-toggle="modal" data-target="#migrate-products-modal">Migrate</button>
                 @else
-                <div style="display: flex; align-items: center;">
-                    <input type="checkbox" id="check-all-mp" value="" data-mark="false">
-                    <div id="migrate-actions">
-                        <button class="btn-delete-products alldeletebutton redbutton mx-1">Delete</button>
-                        <button class="btn-confirm-products allconfirmbutton greenbutton mx-1">Confirm</button>
-                        <button class="btn-set-profit profit greenbutton mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
-                        <button class="btn-setting-profit profit greenbutton mx-1" style="display: none;">Setting...</button>
+                <div class="product-menu" id="product-top-menu">
+                    <div style="display: flex; align-items: center;">
+                        <input type="checkbox" id="check-all-mp" value="" data-mark="false">
+                        <div id="migrate-actions">
+                            <button class="btn-delete-products alldeletebutton redbutton mx-1">Delete</button>
+                            <button class="btn-confirm-products allconfirmbutton greenbutton mx-1">Confirm</button>
+                            <button class="btn-set-profit profit greenbutton mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
+                            <button class="btn-setting-profit profit greenbutton mx-1" style="display: none;">Setting...</button>
+                        </div>
                     </div>
-                </div>
-                <div class="pagesize">
-                    <span>Show</span>
-                    <select name="PageSize" id="page_size">
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
+                    <div class="pagesize">
+                        <span>Show</span>
+                        <select name="PageSize" id="page_size">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
                 </div>
                 <table class="greentable" cellspacing="0">
                     <thead>
@@ -94,7 +96,7 @@
                             <td data-label="PROFIT">
                                 @if($product->type == 'migration')
                                 <div id="profit">
-                                    <input type="text" style="text-align:center;" class="box-profit" id="profit-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" data-sku="{{$product->sku}}" value="{{number_format(($product->price - $product->cost)/$product->cost*100, 2, '.', '')}}">
+                                    <input type="text" class="box-profit text-center border" id="profit-{{$product->id_shopify}}" data-id="{{$product->id_shopify}}" data-sku="{{$product->sku}}" value="{{number_format(($product->price - $product->cost)/$product->cost*100, 2, '.', '')}}">
                                 %</div>
                                 @endif
                             </td>
@@ -171,7 +173,7 @@
                     $(ele).val($('#default_profit').val());
                     var cost = $(`#cost-${$(ele).data('id')}`).text();
                     var profit = $('#default_profit').val();
-                    $(`#price-${$(ele).data('id')}`).text(parseFloat(cost.substr(1) * (1 + profit / 100)).toFixed(2));
+                    $(`#price-${$(ele).data('id')}`).text(parseFloat(cost.substr(4) * (1 + profit / 100)).toFixed(2));
                 });
                 $('.btn-setting-profit').hide();
                 $('.btn-set-profit').show();
@@ -185,8 +187,9 @@
         function deleteProductsAjax() {
             let product_ids = [];
             $("input[type='checkbox']").each(function(index, ele) {
-                if (ele.disabled && ele.checked)
+                if (ele.disabled && ele.checked) {
                     product_ids.push($(ele).attr('id').split('-')[1]);
+                }
             });
             if (user_id && product_ids.length) {
                 $.ajax({
@@ -277,7 +280,7 @@
     });
     
     $('.migrate-products').on('click', '.btn-set-profit', function() {
-        $('#modal-body').html(`<h5>Are you sure to replace current profits of all products with {{$default_profit}}%?</h5>`);
+        $('#modal-body').html(`<h5>Are you sure to set all profits to {{$default_profit}}%?</h5>`);
         $('#modal-footer').show();
     });
 
@@ -391,7 +394,13 @@
                 $('#next').prop('disabled', false);
             }
             $('#total_count').text(data.total_count);
-            $('#page_number').text(`${data.page_number}/${Math.ceil(data.total_count / data.page_size)}`);
+            if (Math.ceil(data.total_count / data.page_size) == 0) {
+                $('#total_page').text(0);
+                $('#page_number').text(0);
+            } else {
+                $('#total_page').text(Math.ceil(data.total_count / data.page_size));
+                $('#page_number').text(data.page_number);
+            }
         }
         function showMigrateProducts (data) {
             $('.productdatarow').remove();
@@ -412,7 +421,7 @@
                                     <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
                                     <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-migproductid="${product.id_shopify}" style="display: none;">Deleted</button>`;
                     profit_str = `<div id="profit">
-                        <input type="text" style="text-align:center;" class="box-profit" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
+                        <input type="text" class="box-profit text-center border" id="profit-${product.id_shopify}" data-id="${product.id_shopify}" data-sku="${product.sku}" value="${parseFloat((product.price - product.cost) / product.cost * 100).toFixed(2)}">
                         %</div>`;
                     cost_str = `<span id="cost-${product.id_shopify}" class="nowrap">US$ ${parseFloat(product.cost).toFixed(2)}</span>`;
                 } else {

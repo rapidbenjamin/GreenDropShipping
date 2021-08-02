@@ -31,8 +31,8 @@ class MigrateProductsController extends Controller
         $this->authorize('plan_view-my-products');
         $mig_products = DB::table('temp_migrate_products')
             ->select('temp_migrate_products.*', 'products.price as cost')
-            ->join('products', 'temp_migrate_products.sku', '=', 'products.sku')
-            ->where('user_id', Auth::User()->id);
+            ->leftJoin('products', 'temp_migrate_products.sku', '=', 'products.sku')
+            ->where('user_id', Auth::User()->id)->orderByDesc('id_shopify');
         $total_count = $mig_products->count();
         $mig_products = $mig_products->paginate(10);
         $settings = Settings::where('id_merchant', Auth::user()->id)->first();
@@ -80,9 +80,13 @@ class MigrateProductsController extends Controller
         foreach ($product_ids as $product_id) {
             $flag = true;
             foreach ($result as $res) {
-                if ($product_id == $res) $flag = false;
+                if ($product_id == $res) {
+                    $flag = false;
+                }
             }
-            if ($flag) $data[] = $product_id;
+            if ($flag) {
+                $data[] = $product_id;
+            }
         }
 
         return response()->json([
@@ -145,12 +149,11 @@ class MigrateProductsController extends Controller
                 $my_product->id_variant_shopify = $mig_product->id_variant_shopify;
                 $my_product->inventory_item_id_shopify = $mig_product->inventory_item_id_shopify;
                 $my_product->location_id_shopify = $mig_product->location_id_shopify;
-                $my_product->profit = $data['profit'];
                 $my_product->stock = $product->stock;
                 $my_product->save();
             }
             if ($check_price) {
-                $price = $product->price * (100 + $data['profit']) / 100;
+                $price = $product->price * (100 + $my_product->profit) / 100;
                 if (number_format($price, 2, '.', '') != $mig_product->price) {
                     MyProducts::where('id_shopify', $mig_product->id_shopify)
                         ->update([

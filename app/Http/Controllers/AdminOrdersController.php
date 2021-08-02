@@ -108,10 +108,11 @@ class AdminOrdersController extends Controller
             ->where('order_details.id_order', $orders->id)->get();
 
         foreach ($order_products as $pro) {
-            if ($pro['images'] != null && count(json_decode($pro['images'])) > 0)
+            if ($pro['images'] != null && count(json_decode($pro['images'])) > 0) {
                 $pro->image_url = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($pro->images)[0]->file;
-            else
+            } else {
                 $pro->image_url = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37cno_selection';
+            }
         }
 
         $sessionPay = PaymentSession::where('id_orders', 'like', "%$orders->id%")

@@ -48,6 +48,36 @@ body.bodyAdmin .panel-left {
 body.bodyAdmin .panel-left .cwrap {
   padding: 17px;
 }
+body.bodyAdmin .panel-left.merchant-info .cwrap {
+  padding: 17px;
+  display: grid;
+  column-gap: 40px;
+}
+@media (max-width: 900px) {
+  body.bodyAdmin .panel-left.merchant-info .cwrap {
+    grid-template-columns: 1fr;
+  }
+}
+@media (min-width: 900px) {
+  body.bodyAdmin .panel-left.merchant-info .cwrap {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 1000px) {
+  body.bodyAdmin .panel-left.merchant-info .cwrap {
+    grid-template-columns: 1fr;
+  }
+}
+@media (min-width: 1200px) {
+  body.bodyAdmin .panel-left.merchant-info .cwrap {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+body.bodyAdmin .panel-left.merchant-info .cwrap p {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  overflow-wrap: anywhere;
+}
 body.bodyAdmin .panel-left .cwrap .tab-body-right {
   list-style: none;
   margin: 0;

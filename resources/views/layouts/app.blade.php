@@ -377,7 +377,7 @@
     <!-- Modal content-->
     <div class="modal-content">
         <div class="modal-header" id="modal-header" style="display:block">
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <button type="button" class="close" id="close" data-dismiss="modal">&times;</button>
             <h4 class="modal-title" id="modal-title">Confirm</h4>
         </div>
         <div class="modal-body" id="modal-body">
@@ -394,7 +394,7 @@
   $(document).ready(function() {
     var usr_id = "{{Auth::user() ? Auth::user()->id : 0}}";
     function syncStockAjax(){
-        if(usr_id != '0'){
+        if (usr_id != '0') {
             $.ajax({
                 type: 'POST',
                 url: '/sync-magento/sync-shopify-stock',

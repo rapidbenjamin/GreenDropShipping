@@ -19,12 +19,12 @@ class CallBackController extends Controller
         $user = User::where('shopify_url', $request->input('shop'))->first();
         $mode = '';
 
-        if ( ! empty($user)) {
+        if (!empty($user)) {
             $mode = 'per-user';
         }
 
         return redirect("https://" . $request->input('shop') . "/admin/oauth/authorize?client_id="
-            . env('SHOPIFY_API_KEY') . "&scope=read_orders,write_orders,write_products,read_inventory,write_inventory,read_locations,read_fulfillments,write_fulfillments&redirect_uri=" . urlencode(env('APP_URL'))."/callback&grant_options[]=" . $mode);
+            . env('SHOPIFY_API_KEY') . "&scope=read_orders,write_orders,write_products,read_inventory,write_inventory,read_locations,read_fulfillments,write_fulfillments&redirect_uri=" . urlencode(env('APP_URL')) . "/callback&grant_options[]=" . $mode);
     }
 
     /**
@@ -41,10 +41,10 @@ class CallBackController extends Controller
 
         // Use hmac data to check that the response is from Shopify or not
         if (hash_equals($hmac, $computed_hmac)) {
-            $result = $this->generateToken($params['code'],$params['shop']);
+            $result = $this->generateToken($params['code'], $params['shop']);
             $user = User::where('shopify_url', $params['shop'])->first();
 
-            if(!$user){
+            if (!$user) {
                 $user = new User();
                 $user->name = $result['associated_user']['first_name'] . $result['associated_user']['last_name'];
                 $user->email = $result['associated_user']['email'];
@@ -60,19 +60,18 @@ class CallBackController extends Controller
 
 
                 //Installing webhook to get new orders from Shopify
-                ShopifyAdminApi::createWebhook($user,'orders/create', env('APP_URL').'/create-order-webkook');
+                ShopifyAdminApi::createWebhook($user, 'orders/create', env('APP_URL') . '/create-order-webkook');
 
 
 
 
-                auth()->login($user);// Login and "remember" the given user...
-                return redirect('https://'.$user->shopify_url.'/admin/apps');
-
-            }else{
+                auth()->login($user); // Login and "remember" the given user...
+                return redirect('https://' . $user->shopify_url . '/admin/apps');
+            } else {
                 $user->shopify_token = $result['access_token'];
                 $user->save();
 
-                auth()->login($user);// Login and "remember" the given user...
+                auth()->login($user); // Login and "remember" the given user...
 
 
             }

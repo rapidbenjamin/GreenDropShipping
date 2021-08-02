@@ -54,10 +54,11 @@ class ImportListController extends Controller
         $prods = $prods->paginate(10);
         foreach ($prods as $product) {
 
-            if ($product['images'] != null && count(json_decode($product['images'])) > 0)
+            if ($product['images'] != null && count(json_decode($product['images'])) > 0) {
                 $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
-            else
+            } else {
                 $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
+            }
 
             $search = new SearchController;
 

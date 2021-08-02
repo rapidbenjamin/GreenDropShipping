@@ -44,8 +44,9 @@ class SearchController extends Controller
         $import_product = ImportList::where('id_customer', Auth::User()->id)->where('id_product', $products->id)->first();
         $my_product = MyProducts::where('id_customer', Auth::User()->id)->where('id_product', $products->id)->first();
         if ($import_product != null) {
-            if ($my_product == null) $action = 'added';
-            else {
+            if ($my_product == null) {
+                $action = 'added';
+            } else {
                 $action = 'my-product';
                 $products->id_shopify = MyProducts::where('id_customer', Auth::User()->id)
                     ->where('id_product', $products->id)

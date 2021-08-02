@@ -10,14 +10,13 @@
             @if(Auth::user()->plan == 'free')
             <div class="alertan">
                 <div class="agrid">
-                    <img src="img/infogray.png" srcset="img/infogray@2x.png 2x,
-                         img/infogray@3x.png 3x">
+                    <img src="img/infogray.png" srcset="img/infogray@2x.png 2x,img/infogray@3x.png 3x">
                     <p>You have a free plan. <a href="/plans">Click here to upgrade your plan.</a></p>
                 </div>
             </div>
             @endif
 
-            <div class="alertan level2 alert-publish-all">
+            <div class="alertan level2">
                 <div class="agrid">
                     @if(count($prods) > 0)
                     <p>You can view here all the products you have added to your Shopify store.</p>
@@ -25,14 +24,17 @@
                     <p>When products are published to Shopify you'll see them here.</p>
                     @endif
                 </div>
+                <i class="fa fa-close text-secondary" aria-hidden="true"></i>
             </div>
             @can("plan_view-my-products")
-            <div class="myproducts" style="display: block;">
-                <div class="checksend" style="float: left; padding: 10px;">
-                    <input type="checkbox" id="check-all-mp" value="" data-mark="false">
-                </div>
-                <div>
-                    <button class="btn-mp-delete-all alldeletebutton redbutton" data-toggle="modal" data-target="#delete-product-modal">Delete</button>
+            <div class="product-menu" id="product-top-menu">
+                <div class="sendtoshopify">
+                    <div class="checksend" style="margin-top: 8px;">
+                        <input type="checkbox" id="check-all-mp" value="" data-mark="false">
+                    </div>
+                    <div class="btn-import-actions">
+                        <button class="btn-mp-delete-all alldeletebutton redbutton" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                    </div>
                 </div>
                 <div class="pagesize">
                     <span>Show</span>
@@ -186,8 +188,11 @@
 
         $('#confirm').click(function() {
             if ($('#product_id').val() != 'cancel') {
-                if ($('#product_id').val() == 'delete-products') deleteProducts();
-                else deleteProduct($('#product_id').val());
+                if ($('#product_id').val() == 'delete-products') {
+                    deleteProducts();
+                } else {
+                    deleteProduct($('#product_id').val());
+                }
             }
         });
 

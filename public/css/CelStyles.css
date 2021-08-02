@@ -1293,6 +1293,7 @@
 #celUITDiv #search input {
     font-size: 18px;
     padding-left: 10px;
+    border: solid 1px #929292;
 }
 @media (max-width: 330px) {
     #celUITDiv #search input {

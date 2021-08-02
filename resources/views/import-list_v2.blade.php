@@ -11,8 +11,7 @@
         @if(Auth::user()->plan == 'free')
         <div class="alertan">
             <div class="agrid">
-                <img src="img/infogray.png" srcset="img/infogray@2x.png 2x,
-                         img/infogray@3x.png 3x">
+                <img src="img/infogray.png" srcset="img/infogray@2x.png 2x,img/infogray@3x.png 3x">
                 <p>You have a free plan. <a href="/plans">Click here to upgrade your plan.</a></p>
             </div>
         </div>
@@ -22,12 +21,14 @@
             <div class="agrid">
                 <p>You can edit product details before adding products to your store.</p>
             </div>
+            <i class="fa fa-close text-secondary" aria-hidden="true"></i>
         </div>
         @else
         <div class="alertan level2">
             <div class="agrid">
-                <p>When products are imported you can publish them to your Shopify store.</p>
+                <p>When products are imported you can publish them to your Shopify store. <a href="/search-products">Click here to import products.</a></p>
             </div>
+            <i class="fa fa-close text-secondary" aria-hidden="true"></i>
         </div>
         @endif
         <div class="alertan level2 alert-publish-all" style="display: none;">
@@ -49,14 +50,18 @@
 
 
         @can("plan_view-my-products")
-        <div class="sendtoshopify" style="display: block;">
-            <div class="checksend" style="float: left; margin-right: 20px; margin-top: 10px;">
-                <input title="Select all products" type="checkbox" id="check-all">
-            </div>
-            <div class="btn-import-actions">
-                <button class="btn-import-list-delete-all redbutton mx-1 my-1" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
-                <button class="btn-import-list-send-all greenbutton mx-1 my-1" id="btn-import-list-send-all">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
-                <button class="btn-import-list-send-all greenbutton mx-1 my-1" id="btn-import-list-sending" style="display: none;">Sending...<img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+        @if(count($array_products) > 0)
+        
+        <div class="product-menu" id="product-top-menu">
+            <div class="sendtoshopify">
+                <div class="checksend" style="margin-top: 8px;">
+                    <input title="Select all products" type="checkbox" id="check-all">
+                </div>
+                <div class="btn-import-actions">
+                    <button class="btn-import-list-delete-all redbutton mx-1 my-1" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                    <button class="btn-import-list-send-all greenbutton mx-1 my-1" id="btn-import-list-send-all">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                    <button class="btn-import-list-send-all greenbutton mx-1 my-1" id="btn-import-list-sending" style="display: none;">Sending...<img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
+                </div>
             </div>
             <div class="pagesize">
                 <span>Show</span>
@@ -68,6 +73,7 @@
                 </select>
             </div>
         </div>
+        @endif
         @endcan
         <div id="import-products">
             @foreach ($array_products as $ap)
@@ -218,30 +224,33 @@
                         <div class="tab-4 wpadding tabcontent">
                             <div class="imagesgrid">
                                 @for($i = 0; $i < count($ap->images); $i++)
-                                    <div class="selectimage">
-                                        <div class="imagewrap">
-                                            <img class="img{{$ap->id_import_list}}-{{$i}}" src="{{env('URL_MAGENTO_IMAGES').'/3a98496dd7cb0c8b28c4c254a98f915a'.$ap->images[$i]->file}}">
-                                        </div>
-                                        <div class="checkim">
-                                            <input type="checkbox" class="chk-img{{$ap->id_import_list}}" data-index="{{$i}}" value="" checked="checked">
-                                        </div>
+                                <div class="selectimage">
+                                    <div class="imagewrap">
+                                        <img class="img{{$ap->id_import_list}}-{{$i}}" src="{{env('URL_MAGENTO_IMAGES').'/3a98496dd7cb0c8b28c4c254a98f915a'.$ap->images[$i]->file}}">
                                     </div>
-                                    @endfor
-
+                                    <div class="checkim">
+                                        <input type="checkbox" class="chk-img{{$ap->id_import_list}}" data-index="{{$i}}" value="" checked="checked">
+                                    </div>
+                                </div>
+                                @endfor
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
             @endforeach
         </div>
     </div>
 </div>
+<div class="back-to-top" style="display:none">
+    <img src=" {{ asset('/img/back_to_top.png') }}" alt="Back to Top">
+    <span style="text-align: center;" class="h5">Back<br>to Top</span>
+</div>
 
 <div id="pagination"></div>
 <input type="text" id="total_count" value="{{$total_count}}" hidden>
 <input type="text" id="product_id" value="" hidden>
+<input type="text" id="modal_type" value="" hidden>
 
 <script src="{{ asset('js/ckeditor/ckeditor.js') }}"></script>
 
@@ -260,7 +269,6 @@
                 $('.checkbox').prop('checked', false);
             }
         });
-
 
         $('#btn-import-list-send-all').click(function() {
 
@@ -308,8 +316,6 @@
                 }
             });
 
-
-
             if (products.length == 0) {
                 $(this).attr('data-toggle', 'modal');
                 $(this).attr('data-target', '#delete-product-modal');
@@ -318,6 +324,7 @@
             } else {
                 $(this).attr('data-toggle', '');
                 $(this).hide();
+                $('.alert-publish-all').show();
                 $('.btn-import-list-delete-all').prop('disabled', true);
                 $('#btn-import-list-sending').show();
                 $('#check-all').prop('disabled', true);
@@ -326,10 +333,7 @@
                     "_token": "{{ csrf_token() }}",
                     products: JSON.stringify(products)
                 }, function(data, status) {
-
                 }).fail(function(data) {
-                    if (data.status == 403)
-                        $('#upgrade-plans-modal').modal('show')
                 });
             }
 
@@ -353,9 +357,37 @@
 
         $('#confirm').click(function() {
             if ($('#product_id').val() != 'cancel') {
-                if ($('#product_id').val() == 'delete-products') deleteProducts();
-                else deleteProduct($('#product_id').val());
+                if ($('#product_id').val() == 'delete-products') {
+                    deleteProducts();
+                } else {
+                    deleteProduct($('#product_id').val());
+                }
             }
+            $('#delete-product-modal').removeClass('show');
+            $('#delete-product-modal').css('display', 'none');
+            $('.modal-backdrop.fade.show').remove();
+        });
+
+        $('#cancel').click(function() {
+            if ($('#modal_type').val().split('-')[0] == '#collections') {
+                $(`${$('#modal_type').val().split('-').join('')}`).val('');
+                $('#modal_type').val('');
+            }
+            $('#delete-product-modal').removeClass('show');
+            $('#delete-product-modal').css('display', 'none');
+            $('.modal-backdrop.fade.show').remove();
+        });
+
+        $('#close').click(function() {
+            $('#delete-product-modal').removeClass('show');
+            $('#delete-product-modal').css('display', 'none');
+            $('.modal-backdrop.fade.show').remove();
+        });
+
+        $('#delete-product-modal .modal-content').blur(function() {
+            $('#delete-product-modal').removeClass('show');
+            $('#delete-product-modal').css('display', 'none');
+            $('.modal-backdrop.fade.show').remove();
         });
 
         function deleteProduct(id) {
@@ -371,7 +403,6 @@
             $.getJSON(ajax_link, parameters, function(data) {
                 $(`#product${id}`).remove();
             }).fail(function(data) {
-                if (data.status == 403) $('#upgrade-plans-modal').modal('show')
             })
         }
 
@@ -401,7 +432,6 @@
                 });
             }).fail(function(data) {
                 console.log('error1', data.status)
-                if (data.status == 403) $('#upgrade-plans-modal').modal('show')
             })
         }
 
@@ -419,6 +449,11 @@
                             $('.btn-import-list-delete-all').prop('disabled', false);
                             $('#btn-import-list-sending').hide();
                             $('#btn-import-list-send-all').show();
+                            $('.alert-publish-all').hide();
+                            $('.alert-publish-all-ready').show();
+                            setTimeout(() => {
+                                $('.alert-publish-all-ready').hide();
+                            }, 1500);
                             for (const key in data.id_shopify) {
                                 $(`.btn-import-list-send-${data.id_shopify[key]}`).hide();
                                 $(`.btn-import-list-send2-${data.id_shopify[key]}`).show();
@@ -427,7 +462,6 @@
                                 $(`#delete-${data.id_shopify[key]}`).hide();
                                 $(`#check-${data.id_shopify[key]}`).prop('checked', false);
                                 $('#check-all').prop('disabled', false);
-                                
                             }
                         }
                     });
@@ -438,6 +472,7 @@
         setInterval(publishProductsAjax, 15000);
 
     }); //Close document ready
+
     function permission_collection_type(id) {
         var collection_flag = true;
         var type_flag = true;
@@ -466,7 +501,8 @@
         var thetabid = $(this).attr("href");
         $(this).parents(".producttabs").find(".tabcontent").removeClass("active");
         $(this).parents(".producttabs").find(thetabid).addClass("active");
-    })
+    });
+
     $('#import-products').on('click', '.btn-import-list-send', function() {
         let productId = $(this).data('id');
         var permission = permission_collection_type(productId);
@@ -507,6 +543,9 @@
                 product: product
             }, function(data, status) {
                 $('.alert-publish-single').show();
+                setTimeout(() => {
+                    $('.alert-publish-single').hide();
+                }, 1500);
                 $(`.btn-import-list-send3-${productId}`).hide();
                 $(`.btn-import-list-send2-${productId}`).show();
                 $(`.btn-import-list-send2-${productId}`).attr('data-shopifyid', data.id_shopify);
@@ -517,6 +556,7 @@
             });
         }
     });
+
     $('#import-products').on('click', '.btn-import-list-delete', function() {
         $('#modal-body').html(`<div style="display:flex;">
                 <img style="width:75px; height:75px;" src="${$(this).data('img')}"/>
@@ -529,17 +569,21 @@
         $('#product_id').val($(this).data('id'));
         $('#modal-footer').show();
     });
+
     $('#import-products').on('change', '.box-profit', function() {
         var id_product = $(this).data('id');
         var cost = $(`#cost${id_product}`).text();
         var profit = $(this).val();
         if (profit > 0) {
             var value = parseFloat((cost * (100 + profit * 1)) / 100).toFixed(2);
-        } else value = cost;
+        } else {
+            value = cost;
+        }
 
         $(`#price${id_product}`).val(value);
         $(`#price${id_product}`).data('price', value);
     });
+
     $('#import-products').on('change', '.box-price', function() {
         var id_product = $(this).data('id');
         var cost = $(`#cost${id_product}`).text();
@@ -551,74 +595,138 @@
         $(`#profit${id_product}`).val(value);
         $(`#profit${id_product}`).data('profit', value);
     });
+
     $('#import-products').on('click', '.btn-import-list-send2', function(e) {
         e.preventDefault();
         window.open(`http://{{Auth::user()->shopify_url}}/admin/products/${e.target.dataset.shopifyid}`, '_blank');
     });
+
     $('#import-products').on('click', '.verModal', function(e) {
         e.preventDefault();
         $('#upgrade-plans-modal').modal('show');
     });
-    $('#import-products').on('keypress', '.collection', function(e) {
+
+    $('#import-products').on('keydown', '.collection', function(e) {
         var id = $(this).data('id');
         if ($(this).val().indexOf(',') > -1) {
             $(`#collection_error${id}`).show();
         } else {
             $(`#collection_error${id}`).hide();
         }
-        if ($(this).val().length >= 2) {
-            var parameters = {
-                action: 'product_collection',
+        let length = e.target.value.length;
+        let collection = e.target.value;
+        if (e.key) {
+            if (e.key.length == 1) {
+                length += 1;
+                collection += e.key;
+            } else {
+                if (e.code == 'Backspace') {
+                    length -= 1;
+                    collection = collection.slice(0, -1);
+                }
             }
-            $.getJSON(ajax_link, parameters, function(data) {
-                var str = '<div id="collection_data">';
-                data.collections.forEach(collection => {
-                    str += `<option value="${collection}">`;
-                });
-                str += '</div>';
+            if (length > 2) {
+                var parameters = {
+                    action: 'product_collection',
+                    collection: JSON.stringify(collection)
+                }
+                $.getJSON(ajax_link, parameters, function(data) {
+                    var str = '<div id="collection_data">';
+                    data.collections.forEach(collection => {
+                        str += `<option value="${collection}">`;
+                    });
+                    str += '</div>';
+                    $('#collection_data').remove();
+                    $(`#collection${id}`).html(str);
+                })
+            } else {
                 $('#collection_data').remove();
-                $(`#collection${id}`).html(str);
-            })
-        } else $('#collection_data').remove();
+            }
+        }
     });
-    $('#import-products').on('keypress', '.type', function(e) {
+
+    $('#import-products').on('blur', '.collection', function(e) {
+        if (e.target.value.trim() != '' && $('#collection_data').children().length == 0) {
+            $('#modal_type').val(`#collections-${e.target.dataset.id}`);
+            $('#modal-body').html("<h5>This collection doesn't exist in your Shopify store.<br>Are you sure to create new custom collection?</h5>");
+            $('#delete-product-modal').css('display', 'block');
+            $('#delete-product-modal').addClass('show');
+            // $('#delete-product-modal .modal-content').attr('tabindex', -1).focus();
+            $('body').append('<div class="modal-backdrop fade show"></div>');
+        }
+    });
+
+    $('#import-products').on('keydown', '.type', function(e) {
         var id = $(this).data('id');
         if ($(this).val().indexOf(',') > -1) {
             $(`#type_error${id}`).show();
         } else {
             $(`#type_error${id}`).hide();
         }
-        if ($(this).val().length >= 2) {
-            var parameters = {
-                action: 'product_type',
+        let length = e.target.value.length;
+        let type = e.target.value;
+        if (e.key) {
+            if (e.key.length == 1) {
+                length += 1;
+                type += e.key;
+            } else {
+                if (e.code == 'Backspace') {
+                    length -= 1;
+                    type = type.slice(0,-1);
+                }
             }
-            $.getJSON(ajax_link, parameters, function(data) {
-                var str = '<div id="type_data">';
-                data.types.forEach(type => {
-                    str += `<option value="${type}">`;
-                });
-                str += '</div>';
+            if (length > 2) {
+                var parameters = {
+                    action: 'product_type',
+                    type: type
+                }
+                $.getJSON(ajax_link, parameters, function(data) {
+                    var str = '<div id="type_data">';
+                    data.types.forEach(type => {
+                        str += `<option value="${type}">`;
+                    });
+                    str += '</div>';
+                    $('#type_data').remove();
+                    $(`#type${id}`).html(str);
+                })
+            } else {
                 $('#type_data').remove();
-                $(`#type${id}`).html(str);
-            })
-        } else $('#type_data').remove();
-    });
-    $('#import-products').on('keypress', '.tag', function(e) {
-        if ($(this).val().length >= 2) {
-            var parameters = {
-                action: 'product_tag',
             }
-            var id = $(this).data('id');
-            $.getJSON(ajax_link, parameters, function(data) {
-                var str = '<div id="tag_data">';
-                data.tags.forEach(tag => {
-                    str += `<option value="${tag}">`;
-                });
-                str += '</div>';
+        }
+    });
+
+    $('#import-products').on('keydown', '.tag', function(e) {
+        let length = e.target.value.length;
+        let tag = e.target.value;
+        if (e.key) {
+            if (e.key.length == 1) {
+                length += 1;
+                tag += e.key;
+            } else {
+                if (e.code == 'Backspace') {
+                    length -= 1;
+                    tag = tag.slice(0, -1);
+                }
+            }
+            if (length > 2) {
+                var parameters = {
+                    action: 'product_tag',
+                    tag: tag
+                }
+                var id = $(this).data('id');
+                $.getJSON(ajax_link, parameters, function(data) {
+                    var str = '<div id="tag_data">';
+                    data.tags.forEach(tag => {
+                        str += `<option value="${tag}">`;
+                    });
+                    str += '</div>';
+                    $('#tag_data').remove();
+                    $(`#tag${id}`).html(str);
+                })
+            } else {
                 $('#tag_data').remove();
-                $(`#tag${id}`).html(str);
-            })
-        } else $('#tag_data').remove();
+            }
+        }
     });
 </script>
 @endsection

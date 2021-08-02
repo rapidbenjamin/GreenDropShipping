@@ -125,8 +125,7 @@ class ShopifyBulkPublish implements ShouldQueue
 
                             if ($filtered == null) { //no existe
                                 $collectionId = ShopifyAdminApi::createCustomCollection($this->user, $item);
-                            }
-                            else{
+                            } else {
                                 $collectionId = $filtered['id'];
                             }
                             if ($collectionId != 0) {

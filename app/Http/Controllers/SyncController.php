@@ -41,7 +41,7 @@ class SyncController extends Controller
         SyncLib::shopifyUpgraded();
 
         //get users with api_status = pending
-        $users_list = User::select('id')->where('api_status','accepted')->get();
+        $users_list = User::select('id')->where('api_status', 'accepted')->get();
 
         foreach ($users_list as $ul) {
 
@@ -50,12 +50,11 @@ class SyncController extends Controller
             $res2 = ShopifyAdminApi::getStatusRecurringCharge($user);
 
             //Validate plan's status
-            if($res2 == 'declined' || $res2 == 'expired' || $res2 == 'frozen' || $res2 == 'cancelled'){
+            if ($res2 == 'declined' || $res2 == 'expired' || $res2 == 'frozen' || $res2 == 'cancelled') {
                 $user->api_status = 'pending';
                 $user->plan = 'free';
                 $user->save();
             }
-
         }
 
         return 'success';
@@ -67,16 +66,15 @@ class SyncController extends Controller
     }
 
 
-    public function syncShopifyStock (Request $request) {
+    public function syncShopifyStock(Request $request)
+    {
 
-        if(!\Session::get('is_bg_running')){
+        if (!\Session::get('is_bg_running')) {
             \Session::put('is_bg_running', 1);
             SyncLib::syncShopifyStock($request);
-        }
-        else
+        } else
             echo "Another background process is already running";
         \Session::put('is_bg_running', 0);
-
     }
 
     public function arregloSku()
@@ -153,7 +151,6 @@ class SyncController extends Controller
     public function setTrackingNumber()
     {
         SyncLib::setTrackingNumber();
-
     }
 
     public function syncCategories()

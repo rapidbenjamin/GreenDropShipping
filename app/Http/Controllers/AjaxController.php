@@ -9,6 +9,8 @@ use App\DashboardSteps;
 use App\ImportList;
 use App\Libraries\OrderStatus;
 use App\Libraries\Shopify\ShopifyAdminApi;
+use App\MonthlyRecurringPlan;
+use App\MonthlyRecurringPlanOrders;
 use App\MyProducts;
 use App\Settings;
 use App\Order;
@@ -26,12 +28,24 @@ class AjaxController extends Controller
         if ($parameters['action'] == 'add_check') {
 
             if ($row = DashboardSteps::find($parameters['id_user'])) {
-                if ($parameters['step'] == 1) $row->step1 = $parameters['value'];
-                if ($parameters['step'] == 2) $row->step2 = $parameters['value'];
-                if ($parameters['step'] == 3) $row->step3 = $parameters['value'];
-                if ($parameters['step'] == 4) $row->step4 = $parameters['value'];
-                if ($parameters['step'] == 5) $row->step5 = $parameters['value'];
-                if ($parameters['step'] == 6) $row->step6 = $parameters['value'];
+                if ($parameters['step'] == 1) {
+                    $row->step1 = $parameters['value'];
+                }
+                if ($parameters['step'] == 2) {
+                    $row->step2 = $parameters['value'];
+                }
+                if ($parameters['step'] == 3) {
+                    $row->step3 = $parameters['value'];
+                }
+                if ($parameters['step'] == 4) {
+                    $row->step4 = $parameters['value'];
+                }
+                if ($parameters['step'] == 5) {
+                    $row->step5 = $parameters['value'];
+                }
+                if ($parameters['step'] == 6) {
+                    $row->step6 = $parameters['value'];
+                }
                 $row->save();
             } else {
                 $row = new DashboardSteps;
@@ -44,14 +58,25 @@ class AjaxController extends Controller
                 $row->step6 = 0;
                 $row->save();
 
-
                 $row = DashboardSteps::find($parameters['id_user']);
-                if ($parameters['step'] == 1) $row->step1 = $parameters['value'];
-                if ($parameters['step'] == 2) $row->step2 = $parameters['value'];
-                if ($parameters['step'] == 3) $row->step3 = $parameters['value'];
-                if ($parameters['step'] == 4) $row->step4 = $parameters['value'];
-                if ($parameters['step'] == 5) $row->step5 = $parameters['value'];
-                if ($parameters['step'] == 6) $row->step6 = $parameters['value'];
+                if ($parameters['step'] == 1) {
+                    $row->step1 = $parameters['value'];
+                }
+                if ($parameters['step'] == 2) {
+                    $row->step2 = $parameters['value'];
+                }
+                if ($parameters['step'] == 3) {
+                    $row->step3 = $parameters['value'];
+                }
+                if ($parameters['step'] == 4) {
+                    $row->step4 = $parameters['value'];
+                }
+                if ($parameters['step'] == 5) {
+                    $row->step5 = $parameters['value'];
+                }
+                if ($parameters['step'] == 6) {
+                    $row->step6 = $parameters['value'];
+                }
                 $row->save();
             }
 
@@ -131,12 +156,15 @@ class AjaxController extends Controller
             $page_number = $parameters['page_number'];
             $page_size = $parameters['page_size'];
             $users = User::where('role', 'admin');
-            if ($parameters['name'] != '')
+            if ($parameters['name'] != '') {
                 $users = $users->where('name', 'like', '%' . $parameters['name'] . '%');
-            if ($parameters['email'] != '')
+            }
+            if ($parameters['email'] != '') {
                 $users = $users->where('email', 'like', '%' . $parameters['email'] . '%');
-            if ($parameters['active'] != '')
+            }
+            if ($parameters['active'] != '') {
                 $users = $users->where('active', $parameters['active']);
+            }
             $total_count = $users->count();
             $users = $users->orderBy('users.id', 'asc')
                 ->skip(($page_number - 1) * $page_size)
@@ -297,8 +325,8 @@ class AjaxController extends Controller
             if ($parameters['count'] == $parameters['total_count']) {
                 $mig_products = DB::table('temp_migrate_products')
                     ->select('temp_migrate_products.*', 'products.price as cost')
-                    ->join('products', 'temp_migrate_products.sku', '=', 'products.sku')
-                    ->where('user_id', Auth::user()->id);
+                    ->leftJoin('products', 'temp_migrate_products.sku', '=', 'products.sku')
+                    ->where('user_id', Auth::user()->id)->orderByDesc('id_shopify');
                 $total_count = $mig_products->count();
                 $mig_products = $mig_products->skip(0)->take(10)->get();
                 return json_encode([
@@ -324,8 +352,8 @@ class AjaxController extends Controller
             $page_size = $parameters['page_size'];
             $mig_products = DB::table('temp_migrate_products')
                 ->select('temp_migrate_products.*', 'products.price as cost')
-                ->join('products', 'temp_migrate_products.sku', '=', 'products.sku')
-                ->where('user_id', Auth::user()->id);
+                ->leftJoin('products', 'temp_migrate_products.sku', '=', 'products.sku')
+                ->where('user_id', Auth::user()->id)->orderByDesc('id_shopify');
             $total_count = $mig_products->count();
             $mig_products = $mig_products->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             return json_encode([
@@ -360,17 +388,26 @@ class AjaxController extends Controller
         }
 
         if ($parameters['action'] == 'product_collection') {
-            $collections = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'C']])->orderBy('value')->pluck('value');
+            $collections = DB::table('user_collections_tags_types')
+                ->where([['user_id', Auth::User()->id], ['type', 'C']])
+                ->where('value', 'like', '%' . json_decode($parameters['collection']) . '%')
+                ->orderBy('value')->pluck('value');
             return json_encode(['collections' => $collections]);
         }
 
         if ($parameters['action'] == 'product_type') {
-            $types = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'X']])->orderBy('value')->pluck('value');
+            $types = DB::table('user_collections_tags_types')
+                ->where([['user_id', Auth::User()->id], ['type', 'X']])
+                ->where('value', 'like', '%' . $parameters['type'] . '%')
+                ->orderBy('value')->pluck('value');
             return json_encode(['types' => $types]);
         }
 
         if ($parameters['action'] == 'product_tag') {
-            $tags = DB::table('user_collections_tags_types')->where([['user_id', Auth::User()->id], ['type', 'T']])->orderBy('value')->pluck('value');
+            $tags = DB::table('user_collections_tags_types')
+                ->where([['user_id', Auth::User()->id], ['type', 'T']])
+                ->where('value', 'like', '%' . $parameters['tag'] . '%')
+                ->orderBy('value')->pluck('value');
             return json_encode(['tags' => $tags]);
         }
 
@@ -398,23 +435,29 @@ class AjaxController extends Controller
                 ->join('status as st1', 'st1.id', 'orders.financial_status')
                 ->join('status as st2', 'st2.id', 'orders.fulfillment_status')
                 ->join('users as us', 'us.id', 'orders.id_customer');
-            if ($parameters['order_number'] != '')
+            if ($parameters['order_number'] != '') {
                 $order_list = $order_list->where('magento_order_id', 'like', '%' . $parameters['order_number'] . '%');
+            }
 
-            if ($parameters['from'] != '')
+            if ($parameters['from'] != '') {
                 $order_list = $order_list->whereDate('orders.created_at', '>=', $parameters['from']);
+            }
 
-            if ($parameters['to'] != '')
+            if ($parameters['to'] != '') {
                 $order_list = $order_list->whereDate('orders.created_at', '<=', $parameters['to']);
+            }
 
-            if ($parameters['payment_status'] > 0)
+            if ($parameters['payment_status'] > 0) {
                 $order_list = $order_list->where('orders.financial_status', $parameters['payment_status']);
+            }
 
-            if ($parameters['order_state'] > 0)
+            if ($parameters['order_state'] > 0) {
                 $order_list = $order_list->where('orders.fulfillment_status', $parameters['order_state']);
+            }
 
-            if ($parameters['merchant_name'] != '')
+            if ($parameters['merchant_name'] != '') {
                 $order_list = $order_list->where('us.name', 'like', '%' . $parameters['merchant_name'] . '%');
+            }
 
             $total_count = $order_list->count();
             $order_list = $order_list->orderBy('orders.updated_at', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
@@ -437,22 +480,29 @@ class AjaxController extends Controller
             $page_number = $parameters['page_number'];
             $page_size = $parameters['page_size'];
             $merchants_list = User::select('users.*')->where('role', 'merchant');
-            if ($parameters['name'] != '')
+            if ($parameters['name'] != '') {
                 $merchants_list = $merchants_list->where('name', 'like', '%' . $parameters['name'] . '%');
-
-            if ($parameters['email'] != '')
-                $merchants_list = $merchants_list->where('email', 'like', '%' . $parameters['email'] . '%');
-
-            if ($parameters['url'] != '')
-                $merchants_list = $merchants_list->where('shopify_url', 'like', '%' . $parameters['url'] . '%');
-
-            if ($parameters['plan'] != '') {
-                if ($parameters['plan'] == '0') $merchants_list = $merchants_list->whereNull('plan');
-                else $merchants_list = $merchants_list->where('plan', $parameters['plan']);
             }
 
-            if ($parameters['active'] != '')
+            if ($parameters['email'] != '') {
+                $merchants_list = $merchants_list->where('email', 'like', '%' . $parameters['email'] . '%');
+            }
+
+            if ($parameters['url'] != '') {
+                $merchants_list = $merchants_list->where('shopify_url', 'like', '%' . $parameters['url'] . '%');
+            }
+
+            if ($parameters['plan'] != '') {
+                if ($parameters['plan'] == '0') {
+                    $merchants_list = $merchants_list->whereNull('plan');
+                } else {
+                    $merchants_list = $merchants_list->where('plan', $parameters['plan']);
+                }
+            }
+
+            if ($parameters['active'] != '') {
                 $merchants_list = $merchants_list->where('active', $parameters['active']);
+            }
             $total_count = $merchants_list->count();
             $merchants_list = $merchants_list->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             return json_encode([
@@ -505,57 +555,70 @@ class AjaxController extends Controller
                 ->join('status as st1', 'st1.id', 'orders.financial_status')
                 ->join('status as st2', 'st2.id', 'orders.fulfillment_status')
                 ->where('orders.id_customer', Auth::user()->id);
-    
-            if ($parameters['order_number'] != '' && $parameters['order_number'] > 0) {
-                $order_list = $order_list->where('order_number_shopify', '#' . $parameters['order_number']);
-            }
 
-            if ($parameters['from'] != '' && $parameters['to'] != '') {
-                $order_list = $order_list->whereDate('created_at', '>=', $parameters['from'])
-                    ->whereDate('created_at', '<=', $parameters['to']);
-            }
+            $total_period_orders = Order::where('id_customer', Auth::user()->id);
 
-            
             if ($parameters['notifications'] != '' && $parameters['notifications']) {
                 $order_list = $order_list->where('financial_status', OrderStatus::Outstanding)
                     ->where('fulfillment_status', OrderStatus::NewOrder);
+                $total_period_orders = $total_period_orders->where('financial_status', OrderStatus::Outstanding)
+                    ->where('fulfillment_status', OrderStatus::NewOrder);
+            }
+
+            $order_count = $order_list->count();
+
+            $current_period = MonthlyRecurringPlan::where('current', 1)->where('merchant_id', Auth::user()->id)->first();
+
+            if ($parameters['from'] != '' && $parameters['to'] != '') {
+                $total_period_orders = $total_period_orders->whereDate('created_at', '>=', $parameters['from'])
+                    ->whereDate('created_at', '<=', $parameters['to']);
+            } else {
+                $total_period_orders = $total_period_orders->whereDate('created_at', '>=', $current_period->start_date)
+                    ->whereDate('created_at', '<=', $current_period->end_date);
+            }
+
+            if ($parameters['order_number'] != '' && $parameters['order_number'] > 0) {
+                $order_list = $order_list->where('order_number_shopify', '#' . $parameters['order_number']);
+                $total_period_orders = $total_period_orders->where('order_number_shopify', '#' . $parameters['order_number']);
+            } else {
+                if ($parameters['from'] != '' && $parameters['to'] != '') {
+                    $order_list = $order_list->whereDate('created_at', '>=', $parameters['from'])
+                        ->whereDate('created_at', '<=', $parameters['to']);
+                }
+            }
+
+            $basic_period = '';
+            if (Auth::user()->plan == 'basic' && $current_period != null) {
+                $basic_period = $current_period->start_date . ' - ' . $current_period->end_date;
             }
 
             if ($parameters['payment_status'] > 0) {
                 $order_list = $order_list->where('orders.financial_status', $parameters['payment_status']);
+                $total_period_orders = $total_period_orders->where('orders.financial_status', $parameters['payment_status']);
             }
-    
+
             if ($parameters['order_state'] > 0) {
                 $order_list = $order_list->where('orders.fulfillment_status', $parameters['order_state']);
+                $total_period_orders = $total_period_orders->where('orders.fulfillment_status', $parameters['order_state']);
             }
-            $notifications = Order::select(
-                'orders.*',
-                'osa.first_name',
-                'osa.last_name',
-                'st1.name as status1',
-                'st1.color as color1',
-                'st2.name as status2',
-                'st2.color as color2',
-                'st1.id as financial_status',
-                'st2.id as fulfillment_status'
-            )
-                ->join('order_shipping_address as osa', 'orders.id', 'osa.id_order')
-                ->join('status as st1', 'st1.id', 'orders.financial_status')
-                ->join('status as st2', 'st2.id', 'orders.fulfillment_status')
-                ->where('orders.id_customer', Auth::user()->id)
-                ->where('financial_status', OrderStatus::Outstanding)
+
+            $notifications = Order::where('financial_status', OrderStatus::Outstanding)
                 ->where('fulfillment_status', OrderStatus::NewOrder)
                 ->where('orders.id_customer', Auth::user()->id)
                 ->count();
-            if ($parameters['notifications'] != '' && $parameters['notifications']) {
-                $order_list = $order_list->where('financial_status', OrderStatus::Outstanding)->where('fulfillment_status', OrderStatus::NewOrder);
-            }
+
+            $total_period_orders = $total_period_orders->count();
             $total_count = $order_list->count();
-            $orders = $order_list->orderBy('orders.id', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size);
+
             return json_encode([
                 'my_orders' => [
-                    'orders' => $orders->get(),
+                    'orders' => $order_list->orderBy('orders.id', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get(),
                     'notifications' => $notifications,
+                    'from' => $parameters['from'],
+                    'to' => $parameters['to'],
+                    'basic_period' => $basic_period,
+                    'total_period_orders' => $total_period_orders,
+                    'total_count' => $order_count
                 ],
                 'total_count' => $total_count,
                 'page_size' => $page_size,

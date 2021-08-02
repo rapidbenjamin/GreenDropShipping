@@ -166,43 +166,71 @@
     $(document).ready(function() {
         $('#total_count').text("{{$total_count}}");
 
-        $('#idOrder').keypress(function(e) {
-            if ($('#idOrder').val().trim().length >= 2) {
-                $.getJSON(ajax_link, {
-                    action: 'admin-order-number',
-                    number: $('#idOrder').val().trim()
-                }, function(data) {
-                    var str = '<div id="number_data">';
-                    data.numbers.forEach(number => {
-                        str += `<option value="${number}">`;
-                    });
-                    str += '</div>';
+        $('#idOrder').keydown(function(e) {
+            let length = $('#idOrder').val().length;
+            if (e.key) {
+                if (e.key.length == 1) {
+                    length += 1;
+                } else {
+                    if (e.code == 'Backspace') {
+                        length -= 1;
+                    }
+                }
+                if (length > 2) {
+                    $.getJSON(ajax_link, {
+                        action: 'admin-order-number',
+                        number: $('#idOrder').val().trim()
+                    }, function(data) {
+                        var str = '<div id="number_data">';
+                        data.numbers.forEach(number => {
+                            str += `<option value="${number}">`;
+                        });
+                        str += '</div>';
+                        $('#number_data').remove();
+                        $('#numbers').html(str);
+                    })
+                } else {
                     $('#number_data').remove();
-                    $('#numbers').html(str);
-                })
-            } else $('#number_data').remove();
+                }
+            }
         })
 
-        $('#merchant').keypress(function(e) {
-            if ($('#merchant').val().trim().length >= 2) {
-                $.getJSON(ajax_link, {
-                    action: 'admin-order-merchant',
-                    name: $('#merchant').val().trim()
-                }, function(data) {
-                    var str = '<div id="merchant_data">';
-                    data.names.forEach(name => {
-                        str += `<option value="${name}">`;
-                    });
-                    str += '</div>';
+        $('#merchant').keydown(function(e) {
+            let length = $('#merchant').val().length;
+            if (e.key) {
+                if (e.key.length == 1) {
+                    length += 1;
+                } else {
+                    if (e.code == 'Backspace') {
+                        length -= 1;
+                    }
+                }
+                if (length > 2) {
+                    console.log(length)
+                    $.getJSON(ajax_link, {
+                        action: 'admin-order-merchant',
+                        name: $('#merchant').val().trim()
+                    }, function(data) {
+                        var str = '<div id="merchant_data">';
+                        data.names.forEach(name => {
+                            str += `<option value="${name}">`;
+                        });
+                        str += '</div>';
+                        $('#merchant_data').remove();
+                        $('#names').html(str);
+                    })
+                } else {
                     $('#merchant_data').remove();
-                    $('#names').html(str);
-                })
-            } else $('#merchant_data').remove();
+                }
+            }
         })
 
         $('#check-orders').click(function (event) {
-            if (event.target.checked) $('.checkbox').prop('checked', true);
-            else $('.checkbox').prop('checked', false);
+            if (event.target.checked) {
+                $('.checkbox').prop('checked', true);
+            } else {
+                $('.checkbox').prop('checked', false);
+            }
         })
 
         $('.exporsel').click(function() {
@@ -210,7 +238,9 @@
             $("input.checkbox:checked").each(function (index, ele) {
                 ids.push($(ele).data('id'));
             });
-            if (ids.length) window.location.href = `/admin/orders/exports?ids=${JSON.stringify(ids)}`;
+            if (ids.length) {
+                window.location.href = `/admin/orders/exports?ids=${JSON.stringify(ids)}`;
+            }
 
         });
     });

@@ -26,7 +26,7 @@ $( document ).ready(function() {
           }
     });
 
-    if($(window).width() <= 1000) {
+    if ($(window).width() <= 1000) {
         if ($('#role').val() == 'admin') {
             $('#merchant-menu').hide();
             $('#admin-menu').show();

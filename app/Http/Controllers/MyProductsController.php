@@ -95,9 +95,13 @@ class MyProductsController extends Controller
         foreach ($product_shopify_ids as $product_shopify_id) {
             $flag = true;
             foreach ($result as $res) {
-                if ($product_shopify_id == $res) $flag = false;
+                if ($product_shopify_id == $res) {
+                    $flag = false;
+                }
             }
-            if ($flag) $data[] = $product_shopify_id;
+            if ($flag) {
+                $data[] = $product_shopify_id;
+            }
         }
 
         return response()->json([

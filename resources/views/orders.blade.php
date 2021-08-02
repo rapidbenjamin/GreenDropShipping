@@ -89,8 +89,16 @@
             </div>
 
             @if(Auth::user()->plan == 'basic')
+            <div class="results">
+                <div><strong>Period</strong></div>
+                <div><label id="period">{{$basic_period}}</label></div>
+                <div><strong>Total Orders</strong></div>
+                <div>
+                    <span class="font-weight-bold" id="total_period_orders" style="{{($total_period_orders >= env('LIMIT_ORDERS'))?'background-color:red':''}}">{{$total_period_orders}}</span> of <span class="font-weight-bold" id="total_orders">{{$total_count}}</span>
+                </div>
+            </div>
             <div class="actions">
-                <button class="btn-order-notifications pendingpay mt-5" title="Outstanding orders that require payment"> <span class="badge">{{$notifications}}</span> Pending Payments</button>
+                <button class="btn-order-notifications pendingpay mt-5" title="Outstanding orders that require payment"> <span class="badge" id="notifications">{{$notifications}}</span> Pending Payments</button>
                 <div></div>
                 <div></div>
             </div>
@@ -146,7 +154,7 @@
                         @foreach($order_list as $ol)
                         <tr class="productdatarow">
                             <td data-label="ORDER #">
-                                {{$ol->order_number_shopify}}
+                                {{substr($ol->order_number_shopify, 1)}}
                             </td>
                             <td data-label="DATE">
                                 {{$ol->created_at}}
@@ -157,19 +165,15 @@
                             <td data-label="TOTAL TO PAY">
                                 ${{number_format($ol->total + $ol->shipping_price, 2, '.', '')}}
                             </td>
-                            <td>
-                                <div class="buttonge">
-                                    {{$ol->status1}}
-                                </div>
+                            <td data-label="PAYMENT STATUS">
+                                {{$ol->status1}}
                             </td>
-                            <td>
-                                <div class="buttonge">
-                                    {{$ol->status2}}
-                                </div>
+                            <td data-label="ORDER STATE">
+                                {{$ol->status2}}
                             </td>
                             <td>
                                 @if($ol->financial_status== App\Libraries\OrderStatus::Outstanding && $ol->fulfillment_status != 9 && $ol->fulfillment_status != 12)
-                                <button class="payorder pay-button checkout-button" data-id="{{$ol->id}}" data-toggle="modal" data-target="#delete-product-modal">PAY ORDER</button>
+                                <button class="payorder pay-button checkout-button" data-id="{{$ol->id}}">PAY ORDER</button>
                                 @elseif($ol->fulfillment_status == 9)
                                 <button class="payorder payorderoff canceled" data-id="{{$ol->id}}">Canceled</button>
                                 @else
@@ -195,6 +199,11 @@
     $(document).ready(function() {
         $('#total_count').text("{{$total_count}}");
 
+        if ($('#notifications').text() > 9) {
+            $('#notifications').addClass('circle');
+        } else {
+            $('#notifications').removeClass('circle');
+        }
         $('#check-all-mp').click(function() {
             if (!$(this).data('mark')) {
                 $('.checkbox').prop('checked', true);
@@ -208,65 +217,61 @@
         $('.btn-order-notifications').click(function() {
             window.location.href = encodeURI('{{url("/orders/")}}?notifications=true');
         });
-
-        $('#confirm').click(function() {
-            let idx = $('.checkout-button').data('id');
-            $('.cb' + idx).attr('checked', 'checked');
-
-            let stripe = Stripe('{{env("STRIPE_API_KEY")}}');
-            let res = $('input[name=s_method]:checked', '#shipping-methods').val();
-            let orders = [$('.checkout-button').attr('data-id')];
-
-            $("input.checkbox:checked").each(function(index, ele) {
-                orders.push($(ele).attr('data-id'));
-            });
-
-            console.log('ordenes... ' + orders);
-
-            // Create a new Checkout Session using the server-side endpoint you
-            // created in step 3.
-            fetch('/create-checkout-session', {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json, text-plain, */*",
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                },
-                method: 'POST',
-                body: JSON.stringify({
-                    orders: orders
-                    //shipping: $('input[name=s_method]:checked', '#shipping-methods').val(),
-                }),
-            })
-            .then(function(response) {
-                if (response.status == 406) {
-                    $('#order-limit-modal').modal('show')
-                }
-                return response.json();
-            })
-            .then(function(session) {
-                return stripe.redirectToCheckout({
-                    sessionId: session.id
-                }).then(function(result) {
-                    console.log('res', result);
-                });
-            })
-            .then(function(result) {
-                // If `redirectToCheckout` fails due to a browser or network
-                // error, you should display the localized error message to your
-                // customer using `error.message`.
-                if (result.error) {
-                    alert(result.error.message);
-                }
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-            });
-        })
     });
 
     $('#order_data').on('click', '.checkout-button', function() {
-        $('#modal-body').html('<h5></h5>');
+        let idx = $('.checkout-button').data('id');
+        $('.cb' + idx).attr('checked', 'checked');
+
+        let stripe = Stripe('{{env("STRIPE_API_KEY")}}');
+        let res = $('input[name=s_method]:checked', '#shipping-methods').val();
+        let orders = [$('.checkout-button').attr('data-id')];
+
+        $("input.checkbox:checked").each(function(index, ele) {
+            orders.push($(ele).attr('data-id'));
+        });
+
+        console.log('ordenes... ' + orders);
+
+        // Create a new Checkout Session using the server-side endpoint you
+        // created in step 3.
+        fetch('/create-checkout-session', {
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json, text-plain, */*",
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+            },
+            method: 'POST',
+            body: JSON.stringify({
+                orders: orders
+                //shipping: $('input[name=s_method]:checked', '#shipping-methods').val(),
+            }),
+        })
+        .then(function(response) {
+            if (response.status == 406) {
+                $('#order-limit-modal').modal('show')
+            }
+            return response.json();
+        })
+        .then(function(session) {
+            return stripe.redirectToCheckout({
+                sessionId: session.id
+            }).then(function(result) {
+                console.log('res', result);
+            });
+        })
+        .then(function(result) {
+            // If `redirectToCheckout` fails due to a browser or network
+            // error, you should display the localized error message to your
+            // customer using `error.message`.
+            if (result.error) {
+                alert(result.error.message);
+            }
+        })
+        .catch(function(error) {
+            console.error('Error:', error);
+        });
     });
 </script>
 

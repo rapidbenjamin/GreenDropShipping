@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\ShopifyStore;
 use Illuminate\Http\Request;
 use App\User;
 
@@ -35,8 +36,10 @@ class AdminMerchantsController extends Controller
     public function show(User $merchant)
     {
         $this->authorize('view-admin-merchants');
+        $shopify_data = ShopifyStore::where('user_id', $merchant->id)->get();
         return view('admin_merchants_detail', array(
-            'merchant' => $merchant
+            'merchant' => $merchant,
+            'shopify_data' => count($shopify_data) ? $shopify_data[0] : []
         ));
     }
 
@@ -57,7 +60,16 @@ class AdminMerchantsController extends Controller
         header("Content-Disposition: attachment;filename=merchants.csv");
         header("Content-Transfer-Encoding: binary");
 
-        $merchants = User::select('users.name', 'users.email', 'users.shopify_url', 'users.role', 'users.plan', 'users.active', 'users.created_at')->where('role', 'merchant')->get()->toArray();
+        $merchants = User::select(
+            'users.name',
+            'users.email',
+            'users.shopify_url',
+            'users.role',
+            'users.plan',
+            'users.active',
+            'users.created_at'
+        )
+            ->where('role', 'merchant')->get()->toArray();
         ob_start();
         $df = fopen("php://output", 'w');
 

@@ -119,7 +119,7 @@
                             <td class="btngroup">
 
                                 <button class="view greenbutton detail-merchants" data-merchantid="{{$ml->id}}">View</button>
-                                <button class="payorder orders-customers" data-merchantid="{{$ml->id}}">Orders</button>
+                                <button class="vieworder orders-customers" data-merchantid="{{$ml->id}}">Orders</button>
 
                             </td>
                         </tr>
@@ -158,17 +158,20 @@
 
     $('#merchant_data').on('click', 'input.change-status', function() {
         let status = $(this).is(':checked')
-        if ($(this).is(':checked')) $(this).prop('checked', false);
-        else $(this).prop('checked', true);
+        if ($(this).is(':checked')) {
+            $(this).prop('checked', false);
+        } else {
+            $(this).prop('checked', true);
+        }
         $('#user_id').val($(this).data('merchantid'));
         $('#modal-body').html(`<h5>Are your sure to ${$(this).is(':checked') ? 'disable' : 'enable'} this merchant?</h5>`);
     });
-    
-    $('#merchant_data').on('click', 'button.orders-customers', function () {
+
+    $('#merchant_data').on('click', 'button.orders-customers', function() {
         window.location.href = '/admin/orders?merchantid=' + $(this).data('merchantid');
     })
 
-    $('#merchant_data').on('click', 'button.detail-merchants', function () {
+    $('#merchant_data').on('click', 'button.detail-merchants', function() {
         window.location.href = '/admin/merchants/show/' + $(this).data('merchantid');
     })
 </script>

@@ -90,7 +90,9 @@ class MOrder
     public static function getSateIdByName($name)
     {
         foreach (self::USAstates() as $key => $value) {
-            if (strtolower($value) == strtolower($name)) return $key;
+            if (strtolower($value) == strtolower($name)) {
+                return $key;
+            }
         }
         return 0;
     }
@@ -98,7 +100,9 @@ class MOrder
     public static function getSateCodeByName($name)
     {
         foreach (self::USACodestates() as $key => $value) {
-            if (strtolower($value) == strtolower($name)) return $key;
+            if (strtolower($value) == strtolower($name)) {
+                return $key;
+            }
         }
         return 0;
     }
