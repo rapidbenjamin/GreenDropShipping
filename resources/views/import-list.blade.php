@@ -351,8 +351,8 @@
     $('.btn-import-list-send2').off('click');
     $('.btn-import-list-send2').click(function(e) {
       e.preventDefault();
-      //console.log('http://{{Auth::user()->shopify_url}}/admin/products/' + $(this).attr('data-shopifyid'));
-      window.open('http://{{Auth::user()->shopify_url}}/admin/products/', '_blank');
+      //console.log('https://{{Auth::user()->shopify_url}}/admin/products/' + $(this).attr('data-shopifyid'));
+      window.open('https://{{Auth::user()->shopify_url}}/admin/products/', '_blank');
       return false;
     });
 

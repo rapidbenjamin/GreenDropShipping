@@ -598,7 +598,7 @@
 
     $('#import-products').on('click', '.btn-import-list-send2', function(e) {
         e.preventDefault();
-        window.open(`http://{{Auth::user()->shopify_url}}/admin/products/${e.target.dataset.shopifyid}`, '_blank');
+        window.open(`https://{{Auth::user()->shopify_url}}/admin/products/${e.target.dataset.shopifyid}`, '_blank');
     });
 
     $('#import-products').on('click', '.verModal', function(e) {

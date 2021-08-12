@@ -162,7 +162,7 @@
         });
 
         $('.edit-product').click(function() {
-            window.open('http://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');
+            window.open('https://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');
         });
 
         $('.btn-mp-delete').click(function() {
