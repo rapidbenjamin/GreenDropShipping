@@ -17,12 +17,12 @@ class SettingsController extends Controller
     {
         $this->middleware('auth');
     }
-    
+
     public function index()
     {
-        $this->authorize('view-merchant-settings'); 
-        $settings = Settings::where('id_merchant',Auth::user()->id)->first();
-        if($settings==null){
+        $this->authorize('view-merchant-settings');
+        $settings = Settings::where('id_merchant', Auth::user()->id)->first();
+        if ($settings == null) {
             $settings = new Settings();
             $settings->set1 = 0;
             $settings->set2 = 0;
@@ -33,8 +33,6 @@ class SettingsController extends Controller
             $settings->set7 = 1;
             $settings->set8 = '';
         }
-        return view('settings',['settings'=>$settings]);
+        return view('settings', ['settings' => $settings]);
     }
-    
-    
 }

@@ -116,7 +116,7 @@
                                         </p>
 
                                         <div class="pbuttons">
-                                            <button class="edit edit-product" data-shopifyid="{{ $pr->id_shopify }}">Edit on Shopify</button>
+                                            <button class="edit edit-product" data-shopifyid="{{ $pr->id_shopify }}">Edit in Shopify</button>
                                             <button class="delete btn-mp-delete" data-myproductid="{{ $pr->id_my_products }}">Delete</button>
                                         </div>
                                     </div>

@@ -47,7 +47,6 @@ class StripeWebHooksController extends Controller
     {
 
         $this->middleware('guest');
-
     }
 
 
@@ -78,7 +77,6 @@ class StripeWebHooksController extends Controller
                 $order->fulfillment_status = OrderStatus::InProcessOrder;
 
                 $order->save();
-
             }
 
             DB::commit();
@@ -87,22 +85,20 @@ class StripeWebHooksController extends Controller
 
             foreach ($orders as $order) {
 
-               $magento_order = MOrder::createOrderv2($order);
+                $magento_order = MOrder::createOrderv2($order);
 
-               $order->magento_quote_id = $magento_order['quote_id'].'';
+                $order->magento_quote_id = $magento_order['quote_id'] . '';
 
-               $order->magento_order_id = $magento_order['reserved_order_id'];
+                $order->magento_order_id = $magento_order['reserved_order_id'];
 
-               $order->save();
-               
-               if($order->magento_order_id != NULL){
-                
-                    $msg = 'Id Stripe Payment: '.$payment_session->payment_intent;
-               
-                    MOrder::commentOrder($order->magento_entity_id,$msg);                  
-                   
-               }
+                $order->save();
 
+                if ($order->magento_order_id != NULL) {
+
+                    $msg = 'Id Stripe Payment: ' . $payment_session->payment_intent;
+
+                    MOrder::commentOrder($order->magento_entity_id, $msg);
+                }
             }
 
 
@@ -122,13 +118,10 @@ class StripeWebHooksController extends Controller
                 $payment_session->card_last4 = $card['last4'];
 
                 $payment_session->save();
-
             }
-
         }
 
         return response()->json(array('result' => 'ok'));
-
     }
 
 
@@ -145,13 +138,11 @@ class StripeWebHooksController extends Controller
             $payment_session->status = 'Fail';
 
             $payment_session->save();
-
         }
 
 
 
         return response()->json(array('result' => 'ok'));
-
     }
 
 
@@ -173,9 +164,7 @@ class StripeWebHooksController extends Controller
             $exp_year = $card['exp_year'];
 
             $last4 = $card['last4'];
-
         }
-
     }
 
 
@@ -216,15 +205,13 @@ class StripeWebHooksController extends Controller
 
             $middle = explode(":", $part, 2);
 
-            if (count($middle) < 2) continue;
+            if (count($middle) < 2) {
+                continue;
+            }
 
             $header_line = trim($middle[0]);
-
         }
 
         return array('HTTP_CODE' => $httpcode, 'body' => $body);
-
     }
-
 }
-

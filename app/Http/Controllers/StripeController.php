@@ -34,7 +34,7 @@ class StripeController extends Controller
         Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
         $line_items = array();
         if (!count($orders)) {
-            return response()->json(['message' => 'yo have to select valid orders'], 500);
+            return response()->json(['message' => 'you have to select valid orders'], 500);
         }
 
         $description = "";

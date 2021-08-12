@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Libraries\Magento\MagentoApi;
 use App\Libraries\Magento\MOrder;
 use App\Libraries\OrderStatus;
 use App\Log;
@@ -33,6 +34,80 @@ class OrdersController extends Controller
 
 	public function index(Request $request)
 	{
+		// $this->authorize('plan_view-manage-orders');
+		// $order_list = Order::select(
+		// 	'orders.*',
+		// 	'osa.first_name',
+		// 	'osa.last_name',
+		// 	'st1.name as status1',
+		// 	'st1.color as color1',
+		// 	'st2.name as status2',
+		// 	'st2.color as color2',
+		// 	'st1.id as financial_status',
+		// 	'st2.id as fulfillment_status'
+		// )
+		// 	->join('order_shipping_address as osa', 'orders.id', 'osa.id_order')
+		// 	->join('status as st1', 'st1.id', 'orders.financial_status')
+		// 	->join('status as st2', 'st2.id', 'orders.fulfillment_status')
+		// 	->where('orders.id_customer', Auth::user()->id);
+
+		// $notifications = Order::select(
+		// 	'orders.*',
+		// 	'osa.first_name',
+		// 	'osa.last_name',
+		// 	'st1.name as status1',
+		// 	'st1.color as color1',
+		// 	'st2.name as status2',
+		// 	'st2.color as color2',
+		// 	'st1.id as financial_status',
+		// 	'st2.id as fulfillment_status'
+		// )
+		// 	->join('order_shipping_address as osa', 'orders.id', 'osa.id_order')
+		// 	->join('status as st1', 'st1.id', 'orders.financial_status')
+		// 	->join('status as st2', 'st2.id', 'orders.fulfillment_status')
+		// 	->where('orders.id_customer', Auth::user()->id)
+		// 	->where('financial_status', OrderStatus::Outstanding)
+		// 	->where('fulfillment_status', OrderStatus::NewOrder)
+		// 	->where('orders.id_customer', Auth::user()->id)
+		// 	->count();
+
+		// $current_period = MonthlyRecurringPlan::where('current', 1)->where('merchant_id', Auth::user()->id)->first();
+		// $total_period_orders = 0;
+		// $basic_period = '';
+		// if (Auth::user()->plan == 'basic' && $current_period != null) {
+		// 	// $period_orders = MonthlyRecurringPlanOrders::where('period_id', $current_period->id)
+		// 	// 	->Join('orders', 'orders.id', '=', 'monthly_recurring_plan_orders.order_id')->get();
+		// 	// $total_period_orders = $period_orders->filter(function ($value, $key) {
+		// 	// 	dd($value, $key);
+		// 	// 	// return $value->role != 'admin' && $value->created_at >= $current_period->start_date && $value->created_at <= $current_period->end_date;
+		// 	// })->count();
+		// 	// dd($current_period);
+		// 	$total_period_orders = MonthlyRecurringPlanOrders::where('period_id', $current_period->id)
+		// 		->Join('orders', 'orders.id', '=', 'monthly_recurring_plan_orders.order_id')
+		// 		->whereDate('created_at', '>=', $current_period->start_date)
+		// 		->whereDate('created_at', '<=', $current_period->end_date)
+		// 		->count();
+		// 	$basic_period = $current_period->start_date . ' - ' . $current_period->end_date;
+		// }
+		// // $order_list = $order_list->whereDate('created_at', '>=', $current_period->start_date)
+		// // 	->whereDate('created_at', '<=', $current_period->end_date);
+		// $is_notification = false;
+		// if ($request->notifications != '' && $request->notifications) {
+		// 	$is_notification = true;
+		// 	$order_list = $order_list->where('financial_status', OrderStatus::Outstanding)->where('fulfillment_status', OrderStatus::NewOrder);
+		// }
+
+		// $total_count = $order_list->count();
+
+		// return view('orders', array(
+		// 	'order_list' => $order_list->orderBy('orders.id', 'desc')->paginate(10),
+		// 	'notifications' => $notifications,
+		// 	'is_notification' => $is_notification,
+		// 	'status' => Status::get(),
+		// 	'basic_period' => $basic_period,
+		// 	'total_period_orders' => $total_period_orders,
+		// 	'total_count' => $total_count
+		// ));
 		$this->authorize('plan_view-manage-orders');
 		$order_list = Order::select(
 			'orders.*',
@@ -50,120 +125,146 @@ class OrdersController extends Controller
 			->join('status as st2', 'st2.id', 'orders.fulfillment_status')
 			->where('orders.id_customer', Auth::user()->id);
 
-		$searchBy = 'Search By';
+		$is_notification = false;
+		if ($request->notifications != '' && $request->notifications) {
+			$is_notification = true;
+			$order_list = $order_list->where('financial_status', OrderStatus::Outstanding)
+				->where('fulfillment_status', OrderStatus::NewOrder);
+		}
+
+		$total_count = $order_list->count();
+
+		$current_period = MonthlyRecurringPlan::where('current', 1)->where('merchant_id', Auth::user()->id)->first();
+
+		$total_period_orders = 0;
 		if ($request->order != '' && $request->order > 0) {
 			$order_list = $order_list->where('order_number_shopify', '#' . $request->order);
-			$searchBy .= ' order number => ' . $request->order;
 		} else {
 			if ($request->from != '' && $request->to != '') {
-				$searchBy .= ' dates => ' . $request->from  . '-' . $request->to;
 				$order_list = $order_list->whereDate('created_at', '>=', $request->from)
 					->whereDate('created_at', '<=', $request->to);
+				$total_period_orders = Order::where('id_customer', Auth::user()->id)
+					->whereDate('created_at', '>=', $request->from)
+					->whereDate('created_at', '<=', $request->to)
+					->count();
+			} else {
+				$total_period_orders = Order::where('id_customer', Auth::user()->id)
+					->whereDate('created_at', '>=', $current_period->start_date)
+					->whereDate('created_at', '<=', $current_period->end_date)
+					->count();
 			}
 		}
 
-		$current_period = MonthlyRecurringPlan::where('current', 1)->where('merchant_id', Auth::user()->id)->first();
-		$total_period_orders = 0;
-		$basic_period_orders = '';
+		$basic_period = '';
 		if (Auth::user()->plan == 'basic' && $current_period != null) {
-			$period_orders = MonthlyRecurringPlanOrders::where('period_id', $current_period->id)->Join('orders', 'orders.id', '=', 'monthly_recurring_plan_orders.order_id')->get();
-			$total_period_orders = $period_orders->filter(function ($value, $key) {
-				return $value->role != 'admin';
-			})->count();
-			$basic_period_orders = $current_period->start_date . ' - ' . $current_period->end_date;
+			// $period_orders = MonthlyRecurringPlanOrders::where('period_id', $current_period->id)->Join('orders', 'orders.id', '=', 'monthly_recurring_plan_orders.order_id')->get();
+			// $total_period_orders = $period_orders->filter(function ($value, $key) {
+			// 	return $value->role != 'admin';
+			// })->count();
+
+			$basic_period = $current_period->start_date . ' - ' . $current_period->end_date;
 		}
 
-		$notifications = Order::where('financial_status', OrderStatus::Outstanding)->where('fulfillment_status', OrderStatus::NewOrder)->where('orders.id_customer', Auth::user()->id)->count();
-		if ($request->notifications != '' && $request->notifications) {
-			$searchBy .= ' pending payments';
-			$order_list = $order_list->where('financial_status', OrderStatus::Outstanding)->where('fulfillment_status', OrderStatus::NewOrder);
-		}
+		$notifications = Order::where('financial_status', OrderStatus::Outstanding)
+			->where('fulfillment_status', OrderStatus::NewOrder)
+			->where('orders.id_customer', Auth::user()->id)
+			->count();
+
 		if ($request->st1 > 0) {
-			$searchBy .= ' financial state => ' . $request->st1;
 			$order_list = $order_list->where('orders.financial_status', $request->st1);
 		}
 
 		if ($request->st2 > 0) {
-			$searchBy .= ' order state => ' . $request->st2;
 			$order_list = $order_list->where('orders.fulfillment_status', $request->st2);
 		}
 
-
-		self::GDSLOG('Search Orders', ($searchBy == 'Search By' ? 'View Orders' : $searchBy));
-
 		return view('orders', array(
-			'order_list' => $order_list->orderBy('orders.id_shopify', 'desc')->paginate(50),
+			'order_list' => $order_list->orderBy('orders.id', 'desc')->paginate(10),
 			'from' => $request->from,
 			'to' => $request->to,
 			'order' => $request->order,
 			'total_period_orders' => $total_period_orders,
-			'basic_period_orders' => $basic_period_orders,
+			'basic_period' => $basic_period,
 			'order_limit' => env('LIMIT_ORDERS', 1),
 			'notifications' => $notifications,
-			'status' => Status::get()
+			'status' => Status::get(),
+			'is_notification' => $is_notification,
+			'total_count' => $total_count
 		));
 	}
 
 	public function show(Order $orders)
 	{
 		$this->authorize('plan_view-manage-orders');
-	    if(Auth::user()->id == $orders->id_customer){
-		$osa = OrderShippingAddress::select('order_shipping_address.*')
-			->where('order_shipping_address.id_order', $orders->id)
-			->first();
+		if (Auth::user()->id == $orders->id_customer) {
+			$osa = OrderShippingAddress::select('order_shipping_address.*')
+				->where('order_shipping_address.id_order', $orders->id)
+				->first();
 
-		$fs = Status::select('status.*')
-			->where('status.id', $orders->financial_status)
-			->first();
+			$fs = Status::select('status.*')
+				->where('status.id', $orders->financial_status)
+				->first();
 
-		$os = Status::select('status.*')
-			->where('status.id', $orders->fulfillment_status)
-			->first();
+			$os = Status::select('status.*')
+				->where('status.id', $orders->fulfillment_status)
+				->first();
 
 
-		$order_products = OrderDetails::select(
-			'order_details.sku',
-			'order_details.price',
-			'order_details.quantity',
-			'products.name',
-			'products.images'
-		)->join('products', 'order_details.sku', 'products.sku')
-            ->where('order_details.id_order', $orders->id)->get();
+			$order_products = OrderDetails::select(
+				'order_details.sku',
+				'order_details.price',
+				'order_details.quantity',
+				'products.name',
+				'products.images'
+			)->join('products', 'order_details.sku', 'products.sku')
+				->where('order_details.id_order', $orders->id)->get();
 
-		foreach ($order_products as $pro) {
-			$pro->image_url = env('URL_MAGENTO_IMAGES') . json_decode($pro->images)[0]->file;
+			foreach ($order_products as $pro) {
+				if ($pro['images'] != null && count(json_decode($pro['images'])) > 0) {
+					$pro->image_url = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($pro->images)[0]->file;
+				} else {
+					$pro->image_url = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37cno_selection';
+				}
+			}
+			$sessionPay = PaymentSession::where('id_orders', 'like', "%$orders->id%")
+				->whereDate('created_at', '>=', $orders->created_at)->orderBy('id', 'desc')->first();
+
+			$user_canceled = User::find($orders->user_id_canceled);
+			$user_canceled_name = '';
+			if ($user_canceled != null) {
+				$user_canceled_name = $user_canceled->name;
+			}
+			$api = MagentoApi::getInstance();
+			$criteria = [
+				'searchCriteria[filterGroups][1][filters][0][field]' => 'increment_id',
+				'searchCriteria[filterGroups][1][filters][0][value]' => $orders->magento_order_id,
+				'searchCriteria[filterGroups][1][filters][0][condition_type]' => "eq"
+			];
+			$mg_order = $api->query('GET', 'orders', $criteria);
+
+			self::GDSLOG('View Order Detail', 'View Order Detail => ' . $orders->id);
+
+			return view('order_detail', array(
+				'order' => $orders,
+				'mg_order' => json_decode($mg_order)->total_count ? json_decode($mg_order)->items[0] : '',
+				'osa' => $osa,
+				'fs' => $fs,
+				'os' => $os,
+				'payment_intent' => !is_null($sessionPay) ? $sessionPay->payment_intent : '',
+				'payment_card_number' => !is_null($sessionPay) ? $sessionPay->card_last4 : '',
+				'order_products' => $order_products,
+				'isValidOrder' => self::isValidOrderLimit($orders->id),
+				'user_canceled' => $user_canceled_name,
+				'states' => MOrder::USAstates(),
+				'state_key' => MOrder::getSateIdByName($osa->province)
+			));
+		} else {
+			return redirect('orders');
 		}
-		$sessionPay = PaymentSession::where('id_orders', 'like', "%$orders->id%")
-			->whereDate('created_at', '>=', $orders->created_at)->orderBy('id', 'desc')->first();
-
-		$user_canceled = User::find($orders->user_id_canceled);
-		$user_canceled_name = '';
-		if ($user_canceled != null) {
-			$user_canceled_name = $user_canceled->name;
-		}
-
-		self::GDSLOG('View Order Detail', 'View Order Detail => ' . $orders->id);
-
-		return view('order_detail', array(
-			'order' => $orders,
-			'osa' => $osa,
-			'fs' => $fs,
-			'os' => $os,
-			'payment_intent' => !is_null($sessionPay) ? $sessionPay->payment_intent : '',
-			'payment_card_number' => !is_null($sessionPay) ? $sessionPay->card_last4 : '',
-			'order_products' => $order_products,
-			'isValidOrder' => self::isValidOrderLimit($orders->id),
-			'user_canceled' => $user_canceled_name,
-			'states' => MOrder::USAstates(),
-			'state_key' => MOrder::getSateIdByName($osa->province)
-		));
-	    }else{
-	        return redirect('orders');
-	    }
 	}
 
 
-    //deprecated
+	//deprecated
 	public static function isValidOrderLimit($order_id)
 	{
 
@@ -205,8 +306,9 @@ class OrdersController extends Controller
 			->join('status as st1', 'st1.id', 'orders.financial_status')
 			->join('order_details as od', 'orders.id', 'od.id_order')
 			->join('products as p', 'p.sku', 'od.sku')
-			->join('status as st2', 'st2.id', 'orders.fulfillment_status')->whereIn('orders.id', explode(',', $request->orders))
-			->where('orders.id_customer', Auth::user()->id)->get()->toArray();
+			->join('status as st2', 'st2.id', 'orders.fulfillment_status')
+			->whereIn('orders.id', explode(',', $request->orders))
+			->where('orders.id_customer', Auth::user()->id)->orderBy('orders.id')->get()->toArray();
 
 		self::GDSLOG('Export Order', 'Export Order => ' . $request->orders);
 
@@ -226,10 +328,9 @@ class OrdersController extends Controller
 
 		ob_start();
 		$df = fopen("php://output", 'w');
-
-		fwrite($df, implode(";", array_keys(reset($order_list))) . "\n");
+		fputcsv($df, array_keys(reset($order_list)));
 		foreach ($order_list as $merchant) {
-			fwrite($df, implode(";", $merchant) . "\n");
+			fputcsv($df, $merchant);
 		}
 		fclose($df);
 		echo ob_get_clean();
@@ -338,8 +439,9 @@ class OrdersController extends Controller
 		if ($current_period != null) {
 			$count = MonthlyRecurringPlanOrders::where('period_id', $current_period->id)
 				->orderBy('order_id', 'asc')->count();
-			if ($count >= env('LIMIT_ORDERS', 1))
+			if ($count >= env('LIMIT_ORDERS', 1)) {
 				return true;
+			}
 		}
 		return false;
 	}

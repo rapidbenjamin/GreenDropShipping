@@ -2,15 +2,9 @@
 
 namespace App\Libraries\Shopify;
 
-use App\MyProducts;
 use App\Products;
-use App\Settings;
 use App\ShopifyWebhook;
-use DateTime;
 use Exception;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Stripe\Product;
 
 class ShopifyAdminApi
 {
@@ -23,8 +17,8 @@ class ShopifyAdminApi
         }
         $images = [];
         if (isset($product->images))
-            foreach($product->images as $img){
-                $images[] = (object) ['src' => $img];
+            foreach ($product->images as $img) {
+                $images[] = (object) ['src' => env('URL_MAGENTO_IMAGES') . '/207e23213cf636ccdef205098cf3c8a3' . substr($img, 78)];
             };
         $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2020-07/products.json', json_encode(
             array(
@@ -46,18 +40,16 @@ class ShopifyAdminApi
                             "sku" => $product->sku,
                             "fulfillment_service" => "Greendropship",
                             "inventory_management" => "Greendropship",
-                            "inventory_quantity" => $inventory_quantity
+                            "inventory_quantity" => $inventory_quantity,
+                            "inventory_policy" => 'deny'
                         )
                     ),
-                    "images"=> $images,
+                    "images" => $images,
                 )
             )
         ));
 
         if (isset($result['HTTP_CODE']) && $result['HTTP_CODE'] == 201) {
-
-
-
             return array(
                 'result' => 1,
                 'shopify_id' => $result['body']['product']['id'],
@@ -85,12 +77,11 @@ class ShopifyAdminApi
         );
 
         return $result['body']['shop'];
-
     }
 
     public static function getCollections($user)
     {
-        $resultCustomCollectons = ShopifyAdminApi::request($user, 'GET', '/admin/api/2020-10/custom_collections.json');
+        $resultCustomCollectons = ShopifyAdminApi::request($user, 'GET', '/admin/api/2020-10/custom_collections.json?limit=250');
 
         if (isset($resultCustomCollectons['HTTP_CODE']) && $resultCustomCollectons['HTTP_CODE'] == 200) {
             $collections = collect();
@@ -148,26 +139,23 @@ class ShopifyAdminApi
     public static function createWebhook($user, $topic, $address)
     {
 
-            //get the webhook code create orders
-            $result = ShopifyAdminApi::request(
-                $user,
-                'POST',
-                '/admin/api/2020-07/webhooks.json',
-                json_encode(
-                    array(
-                        'webhook' => array(
-                            'topic' => $topic,
-                            'address' => $address,
-                            'format' => 'json'
-                        )
+        //get the webhook code create orders
+        $result = ShopifyAdminApi::request(
+            $user,
+            'POST',
+            '/admin/api/2020-07/webhooks.json',
+            json_encode(
+                array(
+                    'webhook' => array(
+                        'topic' => $topic,
+                        'address' => $address,
+                        'format' => 'json'
                     )
                 )
-            );
+            )
+        );
 
         $hook = ShopifyWebhook::where('id_customer', $user->id)->where('topic', $topic)->first();
-
-
-
 
         if ($hook == null) {
             $hook = new ShopifyWebhook();
@@ -176,41 +164,35 @@ class ShopifyAdminApi
             $hook->topic = $topic;
             $hook->data = json_encode($result['body']['webhook']);
             $hook->save();
-        }elseif(isset($result['body']['webhook']['id'])){
+        } elseif (isset($result['body']['webhook']['id'])) {
             $id_hook = $result['body']['webhook']['id'];
             $data = json_encode($result['body']['webhook']);
             ShopifyWebhook::where('id_customer', $user->id)->update(['id_hook' => $id_hook]);
             ShopifyWebhook::where('id_customer', $user->id)->update(['data' => $data]);
         }
-
     }
 
-
     //Webhooks List
-    public static function getWebhooksList($user){
+    public static function getWebhooksList($user)
+    {
 
-       return ShopifyAdminApi::request(
+        return ShopifyAdminApi::request(
             $user,
             'GET',
             '/admin/api/2021-01/webhooks.json'
         );
-
     }
-
 
     public static function applyRecurringCharge($user, $plan_price)
     {
-
-
         $result = ShopifyAdminApi::request($user, 'POST', '/admin/api/2021-04/recurring_application_charges.json', json_encode(array(
             "recurring_application_charge" => array(
                 "name" => "Basic Plan",
                 "test" => false, //change after sending shopify
                 'price' => $plan_price, //dollars
-                'return_url' => env('APP_URL').'/plans/update-success' //redirecciona después de que se confirma/rechaza la suscripción.
+                'return_url' => env('APP_URL') . '/plans/update-success' //redirecciona después de que se confirma/rechaza la suscripción.
             )
         )));
-
 
         if (isset($result['HTTP_CODE']) && $result['HTTP_CODE'] == 201) {
             return array(
@@ -222,74 +204,32 @@ class ShopifyAdminApi
             );
         }
         return null;
-
     }
 
-    public static function getStatusRecurringCharge($user){
+    public static function getStatusRecurringCharge($user)
+    {
         $result = ShopifyAdminApi::request(
             $user,
             'GET',
-            '/admin/api/2021-01/recurring_application_charges/'.$user->id_recurring_application.'.json'
+            '/admin/api/2021-01/recurring_application_charges/' . $user->id_recurring_application . '.json'
         );
 
-        if (isset($result['HTTP_CODE']) && $result['HTTP_CODE'] == 200){
+        if (isset($result['HTTP_CODE']) && $result['HTTP_CODE'] == 200) {
             return $result['body']['recurring_application_charge']['status'];
         }
 
         return false;
-
     }
 
     public static function deleteRecurringCharge($user)
     {
-
-
-        $result = ShopifyAdminApi::request($user, 'DELETE', '/admin/api/2021-01/recurring_application_charges/'.$user->id_recurring_application.'.json');
+        $result = ShopifyAdminApi::request($user, 'DELETE', '/admin/api/2021-01/recurring_application_charges/' . $user->id_recurring_application . '.json');
 
         if (isset($result['HTTP_CODE']) && $result['HTTP_CODE'] == 200) {
             return true;
         }
         //return null; //Cambiar para produccion
         return true;
-
-    }
-
-    //deprecated
-    public static function updateProductIventory($user, $productModel, $location_id, $inventory_item_id)
-    {
-        $inventory_quantity = 0;
-        if ($productModel != null) {
-            $inventory_quantity = $productModel->stock;
-        }
-
-        $result = ShopifyAdminApi::request(
-            $user,
-            'POST',
-            '/admin/api/2021-01/inventory_levels/set.json',
-            json_encode(
-                array(
-                    "location_id" => $location_id,
-                    "inventory_item_id" => $inventory_item_id,
-                    "available" => $inventory_quantity
-                )
-            )
-        );
-
-
-
-        if (isset($result['HTTP_CODE']) && $result['HTTP_CODE'] == 200) {
-            return array(
-                'result' => 1,
-                'variante_id' => $result['body']['inventory_level']['inventory_item_id'],
-            );
-        } else if (isset($result['HTTP_CODE']) && ($result['HTTP_CODE'] == 429)) {
-            return array(
-                'result' => 2,
-                'retry-after' => $result['retry-after']
-            );
-        } else {
-            throw new Exception("can't update product inventory to shopofy -> HTTP_CODE: " . $result['HTTP_CODE'] . '-> stack: ' . $productModel->sku);
-        }
     }
 
     public static function updateStock($user, $myProduct)
@@ -317,7 +257,7 @@ class ShopifyAdminApi
         ShopifyAdminApi::request(
             $user,
             'PUT',
-            '/admin/api/2021-04/variants/'.$myProduct->id_variant_shopify.'.json',
+            '/admin/api/2021-04/variants/' . $myProduct->id_variant_shopify . '.json',
             json_encode(
                 array(
                     'variant' => array(
@@ -335,7 +275,7 @@ class ShopifyAdminApi
         $result = ShopifyAdminApi::request(
             $user,
             'GET',
-            '/admin/api/2021-01/inventory_levels.json?inventory_item_ids='.$inventory_item_ids
+            '/admin/api/2021-01/inventory_levels.json?inventory_item_ids=' . $inventory_item_ids
         );
 
         if (isset($result['HTTP_CODE']) && $result['HTTP_CODE'] == 200) {
@@ -353,8 +293,6 @@ class ShopifyAdminApi
             throw new Exception("can't update product inventory to shopofy -> HTTP_CODE: " . $result['HTTP_CODE'] . '-> stack: ' . $inventory_item_ids);
         }
     }
-
-
 
     public static  function request($user, $method, $url, $data = '')
     {
@@ -389,9 +327,9 @@ class ShopifyAdminApi
         return array('HTTP_CODE' => $httpcode, 'x-shopify-shop-api-call-limit' => $call_limit, 'retry-after' => $retry_after, 'body' => $body);
     }
 
-
     //Create FulfillmentService
-    public static function createFulfillmentService($user){
+    public static function createFulfillmentService($user)
+    {
 
         $result = ShopifyAdminApi::request(
             $user,
@@ -420,7 +358,7 @@ class ShopifyAdminApi
             $user->fulfillment_location_id = $result['body']['fulfillment_service']['location_id'];
             $user->save();
 
-            ShopifyAdminApi::putFulfillmentService($user,$result['body']['fulfillment_service']['id']);
+            ShopifyAdminApi::putFulfillmentService($user, $result['body']['fulfillment_service']['id']);
 
             return array(
                 'result' => true
@@ -431,12 +369,13 @@ class ShopifyAdminApi
     }
 
     //Put FulfillmentService
-    public static function putFulfillmentService($user,$fulfillmentServiceId){
+    public static function putFulfillmentService($user, $fulfillmentServiceId)
+    {
 
         $result = ShopifyAdminApi::request(
             $user,
             'PUT',
-            '/admin/api/2020-10/fulfillment_services/'.$fulfillmentServiceId.'.json',
+            '/admin/api/2020-10/fulfillment_services/' . $fulfillmentServiceId . '.json',
             json_encode(
                 array(
                     "fulfillment_service" => array(
@@ -462,74 +401,61 @@ class ShopifyAdminApi
         }
     }
 
-
     //Get Order Informacion
-    public static function getOrderInformation($user,$id_shopify){
+    public static function getOrderInformation($user, $id_shopify)
+    {
 
-       return ShopifyAdminApi::request(
+        return ShopifyAdminApi::request(
             $user,
             'GET',
-            '/admin/api/2021-01/orders/'.$id_shopify.'.json'
+            '/admin/api/2021-01/orders/' . $id_shopify . '.json'
         );
-
     }
 
     //Get Inventory Item Id
-    public static function getInventoryItemId($user,$id_variant){
+    public static function getInventoryItemId($user, $id_variant)
+    {
 
-       return ShopifyAdminApi::request(
+        return ShopifyAdminApi::request(
             $user,
             'GET',
-            '/admin/api/2021-01/variants/'.$id_variant.'.json'
+            '/admin/api/2021-01/variants/' . $id_variant . '.json'
         );
-
     }
-
 
     //Get Item Location Id
-    public static function getItemLocationId($user,$inventory_item_id){
+    public static function getItemLocationId($user, $inventory_item_id)
+    {
 
-       return ShopifyAdminApi::request(
+        return ShopifyAdminApi::request(
             $user,
             'GET',
-            '/admin/api/2021-01/inventory_levels.json?inventory_item_ids='.$inventory_item_id
+            '/admin/api/2021-01/inventory_levels.json?inventory_item_ids=' . $inventory_item_id
         );
-
-    }
-
-
-    //Get Fulfillment Services
-    public static function getFulfillmentServices($user){
-
-       return ShopifyAdminApi::request(
-            $user,
-            'GET',
-            '/admin/api/2020-10/fulfillment_services.json'
-        );
-
     }
 
     //Fulfill Order
-    public static function fulfillItem($user,$location_id,$tracking_number,$line_item_id,$order_id,$shipping_carrier_code){
+    public static function fulfillItem($user, $location_id, $tracking_number, $line_item_id, $order_id, $shipping_carrier_code)
+    {
 
         $carrier = $shipping_carrier_code;
 
-        if($shipping_carrier_code == 'shqusps1')$carrier = 'USPS';
-        if($shipping_carrier_code == 'shqusps2')$carrier = 'USPS';
-        if($shipping_carrier_code == 'shqfedex')$carrier = 'FedEx';
+        if ($shipping_carrier_code == 'shqusps1') $carrier = 'USPS';
+        if ($shipping_carrier_code == 'shqusps2') $carrier = 'USPS';
+        if ($shipping_carrier_code == 'shqfedex') $carrier = 'FedEx';
 
 
         $result = ShopifyAdminApi::request(
             $user,
             'POST',
-            '/admin/api/2021-01/orders/'.$order_id.'/fulfillments.json',
+            '/admin/api/2021-01/orders/' . $order_id . '/fulfillments.json',
             json_encode(
                 array(
                     "fulfillment" => array(
                         "location_id" => $location_id,
                         "tracking_number" => $tracking_number,
                         "tracking_company" => $carrier,
-                       // "tracking_company" => 'FedEx',
+                        // "tracking_company" => 'FedEx',
                         "line_items" => array(
                             0 => array(
                                 "id" => $line_item_id
@@ -540,25 +466,35 @@ class ShopifyAdminApi
             )
         );
 
-       return $result;
+        return $result;
     }
 
     //FulfilledOrder
-    public static function fulfilledOrder($user,$order_id,$fulfillment_id){
+    public static function fulfilledOrder($user, $order_id, $fulfillment_id)
+    {
 
-       return ShopifyAdminApi::request(
+        return ShopifyAdminApi::request(
             $user,
             'POST',
-            '/admin/api/2021-01/orders/'.$order_id.'/fulfillments/'.$fulfillment_id.'/complete.json'
+            '/admin/api/2021-01/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/complete.json'
         );
-
     }
 
-    public static function getProducts($user) {
+    public static function getProducts($user, $index)
+    {
         return ShopifyAdminApi::request(
             $user,
             'GET',
-            '/admin/api/2021-04/products.json'
+            '/admin/api/2021-04/products.json?limit=250&since_id=' . $index
+        );
+    }
+
+    public static function countProducts($user)
+    {
+        return ShopifyAdminApi::request(
+            $user,
+            'GET',
+            '/admin/api/2021-04/products/count.json'
         );
     }
 }

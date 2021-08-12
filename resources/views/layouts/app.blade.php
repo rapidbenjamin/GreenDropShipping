@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="https://cdn.shortpixel.ai/spai/q_lossy+ret_img/https://greendropship.com/wp-content/uploads/2017/06/Allen-favicon1-1-e1497849113735.png" data-spai-eager="1" sizes="32x32">
+    <link rel="icon" href="https://greendropship.com/wp-content/uploads/2017/06/Allen-favicon1-1-e1497849113735.png" data-spai-eager="1" sizes="32x32">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -56,7 +56,7 @@
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <!-- {{ config('app.name', 'Laravel') }} -->
-                    <img src="{{ asset('img/logoGDS.png') }}">
+                    <img src="{{ asset('/img/logoGDS.png') }}">
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -87,12 +87,10 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
+                                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         {{ __('Logout') }}
                                     </a>
-
+                                    <input type="text" value="{{Auth::user()->role}}" id="role" hidden>
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                         @csrf
                                     </form>
@@ -107,122 +105,176 @@
     <!--left menu2 -->
     @if(Auth::user())
     <div class="leftmenu2" id="menu">
-
-           <div class="topel">
-              <div class="currenuser">
-                    <div class="avatar">
-                        <img src="img/user_avatar.png">
+        <div id="merchant-menu" style="display:none;">
+            <div class="topel">
+                <div class="currenuser">
+                        <div class="avatar">
+                            <img src="/img/user_avatar.png">
+                        </div>
+                        <div>
+                            <h3>{{Auth::user()->name}}</h3>
+                            <p><a href="https://{{Auth::user()->shopify_url}}" target="_blank">Go to Shopify Store</a></p>
+                            <p><a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                {{ __('Logout') }}
+                            </a></p>
+                        </div>
                     </div>
-                    <div>
-                        <h3>{{Auth::user()->name}}</h3>
-                        <p><a href="https://{{Auth::user()->shopify_url}}" target="_blank">Go to Shopify Store</a></p>
-                        <p>                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
-                                    </a></p>
-                    </div>
-                </div>
 
-                <ul class="mainmenu">
-                    <li class="active">
-                        <a href="{{ url('/') }}">
-                            <img src="{{ asset('img/dashboard.png') }}" srcset="img/dashboard@2x.png 2x,
-                                 img/dashboard@3x.png 3x">
-                            <p>Dashboard</p>
-                        </a>
-                    </li>
+                    <ul class="mainmenu">
+                        <li class="active">
+                            <a href="{{ url('/') }}">
+                                <img src="{{ asset('/img/dashboard.png') }}" srcset="/img/dashboard@2x.png 2x,/img/dashboard@3x.png 3x">
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
 
-                    @if(Auth::user()->shopify_url and Auth::user()->active == 1)
-                    <li>
-                        <a href="#">
-                            <img src="{{ asset('img/mproduct.png') }}" srcset="img/mproduct@2x.png 2x,
-                                         img/mproduct@3x.png 3x">
-                            <p>Manage Product</p>
-                        </a>
+                        @if(Auth::user()->shopify_url and Auth::user()->active == 1)
+                        <li>
+                            <a href="#">
+                                <img src="{{ asset('/img/mproduct.png') }}" srcset="/img/mproduct@2x.png 2x,/img/mproduct@3x.png 3x">
+                                <p>Manage Product</p>
+                            </a>
 
-                        <ul>
-                            <li>
-                                <a href="{{ url('/search-products') }}">
-                                    Search Products
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ url('/import-list') }}">
-                                    Import List
-                                </a>
-                            </li>
-                            @can('plan_view-my-products')
-                            <li>
-                                <a href="{{ url('/my-products') }}">
-                                    My Products
-                                </a>
-                            </li>
-                            @else
-                            <li data-toggle="modal" data-target="#upgrade-plans-modal">
-                                <a>
-                                    My Products
-                                </a>
-                            </li>
-                            @endcan
-                        </ul>
-                    </li>
-                    @can('plan_view-manage-orders')
-                    <li>
-                        <a href="{{ url('/orders') }}">
-                            <img src="{{ asset('img/manageorder.png') }}" srcset="img/manageorder@2x.png 2x,
-                                     img/manageorder@3x.png 3x">
-                            <p>Manage Order</p>
-                        </a>
-
-                    </li>
-                    @else
-                    <li data-toggle="modal" data-target="#upgrade-plans-modal">
-                      <a>
-                            <img src="{{ asset('img/manageorder.png') }}" srcset="img/manageorder@2x.png 2x,
-                                     img/manageorder@3x.png 3x">
-                            <p>Manage Order</p>
-                      </a>
-                    </li>
-                    @endcan
-                    @endif
-                </ul>
-           </div>
-
-
-
+                            <ul>
+                                <li>
+                                    <a href="{{ url('/search-products') }}">
+                                        Search Products
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ url('/import-list') }}">
+                                        Import List
+                                    </a>
+                                </li>
+                                @can('plan_view-my-products')
+                                <li>
+                                    <a href="{{ url('/my-products') }}">
+                                        My Products
+                                    </a>
+                                </li>
+                                @else
+                                <li data-toggle="modal" data-target="#upgrade-plans-modal">
+                                    <a>
+                                        My Products
+                                    </a>
+                                </li>
+                                @endcan
+                                @can('plan_view-my-products')
+                                @if(Auth::User()->migration == 0)
+                                <li data-name="MIGRATION">
+                                    <a href="{{ url('/migrate-products') }}">
+                                        Migration
+                                    </a>
+                                </li>
+                                @endif
+                                @else
+                                <li data-toggle="modal" data-target="#upgrade-plans-modal" data-name="MY PRODUCTS">
+                                    <a>
+                                        Migration
+                                    </a>
+                                </li>
+                                @endcan
+                            </ul>
+                        </li>
+                        @can('plan_view-manage-orders')
+                        <li>
+                            <a href="{{ url('/orders') }}">
+                                <img src="{{ asset('/img/manageorder.png') }}" srcset="/img/manageorder@2x.png 2x,/img/manageorder@3x.png 3x">
+                                <p>Manage Order</p>
+                            </a>
+                        </li>
+                        @else
+                        <li data-toggle="modal" data-target="#upgrade-plans-modal">
+                            <a>
+                                <img src="{{ asset('/img/manageorder.png') }}" srcset="/img/manageorder@2x.png 2x,/img/manageorder@3x.png 3x">
+                                <p>Manage Order</p>
+                            </a>
+                        </li>
+                        @endcan
+                        @endif
+                    </ul>
+            </div>
             <ul class="mainmenu footermenu">
                 <li>
                     <a href="{{ url('/settings') }}">
-                        <img src="{{ asset('img/settings.png') }}" srcset="img/settings@2x.png 2x,
-                                 img/settings@3x.png 3x">
+                        <img src="{{ asset('/img/settings.png') }}" srcset="/img/settings@2x.png 2x,/img/settings@3x.png 3x">
                         <p>Settings</p>
-
                     </a>
                 </li>
                 <li>
                     <a href="{{ url('/plans') }}">
-                        <img src="{{ asset('img/info.png') }}" srcset="img/info@2x.png 2x,
-                                 img/info@3x.png 3x">
+                        <img src="{{ asset('/img/info.png') }}" srcset="/img/info@2x.png 2x,/img/info@3x.png 3x">
                         <p>Your Plan</p>
-
                     </a>
                 </li>
                 <li>
                     <a href="http://greendropship.com/knowledge-base" target="_blank">
-                        <img src="{{ asset('img/info.png') }}" srcset="img/info@2x.png 2x,
-                                 img/info@3x.png 3x">
+                        <img src="{{ asset('/img/info.png') }}" srcset="/img/info@2x.png 2x,/img/info@3x.png 3x">
                         <p>Help</p>
-
                     </a>
                 </li>
             </ul>
+        </div>
+        <div id="admin-menu" class="leftmenu" style="display: none;">
+            <div class="currenuser">
+                <div class="avatar">
+                    <img src="{{ asset('/img/user_avatar.png') }}">
+                </div>
+                <div>
+                    <h3>{{Auth::user()->name}}</h3>
+                    <p><a class="dropdown-item text-light" href="{{ route('logout') }}"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        {{ __('Logout') }}
+                    </a></p>
+                </div>
+            </div>
+            <ul class="mainmenu footermenu">
+                <li>
+                    <a href="{{ url('/admin/dashboard') }}" class="colorBL bold" data-name="DASHBOARD">
+                        <img src="{{ asset('/img/admin_03.png') }}">
+                        Dashboard
+                    </a>
+                </li>
+                <li><a href="{{ url('/admin/orders') }}" class="colorBL bold" data-name="MANAGE ORDERS">
+                    <img src="{{ asset('/img/Admin_09.png') }}">
+                        Orders
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/admin/merchants') }}" class="colorBL bold" data-name="MANAGE MERCHANTS">
+                        <img src="{{ asset('/img/admin_07.png') }}" >
+                        Merchants
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/admin/users') }}" class="colorBL bold" data-name="USERS">
+                        <img src="{{ asset('/img/Admin_11.png') }}">
+                        Users
+                    </a>
+                </li>
+                <li>
+                    <a class="colorBL bold account" data-name="ACCOUNT">
+                        <img src="{{ asset('/img/Admin_12.png') }}">
+                        Account
+                    </a>
+                    <ul style="display: none;" class="items">
+                        <li>
+                            <a href="{{ url('/admin/profile') }}">
+                                Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url('/admin/password') }}">
+                                Change password
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>        
     </div>
     @endif
     <!--/left menu2 -->
-
-
-
 
         <div id="panel">
 
@@ -236,8 +288,8 @@
                        <i class="fa fa-times" aria-hidden="true"></i>
                    </span>
                </div>
-                  <a href="/">
-                    <img class="mainlogo" src="{{ asset('img/logo.png') }}">
+                  <a id="mainlogo">
+                    <img class="mainlogo" src="{{ asset('/img/logo.png') }}">
                   </a>
             </div>
             <div class="titlebox">
@@ -250,9 +302,9 @@
              <div class="leftmenu">
                <div class="leftmenu">
                    @can('view-admin-menu')
-                       @include('menu.admin-menu')
+                        @include('menu.admin-menu')
                    @else
-                      @include('menu.menu')
+                        @include('menu.menu')
                    @endcan
                </div>
              </div>
@@ -318,11 +370,31 @@
 
   </div>
 </div>
+
+<div id="delete-product-modal" class="modal fade" role="dialog" data-backdrop="true">
+  <div class="modal-dialog modal-dialog-centered">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header" id="modal-header" style="display:block">
+            <button type="button" class="close" id="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title" id="modal-title">Confirm</h4>
+        </div>
+        <div class="modal-body" id="modal-body">
+        </div>
+        <div class="modal-footer" id="modal-footer" style="display:flex">
+            <button class="btn btn-success" id="confirm" data-dismiss="modal">Ok</button>
+            <button class="btn btn-secondary" id="cancel" data-dismiss="modal">Cancel</button>
+        </div>
+    </div>
+
+  </div>
+</div>
 <script type="text/javascript">
   $(document).ready(function() {
     var usr_id = "{{Auth::user() ? Auth::user()->id : 0}}";
     function syncStockAjax(){
-        if(usr_id){
+        if (usr_id != '0') {
             $.ajax({
                 type: 'POST',
                 url: '/sync-magento/sync-shopify-stock',

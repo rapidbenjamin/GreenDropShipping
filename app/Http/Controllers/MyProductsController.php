@@ -37,8 +37,11 @@ class MyProductsController extends Controller
         foreach ($prods as $product) {
             $product['brand'] = $search->getAttributeByCode($product, 'brand');
             if ($product->images != null && count(json_decode($product->images)) > 0) {
-                $product->image_url_75 = env('URL_MAGENTO_IMAGES'). '/dc09e1c71e492175f875827bcbf6a37c' .json_decode($product->images)[0]->file;
-                $product->image_url_285 = env('URL_MAGENTO_IMAGES'). '/e793809b0880f758cc547e70c93ae203' .json_decode($product->images)[0]->file;
+                $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product->images)[0]->file;
+                $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
+            } else {
+                $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37cno_selection';
+                $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
             }
         }
         return view('my-products_v2', ['prods' => $prods, 'total_count' => $total_count]);
@@ -49,9 +52,8 @@ class MyProductsController extends Controller
         $this->authorize('view-merchant-my-products');
         $this->authorize('plan_view-my-products');
         ShopifyBulkDelete::dispatchNow(Auth::User(), [$request->product_id], 'MyProducts');
-        $result = MyProducts::where('id_shopify', $request->product_id)->get();
         return response()->json([
-            'result' => count($result) == 0,
+            'result' => true,
             'product_id' => $request->product_id
         ]);
     }
@@ -60,19 +62,18 @@ class MyProductsController extends Controller
     {
         $this->authorize('view-merchant-my-products');
         $this->authorize('plan_view-my-products');
-        $user_id = Auth::User()->id;
         $rows = [];
         foreach ($request->products as $product) {
             $rows[] = [
                 'id' => $product['product_id'],
-                'user_id' => $user_id,
+                'user_id' => Auth::user()->id,
                 'payload' => $product['product_shopify_id'],
                 'action' => 'delete'
             ];
         }
         DB::table('temp_publish_products')->insert($rows);
         $temp_product_ids = DB::table('temp_publish_products')
-            ->where('user_id', $user_id)
+            ->where('user_id', Auth::user()->id)
             ->where('action', 'delete')
             ->pluck('payload');
         if (ShopifyBulkDelete::dispatch(Auth::User(), $temp_product_ids, 'MyProducts')) {
@@ -88,15 +89,19 @@ class MyProductsController extends Controller
         $this->authorize('plan_view-my-products');
 
         $product_shopify_ids = $request->product_shopify_ids;
-        $result = DB::table('temp_publish_products')
-            ->whereIn('payload', $product_shopify_ids)->pluck('payload');
+        $result = DB::table('temp_publish_products')->where('user_id', Auth::User()->id)
+            ->whereIn('payload', $product_shopify_ids)->where('action', 'delete')->pluck('payload');
         $data = [];
         foreach ($product_shopify_ids as $product_shopify_id) {
             $flag = true;
             foreach ($result as $res) {
-                if ($product_shopify_id == $res) $flag = false;
+                if ($product_shopify_id == $res) {
+                    $flag = false;
+                }
             }
-            if ($flag) $data[] = $product_shopify_id;
+            if ($flag) {
+                $data[] = $product_shopify_id;
+            }
         }
 
         return response()->json([

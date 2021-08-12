@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\ImportList;
 use Illuminate\Http\Request;
 use App\Products;
 use App\MyProducts;
@@ -30,7 +31,6 @@ class ImportListController extends Controller
     {
 
         $this->middleware('auth');
-
     }
 
 
@@ -52,14 +52,13 @@ class ImportListController extends Controller
         $total_count = $prods->count();
 
         $prods = $prods->paginate(10);
-
         foreach ($prods as $product) {
 
-            if ($product['images'] != null && count(json_decode($product['images'])) > 0)
-
-                $product['image_url'] = env('URL_MAGENTO_IMAGES'). '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
-
-
+            if ($product['images'] != null && count(json_decode($product['images'])) > 0) {
+                $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product['images'])[0]->file;
+            } else {
+                $product['image_url'] = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
+            }
 
             $search = new SearchController;
 
@@ -74,7 +73,6 @@ class ImportListController extends Controller
             $product['ship_width'] = round($search->getAttributeByCode($product, 'ship_width'), 2);
 
             $product['ship_length'] = round($search->getAttributeByCode($product, 'ship_length'), 2);
-
         }
 
         $settings = Settings::where('id_merchant', Auth::user()->id)->first();
@@ -84,7 +82,6 @@ class ImportListController extends Controller
             $settings = new Settings();
 
             $settings->set8 = 0;
-
         }
 
         return view('import-list_v2', array(
@@ -96,7 +93,6 @@ class ImportListController extends Controller
             'total_count' => $total_count
 
         ));
-
     }
 
 
@@ -114,7 +110,6 @@ class ImportListController extends Controller
         if ($settings != null) {
 
             $published = $settings->set1 == 1;
-
         }
 
         ShopifyBulkPublish::dispatchNow(Auth::User(), [json_encode((object) $request->product)], $published);
@@ -128,7 +123,6 @@ class ImportListController extends Controller
             'id_shopify' => $myproduct != null ? $myproduct->id_shopify : 0
 
         ));
-
     }
 
 
@@ -137,11 +131,9 @@ class ImportListController extends Controller
     {
         $this->authorize('plan_bulk-publish-product-import-list');
 
-        $user_id = Auth::User()->id;
-
         $result = 'error';
 
-        $settings = Settings::where('id_merchant', $user_id)->first();
+        $settings = Settings::where('id_merchant', Auth::User()->id)->first();
 
         $published = false;
 
@@ -150,13 +142,12 @@ class ImportListController extends Controller
         }
 
         $rows = [];
-
-        foreach ($request->products as $product) {
+        foreach (json_decode($request->products) as $product) {
             $rows[] = [
-                'id' => $product['id'],
-                'sku' => $product['sku'],
+                'id' => $product->id,
+                'sku' => $product->sku,
                 'payload' => json_encode($product),
-                'user_id' => $user_id,
+                'user_id' => Auth::User()->id,
                 'action' => 'publish'
             ];
         }
@@ -164,8 +155,9 @@ class ImportListController extends Controller
         DB::table('temp_publish_products')->insert($rows);
 
         $temp_publish_products = DB::table('temp_publish_products')
-            ->where('user_id', $user_id)
+            ->where('user_id', Auth::User()->id)
             ->where('action', 'publish')
+            ->whereIn('id', ImportList::where('id_customer', Auth::User()->id)->pluck('id'))
             ->pluck('payload');
 
         if (ShopifyBulkPublish::dispatch(Auth::User(), json_decode($temp_publish_products), $published)) {
@@ -179,14 +171,15 @@ class ImportListController extends Controller
     {
         $this->authorize('view-merchant-import-list');
 
-        $user_id = $request->user_id;
         $product_ids = $request->product_ids;
 
-        $prods = MyProducts::where('id_customer', $user_id)
+        $prods = MyProducts::where('id_customer', Auth::User()->id)
             ->whereIn('id_imp_product', $product_ids)
-            ->pluck('id_imp_product');
+            ->pluck('id_imp_product', 'id_shopify');
 
         DB::table('temp_publish_products')
+            ->where('user_id', Auth::User()->id)
+            ->where('action', 'publish')
             ->whereIn('id', $prods)
             ->delete();
 
@@ -196,4 +189,3 @@ class ImportListController extends Controller
         ]);
     }
 }
-

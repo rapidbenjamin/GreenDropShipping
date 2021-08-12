@@ -559,8 +559,13 @@
 
 	$("#apply").click(function() {
 		if (moment($('#start').val()).isAfter( moment($('#to').val()).format('YYYY-MM-DD')) ) {
-			alert('Invalid date range.');
+			$('#modal-body').html(`<h5>Invalid date range</h5>`);
+			$('#modal-footer').hide();
+			$('#apply').attr('data-toggle', 'modal');
+			$('#apply').attr('data-target', '#delete-product-modal');
 			return;
+		} else {
+			$('#apply').attr('data-toggle', '');
 		}
 		applyFilter(12);
 	});
@@ -683,43 +688,52 @@
 
 			$('#txt-orders').text(data.num_sales);
 			$('#txt-returns').text(data.num_returns);
-			$('#txt-sales').text('$' + data.total_sales[0].TotalSales);
+			$('#txt-sales').text(data.total_sales[0].TotalSales ? `$${data.total_sales[0].TotalSales}` : 0);
 			$('#txt-newinstalls').text(data.new_installations);
 			$('#txt-affiates').text();
 
 			$('#orders').empty();
 			let lis = '';
-			var k = 1;
+			let k = 1;
+			let col = "transparent";
 			for (let i = 0; i < lastOrders.length; i++) {
-				if (k == 1) var col = "#fff";
-				else col = "transparent";
-				lis += '<tr class="productdatarow" style="background:' + col + '"><td style="word-break: break-all;" data-label="Shop">' + lastOrders[i].name + '</td><td data-label="Products">' + lastOrders[i].Products + '</td><td data-label="Total (GDS)">' + '$' + lastOrders[i].total + '</td><td data-label="Date">' + lastOrders[i].created_at + '</td><td data-label="Status"><span style="background:' + lastOrders[i].statuscolor + ';color:#000;padding: 4px;">' + lastOrders[i].status + '</span></td></tr>';
-				if (k == 1) k = 0;
-				else k = 1;
+				if (k == 1) {
+					col = "#fff";
+				}
+				lis += `<tr class="productdatarow" style="background:${col}"><td style="word-break: break-all;" data-label="Shop">${lastOrders[i].name}</td><td data-label="Products">${lastOrders[i].Products}</td><td data-label="Total (GDS)">$${lastOrders[i].total}</td><td data-label="Date">${lastOrders[i].created_at}</td><td data-label="Status"><div style="display: flex; justify-content: flex-end;"><span style="background:${lastOrders[i].statuscolor}; color:#000;padding: 4px; min-width:70px; text-align:center;"> ${lastOrders[i].status} </span></div></td></tr>`;
+				if (k == 1) {
+					k = 0;
+				}
 			}
 			$('#orders').append(lis);
 
 			$('#merchants').empty();
 			let lism = '';
-			var k = 1;
+			let k = 1;
+			let color = "transparent"
 			for (let i = 0; i < topMerchants.length; i++) {
-				if (k == 1) var col = "#fff";
-				else col = "transparent";
-				lism += '<tr class="productdatarow" style="background:' + col + '"><td style="word-break: break-all;" data-label="Shop">' + topMerchants[i].name + '</td><td data-label="Orders">' + topMerchants[i].num_orders + '</td><td data-label="Total">' + '$' + topMerchants[i].total + '</td></tr>';
-				if (k == 1) k = 0;
-				else k = 1;
+				if (k == 1) {
+					col = "#fff";
+				}
+				lism += `<tr class="productdatarow" style="background:${col}"><td style="word-break: break-all;" data-label="Shop">${topMerchants[i].name}</td><td data-label="Orders">${topMerchants[i].num_orders}</td><td data-label="Total">$${topMerchants[i].total}</td></tr>`;
+				if (k == 1) {
+					k = 0;
+				}
 			}
 			$('#merchants').append(lism);
 
 			$('#sellers').empty();
 			let liss = '';
-			var k = 1;
+			let k = 1;
+			let col = "transparent"
 			for (let i = 0; i < bestsellers.length; i++) {
-				if (k == 1) var col = "#fff";
-				else col = "transparent";
-				liss += '<tr class="productdatarow" style="background:' + col + '"><td style="word-break: break-all;" data-label="Product">' + bestsellers[i].name + '</td><td data-label="SKU">' + bestsellers[i].sku + '</td><td data-label="Units Sold">' + bestsellers[i].Counts + '</td><td data-label="Total (GDS)">$' + bestsellers[i].total + '</td></tr>';
-				if (k == 1) k = 0;
-				else k = 1;
+				if (k == 1) {
+					col = "#fff";
+				}
+				liss += `<tr class="productdatarow" style="background:${col}"><td style="word-break: break-all;" data-label="Product">${bestsellers[i].name}</td><td data-label="SKU">${bestsellers[i].sku}</td><td data-label="Units Sold">${bestsellers[i].Counts}</td><td data-label="Total (GDS)">$${bestsellers[i].total}</td></tr>`;
+				if (k == 1) {
+					k = 0;
+				}
 			}
 			$('#sellers').append(liss);
 
