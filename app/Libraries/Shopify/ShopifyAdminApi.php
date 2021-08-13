@@ -40,8 +40,7 @@ class ShopifyAdminApi
                             "sku" => $product->sku,
                             "fulfillment_service" => "Greendropship",
                             "inventory_management" => "Greendropship",
-                            "inventory_quantity" => $inventory_quantity,
-                            "inventory_policy" => 'deny'
+                            "inventory_quantity" => $inventory_quantity
                         )
                     ),
                     "images" => $images,
