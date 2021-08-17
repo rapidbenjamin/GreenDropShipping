@@ -18,11 +18,19 @@
                </div>
             </div>
             @endif
+            @if(count($array_products) > 0)
             <div class="alertan level2">
                <div class="agrid">
                     <p>You can edit product details before adding products to your store.</p>
                </div>
             </div>
+            @else
+            <div class="alertan level2">
+               <div class="agrid">
+                    <p>When products are imported you can publish them to your Shopify store.</p>
+               </div>
+            </div>
+            @endif
             <div class="alertan level2 alert-publish-all" style="display: none;">
                <div class="agrid">
                     <p><strong>Publishing in Progress!</strong> We´re currently publishing your products into your store.</p>
@@ -304,7 +312,7 @@
         $('.btn-import-list-send3-' + productId).show();
 
       let btn = $(this);
-      btn.attr('disabled', true);
+      btn.prop('disabled', true);
 
       let product = {
           id: productId,
@@ -328,7 +336,7 @@
         product: product
       }, function(data, status) {
 
-        btn.attr('disabled', false);
+        btn.prop('disabled', false);
         //$("#product" + productId).hide();
         $('.alert-publish-single').show();
         $('.btn-import-list-send3-' + productId).hide();
@@ -343,8 +351,8 @@
     $('.btn-import-list-send2').off('click');
     $('.btn-import-list-send2').click(function(e) {
       e.preventDefault();
-      //console.log('http://{{Auth::user()->shopify_url}}/admin/products/' + $(this).attr('data-shopifyid'));
-      window.open('http://{{Auth::user()->shopify_url}}/admin/products/', '_blank');
+      //console.log('https://{{Auth::user()->shopify_url}}/admin/products/' + $(this).attr('data-shopifyid'));
+      window.open('https://{{Auth::user()->shopify_url}}/admin/products/', '_blank');
       return false;
     });
 
@@ -367,7 +375,7 @@
       let nProd = $("input.checkbox:checked").length;
 
         if(nProd > 0){
-          $(this).attr('disabled',true);
+          $(this).prop('disabled',true);
           $('.alert-publish-all').show();
           $('.alert-publish-all-ready').hide();
         }
@@ -379,7 +387,7 @@
 
             $('.btn-import-list-send-' + productId).hide();
             $('.btn-import-list-send3-' + productId).show();
-            $('.btn-import-list-send-' + productId).attr('disabled',true);
+            $('.btn-import-list-send-' + productId).prop('disabled',true);
 
             // data array of all checked products
             $("input.chk-img" + productId + ":checked").each(function(index, ele) {
@@ -404,7 +412,7 @@
         }
       });
 
-      $(this).attr('disabled',false);
+      $(this).prop('disabled',false);
 
 
       let btn = $(this);

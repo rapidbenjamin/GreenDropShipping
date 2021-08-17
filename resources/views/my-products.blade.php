@@ -116,7 +116,7 @@
                                         </p>
 
                                         <div class="pbuttons">
-                                            <button class="edit edit-product" data-shopifyid="{{ $pr->id_shopify }}">Edit on Shopify</button>
+                                            <button class="edit edit-product" data-shopifyid="{{ $pr->id_shopify }}">Edit in Shopify</button>
                                             <button class="delete btn-mp-delete" data-myproductid="{{ $pr->id_my_products }}">Delete</button>
                                         </div>
                                     </div>
@@ -162,7 +162,7 @@
         });
 
         $('.edit-product').click(function() {
-            window.open('http://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');
+            window.open('https://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');
         });
 
         $('.btn-mp-delete').click(function() {

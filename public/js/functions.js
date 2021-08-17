@@ -2,15 +2,21 @@ $( document ).ready(function() {
 
     $(window).on('resize', function(){
           var win = $(this);
-          if (win.width() <= 800) {
-
+          if (win.width() <= 1000) {
+            if ($('#role').val() == 'admin') {
+                $('#merchant-menu').hide();
+                $('#admin-menu').show();
+            }
+            else{
+                $('#merchant-menu').show();
+                $('#admin-menu').hide();
+            }
                 var slideout = new Slideout({
                     'panel': document.getElementById('panel'),
                     'menu': document.getElementById('menu'),
                     'padding': 256,
                     'tolerance': 70
                 });
-
                 // Toggle button
                 document.querySelector('.toggle-button').addEventListener('click', function() {
                     slideout.toggle();
@@ -20,7 +26,15 @@ $( document ).ready(function() {
           }
     });
 
-    if($(window).width() <= 800) {
+    if ($(window).width() <= 1000) {
+        if ($('#role').val() == 'admin') {
+            $('#merchant-menu').hide();
+            $('#admin-menu').show();
+        }
+        else{
+            $('#merchant-menu').show();
+            $('#admin-menu').hide();
+        }
         var slideout = new Slideout({
             'panel': document.getElementById('panel'),
             'menu': document.getElementById('menu'),
@@ -33,14 +47,6 @@ $( document ).ready(function() {
             slideout.toggle();
         });
     }
-
-
-    $(".thumbnails a").on("click", function (e) {
-          e.preventDefault();
-          var galleryImage = $(this).attr("href");
-          $(".maingreenproducimage").attr("src", galleryImage);
-          $(".maingreenproducimagelink").attr("href", galleryImage);
-    });
 
     Tipped.create('.simple-tooltip');
 

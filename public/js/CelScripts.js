@@ -6,16 +6,10 @@ angular
     .config(["$routeProvider", "$locationProvider", "$sceDelegateProvider", function ($routeProvider, $locationProvider, $sceDelegateProvider) {
         $routeProvider
             .otherwise({
-                template: "<div id=\"profile-tabs\" ng-show=\"settings.General.ProfileTabs !== ''\" class=\"ng-cloak\">    <ul>        <li cel-profile ng-repeat=\"(name, tab) in settings.General.ProfileTabs\" profile=\"{{ tab.Profile }}\" display=\"{{ tab.Display }}\" ng-class=\"{ 'selected' : profile == tab.Profile }\" tabindex=\"0\">            <span>{{ tab.Alias !== undefined ? tab.Alias : name }}</span>        </li>    </ul></div><div id=\"loader\" ng-hide=\"loading == false\">    <div><i class=\"cel-icon-spin3 animate-spin\"></i></div></div>        <div id=\"filter-details\">            <div ng-show=\"searchPage === true\" id=\"filter-title\">{{ settings.Language.Search }} \"{{ results.OriginalQuery }}\" </div>            <div id=\"products-count\">{{ results.ProductsCount }} {{ settings.Language.Products }}</div>        </div><div cel-search-anlx cel-infinite-scroll=\"{{ settings.General.InfiniteScroll }}\" id=\"container\" class=\"flex-box-row {{ profile !== '' ? 'profile-' + profile : '' }}\" ng-hide=\"loading == true\">    <div id=\"filter-content\">        <div id=\"filter-breadcrumbs\" ng-show=\"results.SearchPath.Answers.length != 0\" class=\"ng-cloak\">            <div class=\"filter-by\">{{ settings.Language.FilterBy }}</div>            <ul class=\"breadcrumbs\">                <li cel-breadcrumb ng-repeat=\"breadcrumb in results.SearchPath.Answers\" id=\"{{ breadcrumb.ID }}\" class=\"breadcrumb\" answer-id=\"{{ breadcrumb.ID }}\" tabindex=\"0\">                    <!-- Template in breadcrumb.html -->                </li>            </ul>            <div id=\"clear-all\">                <button class=\"btn-default\" ng-click=\"clearAll()\">{{ settings.Language.ClearAll }}</button>            </div>        </div>        <div id=\"filters\">            <div id=\"questions-toggle\" class=\"hidden visible-sm visible-xs\">                <span cel-toggle=\"toggleQuestions\" tabindex=\"0\"><i ng-class=\"{ 'cel-icon-angle-down' : toggleQuestions == false, 'cel-icon-angle-up' : toggleQuestions == true }\"></i>{{ settings.Language.Filters }}</span>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Langauge.Apply }}</span>            </div>            <div id=\"questions-container\" ng-class=\"{ 'hidden-xs hidden-sm' : toggleQuestions == false }\">                <ul class=\"questions\">                    <li cel-question ng-repeat=\"question in results.Questions\" id=\"{{ question.SideText }}\">                        <!-- Template in question.html -->                    </li>                    <rzslider cel-price-slider ng-if=\"settings.Refinements.EnablePriceSlider == true\" ng-show=\"showSlider === true\" class=\"hidden-xs hidden-sm\"                                rz-slider-model=\"slider.minValue\"                                rz-slider-high=\"slider.maxValue\"                                rz-slider-options=\"slider.options\"></rzslider>                </ul>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Language.Apply }}</span>            </div>        </div>    </div>    <div id=\"main-content\">        <div cel-campaigns id=\"campaigns\"></div>        <div id=\"messages\" ng-show=\"results.RecommendedMessage != '' && results.RecommendedMessage !== undefined\" class=\"ng-cloak\">            <span ng-bind-html=\"results.RecommendedMessage | trust_html\"></span>        </div>        <div id=\"related-searches\" ng-if=\"results.RelatedSearches.length > 0\"><a ng-repeat=\"query in results.RelatedSearches\" href=\"?{{ settings.General.DoSearchUrlParameter }}={{ query }}\">{{ query }}</a></div>        <div class=\"toolbar flex-box-row col-xs-max-1 col-sm-max-3 col-md-max-3 col-max-2\">                      <div id=\"display\" class=\"hidden-sm\">                <ul class=\"flex-box-row\">                    <li cel-display=\"grid\" class=\"grid_list grid\" ng-class=\"{ selected : display == 'grid' }\" ng-attr-tabindex=\"{{display == 'grid' ? '': '0'}}\" title=\"{{ settings.Language.Grid }}\">                        <i class=\"cel-icon-grid\"></i>                    </li>                    <li cel-display=\"list\" class=\"grid_list list\" ng-class=\"{ selected : display == 'list' }\" ng-attr-tabindex=\"{{ display == 'list' ? '': '0' }}\" title=\"{{ settings.Language.List }}\">                        <i class=\"cel-icon-list\"></i>                    </li>                </ul>            </div>                         <div id=\"sorting\">            	<div class=\"select-wrapper cel-icon-angle-down\">Sort By 	            	<select cel-sort >	            		<option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-selected=\"currentSort.alias === sort.Alias\" t=\"{{ currentSort.alias }} {{ sort.Alias }}\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\">{{ settings.Language[name] !== undefined ? settings.Language[name] : sort.Alias }}</option>	            	</select>	                <!--<select ng-if=\"searchPage === false\" class=\"flex-box-row\" onChange=\"location = this.value\">	                    <option cel-sort-option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\" ng-value=\"sort.NavURL\" ng-selected=\"currentSort.alias === sort.Alias\">{{ sort.Alias }}</option>	                </select>-->                </div>            </div>                                             </div>        <ul class=\"products products-{{ display }} flex-box-row\" ng-class=\"{'col-xs-max-2 col-sm-max-3 col-md-max-3 col-lg-max-3 col-max-4' : display=='grid',  'col-max-1' : display == 'list' }\">            <li cel-product ng-repeat=\"product in results.Products\" id=\"{{ product.Id }}\" class=\"cuit_item product flex-box-column product-item\">                <!-- Template in product.html -->            </li>        </ul>        <div class=\"toolbar toolbar-bottom flex-box-row col-xs-max-1 col-sm-max-3 col-max-2\">            <div cel-pagination ng-hide=\"results.PagesCount == 1 || settings.ProductResults.InfiniteScroll == true\" id=\"pagination\" current-page=\"{{ results.CurrentPage }}\" pages-count=\"{{ results.PagesCount }}\">                <!-- Template in pagination.html -->            </div>            <div id=\"page-sizer\" class=\"hidden-xs hidden-sm hidden-md\">                <div class=\"select-wrapper cel-icon-angle-down\" ng-if=\"settings.Toolbar.PageSizes.Enabled == true && settings.ProductResults.InfiniteScroll == false\">                    <span>{{ settings.Language.ProductsPerPage }}</span>                    <select cel-page-sizer class=\"cel-icon-angle-down\">                        <option ng-repeat=\"size in settings.Toolbar.PageSizes.Option\" id=\"{{ size.Value }}\" ng-selected=\"{{ size.Value == pageSize }}\" ng-value=\"{{ size.Value }}\">{{ size.Value }}</option>                    </select>                </div>            </div>        </div>    </div></div><div cel-to-top ng-if=\"settings.ProductResults.InfiniteScroll == true && showToTop == true\" class=\"to-top cel-icon-angle-up\" ng-attr-tabindex=\"{{settings.ProductResults.InfiniteScroll == true ? '': '0'}}\"></div>",
+                template: "<div id=\"profile-tabs\" ng-show=\"settings.General.ProfileTabs !== ''\" class=\"ng-cloak\">    <ul>        <li cel-profile ng-repeat=\"(name, tab) in settings.General.ProfileTabs\" profile=\"{{ tab.Profile }}\" display=\"{{ tab.Display }}\" ng-class=\"{ 'selected' : profile == tab.Profile }\" tabindex=\"0\">            <span>{{ tab.Alias !== undefined ? tab.Alias : name }}</span>        </li>    </ul></div><div id=\"loader\" ng-hide=\"loading == false\">    <div><i class=\"cel-icon-spin3 animate-spin\"></i></div></div>        <div id=\"filter-details\">            <div ng-show=\"searchPage === true\" id=\"filter-title\">{{ settings.Language.Search }} \"{{ results.OriginalQuery }}\" </div>            <div id=\"products-count\">{{ results.ProductsCount }} {{ settings.Language.Products }}</div>        </div><div cel-search-anlx cel-infinite-scroll=\"{{ settings.General.InfiniteScroll }}\" id=\"container\" class=\"flex-box-row {{ profile !== '' ? 'profile-' + profile : '' }}\" ng-hide=\"loading == true\">    <div id=\"filter-content\">        <div id=\"filter-breadcrumbs\" ng-show=\"results.SearchPath.Answers.length != 0\" class=\"ng-cloak\">            <div class=\"filter-by\">{{ settings.Language.FilterBy }}</div>            <ul class=\"breadcrumbs\">                <li cel-breadcrumb ng-repeat=\"breadcrumb in results.SearchPath.Answers\" id=\"{{ breadcrumb.ID }}\" class=\"breadcrumb\" answer-id=\"{{ breadcrumb.ID }}\" tabindex=\"0\">                    <!-- Template in breadcrumb.html -->                </li>            </ul>            <div id=\"clear-all\">                <button class=\"btn-default\" ng-click=\"clearAll()\">{{ settings.Language.ClearAll }}</button>            </div>        </div>        <div id=\"filters\">            <div id=\"questions-toggle\" class=\"hidden visible-sm visible-xs\">                <span cel-toggle=\"toggleQuestions\" tabindex=\"0\"><i ng-class=\"{ 'cel-icon-angle-down' : toggleQuestions == false, 'cel-icon-angle-up' : toggleQuestions == true }\"></i>{{ settings.Language.Filters }}</span>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Langauge.Apply }}</span>            </div>            <div id=\"questions-container\" ng-class=\"{ 'hidden-xs hidden-sm' : toggleQuestions == false }\">                <ul class=\"questions\">                    <li cel-question ng-repeat=\"question in results.Questions\" id=\"{{ question.SideText }}\">                        <!-- Template in question.html -->                    </li>                    <rzslider cel-price-slider ng-if=\"settings.Refinements.EnablePriceSlider == true\" ng-show=\"showSlider === true\" class=\"hidden-xs hidden-sm\"                                rz-slider-model=\"slider.minValue\"                                rz-slider-high=\"slider.maxValue\"                                rz-slider-options=\"slider.options\"></rzslider>                </ul>            </div>            <div ng-hide=\"settings.Refinements.InstantAnswerMode == true || showApply == false\" class=\"filter-apply\">                <span cel-filter-apply>{{ settings.Language.Apply }}</span>            </div>        </div>    </div>    <div id=\"main-content\">        <div cel-campaigns id=\"campaigns\"></div>        <div id=\"messages\" ng-show=\"results.RecommendedMessage != '' && results.RecommendedMessage !== undefined\" class=\"ng-cloak\">            <span ng-bind-html=\"results.RecommendedMessage | trust_html\"></span>        </div>        <div id=\"related-searches\" ng-if=\"results.RelatedSearches.length > 0\"><a ng-repeat=\"query in results.RelatedSearches\" href=\"?{{ settings.General.DoSearchUrlParameter }}={{ query }}\">{{ query }}</a></div>        <div class=\"toolbar flex-box-row col-xs-max-1 col-sm-max-1 col-md-max-1 col-lg-max-1 col-max-3\">                      <div id=\"display\" class=\"hidden-sm\">                <ul class=\"flex-box-row\">                    <li cel-display=\"grid\" class=\"grid_list grid\" ng-class=\"{ selected : display == 'grid' }\" ng-attr-tabindex=\"{{display == 'grid' ? '': '0'}}\" title=\"{{ settings.Language.Grid }}\">                        <i class=\"cel-icon-grid\"></i>                    </li>                    <li cel-display=\"list\" class=\"grid_list list\" ng-class=\"{ selected : display == 'list' }\" ng-attr-tabindex=\"{{ display == 'list' ? '': '0' }}\" title=\"{{ settings.Language.List }}\">                        <i class=\"cel-icon-list\"></i>                    </li>                </ul>            </div><div id=\"search\"><input type=\"text\" value=\"{{settings.search_key}}\" id=\"search-products\" placeholder=\"Search Products\" ng-keyup= \"searchProducts($event)\"><span ng-click= \"searchProducts()\" ><i class=\"cel-icon-search\"></i></span></div>                         <div id=\"sorting\">            	<div class=\"select-wrapper cel-icon-angle-down\"><select cel-sort >	            		<option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-selected=\"currentSort.alias === sort.Alias\" t=\"{{ currentSort.alias }} {{ sort.Alias }}\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\">{{ settings.Language[name] !== undefined ? settings.Language[name] : sort.Alias }}</option>	            	</select>	                <!--<select ng-if=\"searchPage === false\" class=\"flex-box-row\" onChange=\"location = this.value\">	                    <option cel-sort-option ng-repeat=\"(name, sort) in settings.Toolbar.SortOptions\" ng-attr-tabindex=\"{{ currentSort.alias == sort.Alias && sort.SingleOrder !== undefined ? '': '0'}}\" ng-value=\"sort.NavURL\" ng-selected=\"currentSort.alias === sort.Alias\">{{ sort.Alias }}</option>	                </select>-->                </div>            </div>                                             </div><div style=\"display:flex; align-items: center;\"><input type=\"checkbox\" ng-click=\"checkAll($event)\" class=\"check-all-products\"><button ng-click=\"allAddToImportList($event)\" type=\"submit\" title=\"{{ settings.Language.BulkImport }}\" class=\"all-add-products py-3 px-2 mx-1\">{{ settings.Language.BulkImport }}</button></div>        <ul class=\"products products-{{ display }} flex-box-row\" ng-class=\"{'col-xs-max-2 col-sm-max-3 col-md-max-3 col-lg-max-3 col-max-4' : display=='grid',  'col-max-1' : display == 'list' }\">            <li cel-product ng-repeat=\"product in results.Products\" id=\"{{ product.Id }}\" class=\"cuit_item product flex-box-column product-item\">                <!-- Template in product.html -->            </li>        </ul>        <div class=\"toolbar toolbar-bottom flex-box-row col-xs-max-1 col-sm-max-3 col-max-2\">            <div cel-pagination ng-hide=\"results.PagesCount == 1 || settings.ProductResults.InfiniteScroll == true\" id=\"pagination\" current-page=\"{{ results.CurrentPage }}\" pages-count=\"{{ results.PagesCount }}\">                <!-- Template in pagination.html -->            </div><div id=\"page-sizer\" class=\"hidden-xs hidden-sm hidden-md\">                <div class=\"select-wrapper cel-icon-angle-down\" ng-if=\"settings.Toolbar.PageSizes.Enabled == true && settings.ProductResults.InfiniteScroll == false\">                    <span>{{ settings.Language.ProductsPerPage }}</span>                    <select cel-page-sizer class=\"cel-icon-angle-down\">                        <option ng-repeat=\"size in settings.Toolbar.PageSizes.Option\" id=\"{{ size.Value }}\" ng-selected=\"{{ size.Value == pageSize }}\" ng-value=\"{{ size.Value }}\">{{ size.Value }}</option>                    </select>                </div>            </div></div>    </div></div><div cel-to-top ng-if=\"settings.ProductResults.InfiniteScroll == true && showToTop == true\" class=\"to-top cel-icon-angle-up\" ng-attr-tabindex=\"{{settings.ProductResults.InfiniteScroll == true ? '': '0'}}\"></div>",
                 controller: "CelController",
                 reloadOnSearch: false
             });
-       /* $locationProvider.hashPrefix("");
-
-        $sceDelegateProvider.resourceUrlWhitelist([
-            "self",
-            "**.celebros.com**"
-        ]);*/
         $locationProvider.html5Mode({
             enabled: true
         }).hashPrefix('');
@@ -30,7 +24,7 @@ angular
                 .then(function (response) {
                     return response;
                 }, function (error) {
-                    /* console.log(error); */
+                    console.log(error);
                 });
         };
 
@@ -134,6 +128,9 @@ angular
                     if (addProduct) { /* Add Answer */
                         scope.$apply(function () {
                             /* Used to send to the API function */
+                            if (typeof(scope.data.answerIds) == 'string') {
+                                scope.data.answerIds = scope.data.answerIds.split(',');
+                            }
                             scope.data.answerIds.push(answerID);
 
                             /* Update selected Answer array */
@@ -170,6 +167,9 @@ angular
                             /* Used to send to the API function */
                             var index = scope.data.answerIds.indexOf(answerID);
                             if (index > -1) {
+                                if (typeof(scope.data.answerIds) == 'string') {
+                                    scope.data.answerIds = scope.data.answerIds.split(',');
+                                }
                                 scope.data.answerIds.splice(index, 1);
                             }
 
@@ -270,6 +270,7 @@ angular
          * */
         var apiParamMapping = {
             /* doSearch answerId is removed so when instant search is enabled, it won't retain any answer ids */
+            Search: ["query", "siteKey", "principles"],
             doSearch: ["siteId", "searchHandle", "query", /*"answerId",*/ "pageSize", "fieldName", "isAscending", "isNumericSort", "profile", "principles"],
             doSearchParams: ["siteId", "searchHandle", "query", "answerIds", "page", "pageSize", "fieldName", "isAscending", "isNumericSort", "profile", "priceField", "effectOnSearchPath", "principles"],
             doChangeProductsPerPage: ["siteId", "searchHandle", "pageSize", "principles"],
@@ -281,10 +282,9 @@ angular
             doSortByRank: ["siteId", "searchHandle", "principles"],
             doSortByPrice: ["siteId", "searchHandle", "isAscending", "principles"]
         };
-
+        var categoryIds = [13169,11794,11954,11046,12544,13033,13359];
         var doSearch = function (data) {
             data = JSON.parse(JSON.stringify(data));
-            console.log(data);
 
             var canceller = $q.defer();
 
@@ -310,7 +310,10 @@ angular
 
             var promise = $http.get(wcfServer + "DoSearch", { params: data, timeout: canceller.promise })
                 .then(function (response) {
-                    return response.data.DoSearchResult;
+                    var data = response.data.DoSearchResult;
+                    data.SearchPath[0].Answers = [];
+                    data.SearchPath[0].Path = "";
+                    return data;
                 });
 
             return {
@@ -319,7 +322,287 @@ angular
             };
         };
 
+        
         var doSearchParams = function (data) {
+            data = getData(data);
+            return $http.get(wcfServer + "DoSearchParams", { params: data })
+                .then(function (response) {
+                    var result = response.data.DoSearchParams;
+                    var count = 0;
+                    result.SearchPath[0].Answers.forEach(answer => {
+                        if (categoryIds.indexOf(answer.ID * 1) > -1) count++;
+                    });
+                    if (count == 7) {
+                        var path_arr = result.SearchPath[0].Path.split('|');
+                        path_arr.pop();
+                        categoryIds.forEach(id => {
+                            result.SearchPath[0].Answers.forEach((answer, i) => {
+                                if (answer.ID == id) {
+                                    result.SearchPath[0].Answers.splice(i, 1);
+                                    path_arr.splice(i, 1);
+                                }
+                            });
+                        });
+                        result.SearchPath[0].Path = path_arr.join('|');
+                    }
+                    return result;
+                });
+        };
+
+        var doChangeProductsPerPage = function (data) {
+            data = JSON.parse(JSON.stringify(data));
+            for (var param in data) {
+                if (apiParamMapping.doChangeProductsPerPage.indexOf(param) < 0 || data[param] === null) {
+                    delete data[param];
+                }
+            }
+
+            return $http.get(wcfServer + "DoChangeProductsPerPage", { params: data })
+                .then(function (response) {
+                    var data = response.data.DoChangeProductsPerPageResult;
+                    if (showSelectedCategory(0)) {
+                        data.SearchPath[0].Answers = [];
+                        data.SearchPath[0].Path = "";
+                    }
+                    return data;
+                });
+        };
+
+        var doAnswerQuestion = function (data) {
+            data.is_remove = false;
+            data = getData(data);
+            return $http.get(wcfServer + "DoSearchParams", { params: data })
+                .then(function (response) {
+                    var result = response.data.DoSearchParams;
+                    var count = 0;
+                    result.SearchPath[0].Answers.forEach(answer => {
+                        if (categoryIds.indexOf(answer.ID * 1) > -1) count++;
+                    });
+                    if (count == 7) {
+                        var path_arr = result.SearchPath[0].Path.split('|');
+                        path_arr.pop();
+                        categoryIds.forEach(id => {
+                            result.SearchPath[0].Answers.forEach((answer, i) => {
+                                if (answer.ID == id) {
+                                    result.SearchPath[0].Answers.splice(i, 1);
+                                    path_arr.splice(i, 1);
+                                }
+                            });
+                        });
+                        result.SearchPath[0].Path = path_arr.join('|');
+                    }
+                    return result;
+            });
+        };
+
+        var doRemoveAnswer = function (data) {
+            data.is_remove = true;
+            data = getData(data);
+            return $http.get(wcfServer + "DoSearchParams", { params: data })
+                .then(function (response) {
+                    var result = response.data.DoSearchParams;
+                    var count = 0;
+                    result.SearchPath[0].Answers.forEach(answer => {
+                        if (categoryIds.indexOf(answer.ID * 1) > -1) count++;
+                    });
+                    if (count == 7) {
+                        var path_arr = result.SearchPath[0].Path.split('|');
+                        path_arr.pop();
+                        categoryIds.forEach(id => {
+                            result.SearchPath[0].Answers.forEach((answer, i) => {
+                                if (answer.ID == id) {
+                                    result.SearchPath[0].Answers.splice(i, 1);
+                                    path_arr.splice(i, 1);
+                                }
+                            });
+                        });
+                        result.SearchPath[0].Path = path_arr.join('|');
+                    }
+                    return result;
+            });
+        };
+
+        var doMovePage = function (data) {
+            data = JSON.parse(JSON.stringify(data));
+            for (var param in data) {
+                if (apiParamMapping.doMovePage.indexOf(param) < 0 || data[param] === null) {
+                    delete data[param];
+                }
+            }
+            return $http.get(wcfServer + "DoMovePage", { params: data })
+                .then(function (response) {
+                    var result = response.data.DoMovePageResult;
+                    if (showSelectedCategory(0)) {
+                        result.SearchPath[0].Answers = [];
+                        result.SearchPath[0].Path = "";
+                    }
+                    return result;
+                });
+        };
+
+        var doSortByField = function (data) {
+            data = JSON.parse(JSON.stringify(data));
+            for (var param in data) {
+                if (apiParamMapping.doSortByField.indexOf(param) < 0 || data[param] === null) {
+                    delete data[param];
+                }
+            }
+            return $http.get(wcfServer + "DoSortByField", { params: data })
+                .then(function (response) {
+                    var result = response.data.DoSortByFieldResult;
+                    if (showSelectedCategory(0)) {
+                        result.SearchPath[0].Answers = [];
+                        result.SearchPath[0].Path = "";
+                    }
+                    return result;
+                });
+        };
+
+        var doSortByName = function (data) {
+            data = JSON.parse(JSON.stringify(data));
+            for (var param in data) {
+                if (apiParamMapping.doSortByName.indexOf(param) < 0 || data[param] === null) {
+                    delete data[param];
+                }
+            }
+            return $http.get(wcfServer + "DoSortByName", { params: data })
+                .then(function (response) {
+                    var result = response.data.DoSortByNameResult;
+                    if (showSelectedCategory(0)) {
+                        result.SearchPath[0].Answers = [];
+                        result.SearchPath[0].Path = "";
+                    }
+                    return result;
+                });
+        };
+
+        var doSortByRank = function (data) {
+            data = JSON.parse(JSON.stringify(data));
+
+            for (var param in data) {
+                if (apiParamMapping.doSortByRank.indexOf(param) < 0 || data[param] === null) {
+                    delete data[param];
+                }
+            }
+            return $http.get(wcfServer + "DoSortByRank", { params: data })
+                .then(function (response) {
+                    var result = response.data.DoSortByRankResult;
+                    if (showSelectedCategory(0)) {
+                        result.SearchPath[0].Answers = [];
+                        result.SearchPath[0].Path = "";
+                    }
+                    return result;
+                });
+        };
+
+        var doSortByPrice = function (data) {
+            data = JSON.parse(JSON.stringify(data));
+
+            for (var param in data) {
+                if (apiParamMapping.doSortByPrice.indexOf(param) < 0 || data[param] === null) {
+                    delete data[param];
+                }
+            }
+            return $http.get(wcfServer + "DoSortByPrice", { params: data })
+                .then(function (response) {
+                    var result = response.data.DoSortByPriceResult;
+                    if (showSelectedCategory(0)) {
+                        result.SearchPath[0].Answers = [];
+                        result.SearchPath[0].Path = "";
+                    }
+                    return result;
+                });
+        };
+
+        /* getPrice is for Magento Clients only */
+        var getPrice = null;
+        if (typeof celConfig.Settings.Magento !== "undefined") {
+            var priceAPI = celConfig.Settings.Magento.RealTimePriceURL.replace("http:", "");
+
+            getPrice = function (data) {
+                var skus = { 'skus': data.toString() };
+
+                return $http.jsonp(priceAPI, { params: skus, jsonpCallbackParam: "callback" })
+                    .then(function (response) {
+                        return response.data;
+                    });
+            };
+        }
+
+        var getData = function (data) {
+            var urlParams = new URLSearchParams(window.location.search);
+            var categoryids = urlParams.getAll('Category');
+            var specialtyids = urlParams.getAll('Specialty');
+            var brandids = urlParams.getAll('Brand');
+            var storageids = urlParams.getAll('Storage');
+            var priceids = urlParams.getAll('By_price_range');
+            var sizeids = urlParams.getAll('Size');
+            var pagesize = urlParams.getAll('PageSize');
+            var display = urlParams.getAll('Display');
+            var sortby = urlParams.getAll('SortBy');
+            var ascending = urlParams.getAll('Ascending');
+            if (categoryids.length == 1 && typeof(categoryids[0]) == 'string')
+                categoryids = categoryids[0].split(',');
+            if (specialtyids.length == 1 && typeof(specialtyids[0]) == 'string')
+                specialtyids = specialtyids[0].split(',');
+            if (brandids.length == 1 && typeof(brandids[0]) == 'string')
+                brandids = brandids[0].split(',');
+            if (storageids.length == 1 && typeof(storageids[0]) == 'string')
+                storageids = storageids[0].split(',');
+            if (priceids.length == 1 && typeof(priceids[0]) == 'string')
+                priceids = priceids[0].split(',');
+            if (sizeids.length == 1 && typeof(sizeids[0]) == 'string')
+                sizeids = sizeids[0].split(',');
+            var temp = categoryids.concat(specialtyids, brandids, storageids, priceids, sizeids);
+            if (data.answerIds.length == 1 && typeof(data.answerIds[0]) == 'string') {
+                data.answerIds = data.answerIds[0].split(',');
+            }
+            if (data.answerIds.length > 6) {
+                data.answerIds = data.answerIds.splice(7);
+            }
+            if (data.answerId) {
+                if (data.is_remove)
+                    if (categoryids.length == 1)
+                        data.answerIds = categoryIds.concat(data.answerIds, temp);
+                else {
+                    if (categoryids.length == 0 && categoryIds.indexOf(data.answerId * 1) < 0)
+                        data.answerIds = categoryIds.concat(data.answerIds, temp);
+                    else data.answerIds = data.answerIds.concat(temp);
+                }
+            } else {
+                if (categoryids.length == 0 && categoryIds.indexOf(data.answerId * 1) < 0)
+                    data.answerIds = categoryIds.concat(data.answerIds, temp);
+                else data.answerIds = data.answerIds.concat(temp);
+            }
+            if (data.answerId) {
+                if (data.is_remove) {
+                    var index = data.answerIds.indexOf(data.answerId);
+                    data.answerIds.splice(index, 1);
+                } else {
+                    data.answerIds.push(data.answerId);
+                }
+            }
+            var ids = [];
+            data.answerIds.forEach(answerId => {
+                var flag = true
+                ids.forEach(id => {
+                    if (id == answerId) flag = false;
+                });
+                if (flag) ids.push(answerId);
+            });
+            if (ids.length == 0)
+                ids = categoryIds;
+            var search_key = document.getElementById('search-products').value.trim();
+            data.query = search_key == '{{settings.search_key}}' ? celConfig.Settings.search_key : search_key;
+            if (sortby.length) data.fieldName = sortby[0];
+            else data.fieldName = 'Relevancy';
+            if (ascending.length) data.isAscending = ascending[0] == 'true' ? true : false;
+            else data.isAscending = false;
+            if (data.fieldName == 'Price') data.isNumericSort = true;
+            else data.isNumericSort = false;
+            if (pagesize.length) data.pageSize = pagesize[0];
+            else data.pageSize = 12;
+            data.answerIds = ids;
             data = JSON.parse(JSON.stringify(data));
             for (var param in data) {
                 if (apiParamMapping.doSearchParams.indexOf(param) < 0 || data[param] === null) {
@@ -344,139 +627,36 @@ angular
             if (data.effectOnSearchPath === undefined || data.effectOnSearchPath === null) {
                 data.effectOnSearchPath = 1;
             }
+            return data;
+        }
 
-            return $http.get(wcfServer + "DoSearchParams", { params: data })
-                .then(function (response) {
-                    return response.data.DoSearchParams;
-                });
-        };
-
-        var doChangeProductsPerPage = function (data) {
-            data = JSON.parse(JSON.stringify(data));
-
-            for (var param in data) {
-                if (apiParamMapping.doChangeProductsPerPage.indexOf(param) < 0 || data[param] === null) {
-                    delete data[param];
-                }
+        var showSelectedCategory = function (length) {
+            var urlParams = new URLSearchParams(window.location.search);
+            var categoryids = urlParams.getAll('Category');
+            var specialtyids = urlParams.getAll('Specialty');
+            var brandids = urlParams.getAll('Brand');
+            var storageids = urlParams.getAll('Storage');
+            var priceids = urlParams.getAll('By_price_range');
+            var sizeids = urlParams.getAll('Size');
+            var result = false;
+            if (length) {
+                if ((categoryids.length == length && categoryids[0].split(',').length == length) && (specialtyids.length == 0) && (brandids.length == 0) && (storageids.length == 0) && (priceids.length == 0) && (sizeids.length == 0))
+                    result = true;
+                if ((specialtyids.length == length && specialtyids[0].split(',').length == length) && (categoryids.length == 0) && (brandids.length == 0) && (storageids.length == 0) && (priceids.length == 0) && (sizeids.length == 0))
+                    result = true;
+                if ((brandids.length == length && brandids[0].split(',').length == length) && (specialtyids.length == 0) && (categoryids.length == 0) && (storageids.length == 0) && (priceids.length == 0) && (sizeids.length == 0))
+                    result = true;
+                if ((storageids.length == length && storageids[0].split(',').length == length) && (specialtyids.length == 0) && (brandids.length == 0) && (categoryids.length == 0) && (priceids.length == 0) && (sizeids.length == 0))
+                    result = true;
+                if ((priceids.length == length && priceids[0].split(',').length == length) && (specialtyids.length == 0) && (brandids.length == 0) && (storageids.length == 0) && (categoryids.length == 0) && (sizeids.length == 0))
+                    result = true;
+                if ((sizeids.length == length && sizeids[0].split(',').length == length) && (specialtyids.length == 0) && (brandids.length == 0) && (storageids.length == 0) && (priceids.length == 0) && (categoryids.length == 0))
+                    result = true;
+            } else {
+                if (categoryids.length == length && specialtyids.length == length && brandids.length == length && storageids.length == length && priceids.length == length && sizeids.length == length)
+                    result = true;
             }
-
-            return $http.get(wcfServer + "DoChangeProductsPerPage", { params: data })
-                .then(function (response) {
-                    return response.data.DoChangeProductsPerPageResult;
-                });
-        };
-
-        var doAnswerQuestion = function (data) {
-            data = JSON.parse(JSON.stringify(data));
-
-            for (var param in data) {
-                if (apiParamMapping.doAnswerQuestion.indexOf(param) < 0 || data[param] === null) {
-                    delete data[param];
-                }
-            }
-            return $http.get(wcfServer + "DoAnswerQuestion", { params: data })
-                .then(function (response) {
-                    return response.data.DoAnswerQuestionResult;
-                });
-        };
-
-        var doRemoveAnswer = function (data) {
-            data = JSON.parse(JSON.stringify(data));
-
-            for (var param in data) {
-                if (apiParamMapping.doRemoveAnswer.indexOf(param) < 0 || data[param] === null) {
-                    delete data[param];
-                }
-            }
-            return $http.get(wcfServer + "DoRemoveAnswer", { params: data })
-                .then(function (response) {
-                    return response.data.DoRemoveAnswerResult;
-                });
-        };
-
-        var doMovePage = function (data) {
-            data = JSON.parse(JSON.stringify(data));
-
-            for (var param in data) {
-                if (apiParamMapping.doMovePage.indexOf(param) < 0 || data[param] === null) {
-                    delete data[param];
-                }
-            }
-            return $http.get(wcfServer + "DoMovePage", { params: data })
-                .then(function (response) {
-                    return response.data.DoMovePageResult;
-                });
-        };
-
-        var doSortByField = function (data) {
-            data = JSON.parse(JSON.stringify(data));
-
-            for (var param in data) {
-                if (apiParamMapping.doSortByField.indexOf(param) < 0 || data[param] === null) {
-                    delete data[param];
-                }
-            }
-            return $http.get(wcfServer + "DoSortByField", { params: data })
-                .then(function (response) {
-                    return response.data.DoSortByFieldResult;
-                });
-        };
-
-        var doSortByName = function (data) {
-            data = JSON.parse(JSON.stringify(data));
-
-            for (var param in data) {
-                if (apiParamMapping.doSortByName.indexOf(param) < 0 || data[param] === null) {
-                    delete data[param];
-                }
-            }
-            return $http.get(wcfServer + "DoSortByName", { params: data })
-                .then(function (response) {
-                    return response.data.DoSortByNameResult;
-                });
-        };
-
-        var doSortByRank = function (data) {
-            data = JSON.parse(JSON.stringify(data));
-
-            for (var param in data) {
-                if (apiParamMapping.doSortByRank.indexOf(param) < 0 || data[param] === null) {
-                    delete data[param];
-                }
-            }
-            return $http.get(wcfServer + "DoSortByRank", { params: data })
-                .then(function (response) {
-                    return response.data.DoSortByRankResult;
-                });
-        };
-
-        var doSortByPrice = function (data) {
-            data = JSON.parse(JSON.stringify(data));
-
-            for (var param in data) {
-                if (apiParamMapping.doSortByPrice.indexOf(param) < 0 || data[param] === null) {
-                    delete data[param];
-                }
-            }
-            return $http.get(wcfServer + "DoSortByPrice", { params: data })
-                .then(function (response) {
-                    return response.data.DoSortByPriceResult;
-                });
-        };
-
-        /* getPrice is for Magento Clients only */
-        var getPrice = null;
-        if (typeof celConfig.Settings.Magento !== "undefined") {
-            var priceAPI = celConfig.Settings.Magento.RealTimePriceURL.replace("http:", "");
-
-            getPrice = function (data) {
-                var skus = { 'skus': data.toString() };
-
-                return $http.jsonp(priceAPI, { params: skus, jsonpCallbackParam: "callback" })
-                    .then(function (response) {
-                        return response.data;
-                    });
-            };
+            return result;
         }
 
         return {
@@ -526,22 +706,11 @@ angular
                         scope.$parent.loading = true;
                     }
 
-                    //var answerID = breadcrumb.attributes["answer-id"].value;
-                    //var questionText;
-
                     var data = JSON.parse(JSON.stringify(scope.data));
                     if (data.answerIds !== undefined) {
                         delete data.answerIds;
                     }
                     data.answerId = answerID;
-
-                    //for (key in $location.search()) {
-                    //    if (isNaN($location.search()[key]) && $location.search()[key].indexOf(answerID) > -1) {
-                    //        questionText = key;
-                    //    } else if (!isNaN($location.search()[key]) && $location.search()[key] === answerID) {
-                    //        questionText = key;
-                    //    }
-                    //}
 
                     scope.$apply(function () {
                         parent.showApply = true;
@@ -549,25 +718,10 @@ angular
                         /* Used to send to the API function */
                         var index = scope.data.answerIds.indexOf(answerID);
                         if (index > -1) {
+                            if (typeof(scope.data.answerIds) == 'string')
+                                scope.data.answerIds = scope.data.answerIds.split(',');
                             scope.data.answerId = scope.data.answerIds.splice(index, 1);
                         }
-
-                        ///* Update selected Answer array */
-                        //index = parent.selectedAnswers.indexOf(answerID);
-                        //if (index > -1) {
-                        //parent.selectedAnswers.splice(index, 1);
-                        //}
-
-                        ///* Update Breadcrumbs */
-                        //index = -1;
-                        //for (var i = 0; i < parent.results.SearchPath.Answers.length; i++) {
-                        //if (answerID == parent.results.SearchPath.Answers[i].ID) {
-                        //index = i;
-                        //}
-                        //}
-                        //if (index >= 0) {
-                        //parent.results.SearchPath.Answers.splice(index, 1);
-                        //}
 
                         $location.search("Page", null);
 
@@ -587,6 +741,10 @@ angular
                             } else {
                                 $location.search(questionText, null);
                             }
+                        }
+                        scope.data.answerId = breadcrumb.id;
+                        if (document.getElementById('search-products').value.trim() == '') {
+                            scope.data.query = '';
                         }
                         if (celConfig.Settings.Refinements.InstantAnswerMode) {
                             celAPI.doRemoveAnswer(scope.data).then(scope.onResults, scope.onError);
@@ -657,7 +815,7 @@ angular
         /*
          * root IS AUTO GENERATED WHEN COMPILED. DO NOT EDIT!
          */
-        var root = {"?xml":{"@version":"1.0","@encoding":"utf-8"}/*V:1.1.6*/,"Settings":{"General":{"#comment":[],"SiteAddress":"GreenDropS-search.celebros.com","SitePort":"6035","SiteKey":"GreenDropS","API":"Default","WcfAddress":"//GreenDropS-search.celebros.com/UiSearch/","Language":"EN","AnalyticsInterfaceServer":"ai.celebros-analytics.com","AnalyticsCustomerName":"GreenDropS","Profile":"","EmptyQueryProfile":"","ProfileTabs":"","TemplateName":"SideKat","DoSearchUrlParameter":"q","PageSize":"12","ClientFolder":"GreenDropS","InstantSearch":"false","UrlRegexPattern":".+(?=[.][a-zA-Z]+$)","ParamsToIgnore":""},"Control":{"#comment":[],"TextControlId":"search","ButtonControlId":"search_button","CharCountThreshold":"3","ExternalCSS":"false","ExternalCSSUrl":""},"#comment":[],"EnableLoader":"false","InitialLoadOnly":"false","SearchResultMessage":null,"ProductResults":{"ShowRatings":"false","ProductRatingRatio":"5","#comment":[],"AddToCartType":"Magento","AddToCartBaseLink":"https://members.greendropship.com/checkout/cart/add/uenc/***window.url***/product/***product.mag_id***/","ProductNameLength":"60","Display":"List","#text":" -->\n    ","InfiniteScroll":"false","ResultRedirection":"0","NoImageUrl":"//ui.salespersonlab.com/UITemplateV6/Images/noimage.jpg","PriceSymbol":"$","PriceSymbolLeft":"1","PriceCall":"Click for Price"},"Toolbar":{/* EnableFirstLastPage - true/false - Enabling this option requires you to disable the BootProtectionEnabled setting for the client in the [Qwiser_System_Common].[dbo].[T_SITE_PARAMETERS] table*/"EnableFirstLastPage":"false","SortOptions":{"Relevancy":{"Default":"true","Alias":"Relevance","SingleOrder":"true","Ascending":"false","FieldName":"Relevancy"},"NameAtoZ":{"Alias":"Name: A-Z","SingleOrder":"true","Ascending":"true","FieldName":"Title"},"NameZtoA":{"Alias":"Name: Z-A","SingleOrder":"true","Ascending":"false","FieldName":"Title"},"PriceLtoH":{"Alias":"Price: Low to High","FieldName":"Price","SingleOrder":"true","Ascending":"true","Numeric":"true"},"PriceHtoL":{"Alias":"Price: High to Low","FieldName":"Price","Numeric":"true","SingleOrder":"true","Ascending":"false"}},"PageSizes":{/* Product count per page options */"Enabled":"true","Option":[{"Default":"true","Value":"12"},{"Value":"24"},{"Value":"36"}]}},"Refinements":{"InstantAnswerMode":"true","#comment":[],"SearchableAnswers":"true","SearchableAnswersThreshold":"20","RefinementVisibilityType":"1","RefinementVisibilityList":"[]","ShowMoreLess":"true","AnswerLimit":"5","EnablePriceSlider":"false","PriceSliderMin":"","PriceSliderMax":""},"Magento":{"RealTimePrice":"false","#comment":[],"RealTimePriceURL":"//celebshop.celebros.com/include_mage230ce/celinclude/"},"Language":{"AddToImportList":"Add to Import List","EditOnImportList":"Edit on Import List","Apply":"Apply","ClearAll":"Clear All","FilterBy":"Filter By:","Filters":"Filters","FirstPage":"First Page","Grid":"Grid","LastPage":"Last Page","Less":"- Less","List":"List","More":"+ More","Name":"Name","NextPage":"Next Page","Page":"Page","PreviousPage":"Previous Page","Price":"Price","Products":"Products","ProductsPerPage":"Show","RelatedSearches":"Related Searches","Relevancy":"Relevancy","Search":"Search:","ViewDetails":"View Details","RedirectMessage":"Are you looking for"}}};
+        var root = {"?xml":{"@version":"1.0","@encoding":"utf-8"}/*V:1.1.6*/,"Settings":{"General":{"#comment":[],"SiteAddress":"GreenDropS-search.celebros.com","SitePort":"6035","SiteKey":"GreenDropS","API":"Default","WcfAddress":"//GreenDropS-search.celebros.com/UiSearch/","Language":"EN","AnalyticsInterfaceServer":"ai.celebros-analytics.com","AnalyticsCustomerName":"GreenDropS","Profile":"","EmptyQueryProfile":"","ProfileTabs":"","TemplateName":"SideKat","DoSearchUrlParameter":"q","PageSize":"12","ClientFolder":"GreenDropS","InstantSearch":"false","UrlRegexPattern":".+(?=[.][a-zA-Z]+$)","ParamsToIgnore":""},"Control":{"#comment":[],"TextControlId":"search","ButtonControlId":"search_button","CharCountThreshold":"3","ExternalCSS":"false","ExternalCSSUrl":""},"#comment":[],"EnableLoader":"false","InitialLoadOnly":"false","SearchResultMessage":null,"ProductResults":{"ShowRatings":"false","ProductRatingRatio":"5","#comment":[],"AddToCartType":"Magento","AddToCartBaseLink":"https://members.greendropship.com/checkout/cart/add/uenc/***window.url***/product/***product.mag_id***/","ProductNameLength":"60","Display":"List","#text":" -->\n    ","InfiniteScroll":"false","ResultRedirection":"0","NoImageUrl":"//ui.salespersonlab.com/UITemplateV6/Images/noimage.jpg","PriceSymbol":"$","PriceSymbolLeft":"1","PriceCall":"Click for Price"},"Toolbar":{/* EnableFirstLastPage - true/false - Enabling this option requires you to disable the BootProtectionEnabled setting for the client in the [Qwiser_System_Common].[dbo].[T_SITE_PARAMETERS] table*/"EnableFirstLastPage":"false","SortOptions":{"Relevancy":{"Default":"true","Alias":"Relevance","SingleOrder":"true","Ascending":"false","FieldName":"Relevancy"},"NameAtoZ":{"Alias":"Name: A-Z","SingleOrder":"true","Ascending":"true","FieldName":"Title"},"NameZtoA":{"Alias":"Name: Z-A","SingleOrder":"true","Ascending":"false","FieldName":"Title"},"PriceLtoH":{"Alias":"Price: Low to High","FieldName":"Price","SingleOrder":"true","Ascending":"true","Numeric":"true"},"PriceHtoL":{"Alias":"Price: High to Low","FieldName":"Price","Numeric":"true","SingleOrder":"true","Ascending":"false"}},"PageSizes":{/* Product count per page options */"Enabled":"true","Option":[{"Default":"true","Value":"12"},{"Value":"24"},{"Value":"36"}]}},"Refinements":{"InstantAnswerMode":"true","#comment":[],"SearchableAnswers":"true","SearchableAnswersThreshold":"20","RefinementVisibilityType":"1","RefinementVisibilityList":"[]","ShowMoreLess":"true","AnswerLimit":"5","EnablePriceSlider":"false","PriceSliderMin":"","PriceSliderMax":""},"Magento":{"RealTimePrice":"false","#comment":[],"RealTimePriceURL":"//celebshop.celebros.com/include_mage230ce/celinclude/"},"Language":{"BulkImport":"Bulk Import", "AddToImportList":"Add to Import List","EditOnImportList":"Edit on Import List","EditOnShopify":"Edit in Shopify","Apply":"Apply","ClearAll":"Clear All","FilterBy":"Filter By:","Filters":"Filters","FirstPage":"First Page","Grid":"Grid","LastPage":"Last Page","Less":"- Less","List":"List","More":"+ More","Name":"Name","NextPage":"Next Page","Page":"Page","PreviousPage":"Previous Page","Price":"Price","Products":"Products","ProductsPerPage":"Show","RelatedSearches":"Related Searches","Relevancy":"Relevancy","Search":"Search:","ViewDetails":"View Details","RedirectMessage":"Are you looking for"}}};
 
         /* Convert Settings to boolean values */
         root.Settings.EnableLoader = root.Settings.EnableLoader !== undefined ? toBoolean(root.Settings.EnableLoader) : false; /* Default to false */
@@ -688,7 +846,7 @@ angular
 
         /* Numeric Values + defaults */
         root.Settings.Control.CharCountThreshold = root.Settings.Control.CharCountThreshold !== undefined ? parseInt(root.Settings.Control.CharCountThreshold) : 2; /* Default to 2 */
-        root.Settings.Refinements.AnswerLimit = root.Settings.Refinements.AnswerLimit !== undefined ? parseInt(root.Settings.Refinements.AnswerLimit) : 5; /* Defaults to 5 */
+        root.Settings.Refinements.AnswerLimit = 7; /* Defaults to 5 */
         root.Settings.ProductResults.ProductRatingRatio = root.Settings.ProductResults.ProductRatingRatio !== undefined ? parseInt(root.Settings.ProductResults.ProductRatingRatio) : 10; /* Defaults to 10 */
 
         if (root.Settings.General.ParamsToIgnore === undefined) {
@@ -756,6 +914,9 @@ angular
     .module("celebrosUI")
     .controller("CelController", ["$scope", "$http", "$location", "$timeout", "$window", "celAPI", "celConfig", "celSort", function ($scope, $http, $location, $timeout, $window, celAPI, celConfig, celSort) {
         $scope.settings = celConfig.Settings;
+        celConfig.Settings.search_key = localStorage.getItem('search_key');
+        celConfig.Settings.CategoryIds = [13169,11794,11954,11046,12544,13033,13359];
+        celConfig.Settings.ProductResults.Display = 'Grid';
 		$scope.mainScopeId = $scope.$id;
         if (!celConfig.Settings.Control.ExternalCSS) {
             LoadCSS();
@@ -796,7 +957,7 @@ angular
             port: celConfig.Settings.General.SitePort,
             profile: celConfig.Settings.General.Profile,
             query: "",
-            answerIds: [],
+            answerIds: celConfig.Settings.CategoryIds,
             pageSize: $scope.pageSize
         };
 
@@ -875,6 +1036,11 @@ angular
             for (i = 0; i < results.Products.length; i++) {
                 var prod = results.Products[i];
                 var imported_ids = JSON.parse(window.localStorage.getItem('imported_ids'));
+                var myproduct_ids = JSON.parse(window.localStorage.getItem('myproduct_ids'));
+                var shopify_ids = JSON.parse(window.localStorage.getItem('shopify_ids'));
+                celConfig.Settings.imported_ids = imported_ids;
+                celConfig.Settings.myproduct_ids = myproduct_ids;
+                prod.ImageUrl = 'https://m.gdss.us/media/catalog/product/cache/6af2da79007bbde83ac425b5e09ddcd4' + prod.ImageUrl.substr(98);
                 var id = 0;
                 results.Products[i].AddtionalFields.forEach(field => {
                     if(field.Name == 'mag_id'){
@@ -883,9 +1049,9 @@ angular
                     }
 
                 });
-                imported_ids.forEach(imported_id => {
-                    if(imported_id == id){
-                        prod.ProductPageUrl = 'import-list';
+                myproduct_ids.forEach((myproduct_id, index) => {
+                    if(myproduct_id == id){
+                        prod.shopify_id = shopify_ids[index];
                     }
                 });
                 /* The spelling of Addtional fields is correct.. Someone misspelled it in the API and it was never fixed... */
@@ -905,6 +1071,7 @@ angular
 
             /* Reset showSlider to false */
             $scope.showSlider = false;
+            results.Questions.splice(2, 1);
             if (celConfig.Settings.Refinements.EnablePriceSlider) {
                 for (i = 0; i < results.Questions.length; i++) {
                     var question = results.Questions[i];
@@ -1008,8 +1175,6 @@ angular
         };
 
         var onError = function (reason) {
-            //$scope.error = "Could not fetch data. " + reason;
-            //console.log($scope.error);
             if (celConfig.Settings.EnableLoader) {
                 $scope.loading = false;
             }
@@ -1181,26 +1346,108 @@ angular
             history.pushState($scope.data, null, $location.absUrl());
         };
 
-        $scope.addtoimportlist = function (event) {
+        $scope.addToImportList = function (event) {
             var data = {
                 'action': 'add_import_list',
-                'id_product': event.target.id.split('-')[1]
+                'sku': event.target.id.split('-')[1]
             }
+            document.getElementById(`check-${event.target.id.split('-')[1]}`).disabled = true;
             $http({
                 url: '/ajax',
                 method: 'GET',
                 params: data
             }).then(res=> {
                 var new_ids = JSON.parse(window.localStorage.getItem('imported_ids'));
-                new_ids.push(JSON.parse(res.data));
-                window.localStorage.setItem('imported_ids', JSON.stringify(new_ids));
-                document.getElementById(`add-${JSON.parse(res.data)}`).hidden = true;
-                document.getElementById(`${JSON.parse(res.data)}`).href = 'import-list';
-                document.getElementById(`edit-${JSON.parse(res.data)}`).hidden = false;
+                if (res.data.result) {
+                    new_ids.push(res.data.sku);
+                    window.localStorage.setItem('imported_ids', JSON.stringify(new_ids));
+                    document.getElementById(`add-${res.data.sku}`).hidden = true;
+                    document.getElementById(`${res.data.sku}`).href = 'import-list';
+                    document.getElementById(`edit-${res.data.sku}`).hidden = false;
+                    document.getElementById(`check-${res.data.sku}`).checked = false;
+                }
             })
+        };
+
+        $scope.checkAll = function (event) {
+            var checkboxes = document.querySelectorAll('.check-product');
+            checkboxes.forEach(checkbox => {
+                if (event.target.checked){
+                    if(!checkbox.disabled)
+                        checkbox.checked = true;
+                }
+                else checkbox.checked = false;
+            });
+        }
+
+        $scope.allAddToImportList = function (event) {
+            var product_ids = [];
+            var checkboxes = document.querySelectorAll('.check-product');
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked){
+                    product_ids.push(checkbox.id.split('-')[1]);
+                    checkbox.disabled = true;
+                }
+            });
+            if (product_ids.length) {
+                event.target.disabled = true;
+                document.querySelector('.check-all-products').checked = false;
+                document.querySelector('.check-all-products').disabled = true;
+                $http.post('/ajax',{skus: product_ids})
+                    .then(res=> {
+                        event.target.disabled = false;
+                        var imported_ids = JSON.parse(window.localStorage.getItem('imported_ids'));
+                        var new_ids = [];
+                        new_ids = imported_ids.concat(res.data);
+                        window.localStorage.setItem('imported_ids', JSON.stringify(new_ids));
+                        document.querySelector('.check-all-products').disabled = false;
+                        res.data.forEach(sku => {
+                            document.getElementById(`add-${sku}`).hidden = true;
+                            document.getElementById(`${sku}`).href = 'import-list';
+                            document.getElementById(`edit-${sku}`).hidden = false;
+                            document.getElementById(`check-${sku}`).checked = false;
+                    });
+                })
+
+            }
+            else {
+                $('#modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
+                $('#modal-footer').hide();
+                $('.all-add-products').attr('data-toggle', 'modal');
+                $('.all-add-products').attr('data-target', '#delete-product-modal');
+            }
         };
         $scope.editonimportlist = function (event) {
             window.location.href = "/import-list";
+        }
+        $scope.editonshopify = function (event) {
+            var arr = event.target.id.split('-');
+            var shopify_id = '';
+            if (arr.length > 1) shopify_id = arr[1];
+            window.open(window.localStorage.getItem('shopify_url') + shopify_id);
+        }
+        $scope.searchProducts = function (event) {
+            var flag = true;
+            if (event) {
+                if (event.keyCode != 13) {
+                    flag = false;
+                }
+            }
+            var search_key = document.querySelector('#search-products').value;
+            var wcfServer = celConfig.Settings.General.WcfAddress;
+            if (search_key == '') $scope.data.answerId = ''
+            var data = {
+                query: search_key,
+                answerIds: $scope.data.answerId ? [$scope.data.answerId] : celConfig.Settings.CategoryIds,
+                effectOnSearchPath: 1,
+                pageSize: 12,
+                profile: "SiteDefault",
+                siteId: celConfig.Settings.General.SiteKey,
+            }
+            if (flag) {
+                localStorage.setItem('search_key', search_key);
+                celAPI.doSearchParams(data).then(onResults, onError);
+            }
         }
         /*
          *
@@ -1292,12 +1539,17 @@ angular
 
         for (key in $location.search()) {
             if ($scope.specialKeys.indexOf(key) < 0) {
-                // This will check if the ids are all numeric, and will ignore values that are not.
-                if ($location.search()[key].indexOf($location.search()[key].match(/^[\d_P]+,*\d/)) > -1) {
-                    var split = $location.search()[key].split(",");
-                    $scope.data.answerIds = $scope.data.answerIds.concat(split);
+                if (typeof($location.search()[key]) == 'object') {
+                    $scope.data.answerIds = $location.search()[key];
                     params = true;
+                } else {
+                    if ($location.search()[key].indexOf($location.search()[key].match(/^[\d_P]+,*\d/)) > -1) {
+                        var split = $location.search()[key].split(",");
+                        $scope.data.answerIds = split;
+                        params = true;
+                    }
                 }
+                // This will check if the ids are all numeric, and will ignore values that are not.
             }
         }
 
@@ -1318,7 +1570,7 @@ angular
             }
         }
         $window.scrollTo(0, 0);
-
+        $scope.data.query = localStorage.getItem('search_key')
         if (!params) {
             celAPI.doSearch($scope.data).promise.then(onResults, onError);
         } else {
@@ -1790,15 +2042,23 @@ angular
 angular
     .module("celebrosUI")
     .directive("celProduct", ['celConfig', function (celConfig) {
-        var imported_ids = JSON.parse(window.localStorage.getItem('imported_ids'));
 
         return {
             restrict: "A",
-            template: "<div class=\"cuit_item_container\" ng-class=\"{ 'flex-box-column' : display == 'grid', 'flex-box-row' : display == 'list' }\"><a cel-prod-anlx id=\"{{product.mag_id}}\" class=\"product-details\" href=\"{{ product.ProductPageUrl }}\" target=\"_self\">        <div class=\"product-image\"><img ng-src=\"{{product.ImageUrl}}\" on-error=\"{{ settings.ProductResults.NoImageUrl }}\" max-width=\"240px\" max-height=\"300px\" />        </div>               <div class=\"product-info\">            <div class=\"product-title\" ng-bind-html=\"product.Name | trust_html\"></div>            <div class=\"product-sku\">SKU #{{ product.Sku }}</div>             <div ng-if=\"product.is_in_stock==0\" class=\"product-stock\">{{ product.is_in_stock.replace('0','OUT OF STOCK') }}</div>                        <div ng-show=\"display == 'list'\" class=\"product-description hidden-sm\" ng-bind-html=\"product.Description | trust_html\">            </div>        </div>                 </a>    <div class=\"product-shop\" ng-if=\"product.Price !== '0'\">	    	 <div ng-if=\"settings.ProductResults.ShowRatings === true\" class=\"ratings-container\">	            <div class=\"ratings\">	                <span class=\"ratings-stars ratings-stars-off\">â˜…â˜…â˜…â˜…â˜…</span>	                <span class=\"ratings-stars ratings-stars-on\" ng-style=\"{ width: product.RatingStars + '%' }\">â˜…â˜…â˜…â˜…â˜…</span>	            </div>	        </div>    		 <div ng-show=\"product.Original_Price !== undefined && product.Original_Price !== product.Price && product.Original_Price !== '0.00'\" class=\"old-product-price\">{{ product.Original_Price | currency : \"$\" : 2  }}</div>	        <div ng-hide=\"settings.Magento.RealTimePrice === true && !priceLoaded\" class=\"product-price\">{{ product.Price | currency : \"$\" : 2 }}</div>	                 		</div> <!--End addtocard vtex -->		     <div class=\"add-to-cart\">		            <a ng-if=\"product.AddToCart === undefined\" cel-prod-anlx href=\"{{ product.ProductPageUrl }}\" target=\"_self\">{{ settings.Language.ViewDetails }}</a>		            <form ng-if=\"product.AddToCart !== undefined && formKey !== undefined\" data-role=\"tocart-form\">		                <input type=\"hidden\" name=\"product\" value=\"{{ product.mag_id }}\" />		                <input type=\"hidden\" name=\"uenc\" value=\"{{ uenc }}\" />		                <input type=\"hidden\" name=\"form_key\" value=\"{{ formKey }}\" />		                <div class=\"control\"><button cel-prod-anlx id=\"add-{{product.mag_id}}\" ng-click=\"addtoimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.AddToImportList }}\" class=\"btn-default\">{{ settings.Language.AddToImportList }}</button><button cel-prod-anlx id=\"edit-{{product.mag_id}}\" hidden ng-click=\"editonimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.EditOnImportList }}\" class=\"btn-default edit\">{{ settings.Language.EditOnImportList }}</button></div></form></div></div></div>",
+            template: "<div class=\"cuit_item_container\" ng-class=\"{ 'flex-box-column' : display == 'grid', 'flex-box-row' : display == 'list' }\"><input type=\"checkbox\" id=\"check-{{product.Sku}}\" class=\"check-product\"><a cel-prod-anlx id=\"{{product.Sku}}\" class=\"product-details\" href=\"{{ product.ProductPageUrl }}\" target=\"_blank\">        <div class=\"product-image\"><img ng-src=\"{{product.ImageUrl}}\" on-error=\"{{ settings.ProductResults.NoImageUrl }}\" max-width=\"240px\" max-height=\"300px\" />        </div>               <div class=\"product-info\">            <div class=\"product-title\" ng-bind-html=\"product.Name | trust_html\"></div>            <div class=\"product-sku\">SKU #{{ product.Sku }}</div>             <div ng-if=\"product.is_in_stock==0\" class=\"product-stock\">{{ product.is_in_stock.replace('0','OUT OF STOCK') }}</div>                        <div ng-show=\"display == 'list'\" class=\"product-description hidden-sm\" ng-bind-html=\"product.Description | trust_html\">            </div>        </div>                 </a>    <div class=\"price-action\"><div class=\"product-shop\" ng-if=\"product.Price == '0'\"></div><div class=\"product-shop\" ng-if=\"product.Price !== '0'\">	    	 <div ng-if=\"settings.ProductResults.ShowRatings === true\" class=\"ratings-container\">	            <div class=\"ratings\">	                <span class=\"ratings-stars ratings-stars-off\">â˜…â˜…â˜…â˜…â˜…</span>	                <span class=\"ratings-stars ratings-stars-on\" ng-style=\"{ width: product.RatingStars + '%' }\">â˜…â˜…â˜…â˜…â˜…</span>	            </div>	        </div>    		 <div ng-show=\"product.Original_Price !== undefined && product.Original_Price !== product.Price && product.Original_Price !== '0.00'\" class=\"old-product-price\">{{ product.Original_Price | currency : \"$\" : 2  }}</div>	        <div ng-hide=\"settings.Magento.RealTimePrice === true && !priceLoaded\" class=\"product-price\">{{ product.Price | currency : \"US$ \" : 2 }}</div>	                 		</div> <!--End addtocard vtex -->		     <div class=\"add-to-cart\">		            <a ng-if=\"product.AddToCart === undefined\" cel-prod-anlx href=\"{{ product.ProductPageUrl }}\" target=\"_self\">{{ settings.Language.ViewDetails }}</a>		            <form ng-if=\"product.AddToCart !== undefined && formKey !== undefined\" data-role=\"tocart-form\">		                <input type=\"hidden\" name=\"product\" value=\"{{ product.mag_id }}\" />		                <input type=\"hidden\" name=\"uenc\" value=\"{{ uenc }}\" />		                <input type=\"hidden\" name=\"form_key\" value=\"{{ formKey }}\" />		                </form><div class=\"control\"><button cel-prod-anlx id=\"add-{{product.Sku}}\" ng-click=\"addToImportList($event)\" type=\"submit\" title=\"{{ settings.Language.AddToImportList }}\" class=\"btn-default\">{{ settings.Language.AddToImportList }}</button><button cel-prod-anlx id=\"edit-{{product.Sku}}\" hidden ng-click=\"editonimportlist($event)\" type=\"submit\" title=\"{{ settings.Language.EditOnImportList }}\" class=\"btn-default edit\">{{ settings.Language.EditOnImportList }}</button><button cel-prod-anlx id=\"shopify-{{product.shopify_id}}\" hidden ng-click=\"editonshopify($event)\" type=\"submit\" title=\"{{ settings.Language.EditOnShopify }}\" class=\"btn-default edit\">{{ settings.Language.EditOnShopify }}</button></div></div></div></div></div>",
             link: function (scope, elem, attr) {
-                imported_ids.forEach(imported_id => {
+                celConfig.Settings.imported_ids.forEach(imported_id => {
                     if(imported_id == scope.product.mag_id){
-                        elem[0].lastElementChild.lastElementChild.hidden = true;
+                        elem[0].children[0].children[2].children[0].children[0].children[0].hidden = true;
+                        elem[0].children[0].children[2].children[0].children[0].children[1].hidden = false;
+                        elem[0].children[0].children[0].disabled = true;
+                    }
+                });
+                celConfig.Settings.myproduct_ids.forEach(myproduct_id => {
+                    if(myproduct_id == scope.product.mag_id){
+                        elem[0].children[0].children[2].children[0].children[0].children[0].hidden = true;
+                        elem[0].children[0].children[2].children[0].children[0].children[2].hidden = false;
+                        elem[0].children[0].children[0].disabled = true;
                     }
                 });
                 if (celConfig.Settings.ProductResults.ShowRatings) {
@@ -1863,7 +2123,7 @@ angular
     .directive("celQuestion", ['celConfig', function (celConfig) {
         return {
             restrict: "A", //E = element, A = attribute, C = class, M = comment
-            template: "<div id=\"title-{{ question.Name }}\" class=\"question-title\" ng-class=\"{ 'answers-hidden cel-icon-plus' : question.toggle === true, 'cel-icon-minus' : question.toggle === false }\">{{ question.SideText }}</div><input id=\"search-{{ question.Name }}\" class=\"form-control answer-search\" type=\"text\" placeholder=\"Search {{ question.SideText }}\" ng-show=\"question.SearchableAnswers && question.AllAnswers.length > question.SearchableAnswersThreshold && !question.toggle\" ng-model=\"question.Search.Text\" ng-click=\"$event.stopPropagation();\"/><ul class=\"answers\" ng-hide=\"question.toggle\" ng-class=\"{ 'no-check' : question.IsHierarchical == true, 'disabled' : question.answerSelected != '' }\">    <li cel-answer ng-repeat=\"answer in (question.AnswersDisplayed = (question.AllAnswers | filter: question.Search | limitTo: question.AnswerLimit))\" id=\"{{ answer.Text }}\" class=\"answer truncate\" ng-class=\"{ selected : selectedAnswers.indexOf(answer.ID) > -1, 'disabled' : !question.enabled && selectedAnswers.indexOf(answer.ID) < 0 }\" title=\"{{ answer.Text }}\" answer-id=\"{{ answer.ID }}\" tabindex=\"0\">        <!-- Template in answer.html-->    </li></ul><span class=\"more-less\" ng-if=\"!question.toggle && (question.showMoreLess && question.hasExtra)\">    <button class=\"btn-default\" ng-click=\"question.toggleExtra($event)\">{{ question.showExtra === true ? settings.Language.Less : settings.Language.More }}</button></span>",
+            template: "<div id=\"title-{{ question.Name }}\" class=\"question-title\" ng-class=\"{'answers-hidden cel-icon-plus' : question.toggle === true, 'cel-icon-minus' : question.toggle === false }\"><span style=\"margin-left:10px;\">{{ question.SideText }}</span></div><input id=\"search-{{ question.Name }}\" class=\"form-control answer-search\" type=\"text\" placeholder=\"Search {{ question.SideText }}\" ng-show=\"question.SearchableAnswers && question.AllAnswers.length > question.SearchableAnswersThreshold && !question.toggle\" ng-model=\"question.Search.Text\" ng-click=\"$event.stopPropagation();\"/><ul class=\"answers\" ng-hide=\"question.toggle\" ng-class=\"{ 'no-check' : question.IsHierarchical == true, 'disabled' : question.answerSelected != '' }\">    <li cel-answer ng-repeat=\"answer in (question.AnswersDisplayed = (question.AllAnswers | filter: question.Search | limitTo: question.AnswerLimit))\" id=\"{{ answer.Text }}\" class=\"answer truncate\" ng-class=\"{ selected : selectedAnswers.indexOf(answer.ID) > -1, 'disabled' : !question.enabled && selectedAnswers.indexOf(answer.ID) < 0 }\" title=\"{{ answer.Text }}\" answer-id=\"{{ answer.ID }}\" tabindex=\"0\">        <!-- Template in answer.html-->    </li></ul><span class=\"more-less\" ng-if=\"!question.toggle && (question.showMoreLess && question.hasExtra)\">    <button class=\"btn-default\" ng-click=\"question.toggleExtra($event)\">{{ question.showExtra === true ? settings.Language.Less : settings.Language.More }}</button></span>",
             link: function (scope, elem, attr) {
 
                 /* This is a hacked way of getting to the celController scope so we can modify the same scope.loading object */
@@ -1875,7 +2135,7 @@ angular
                 }
 
                 scope.question.showExtra = false;
-                scope.question.hasExtra = scope.question.ExtraAnswers.length > 0 ? true : false;
+                scope.question.hasExtra = scope.question.ExtraAnswers.length > 2 ? true : false;
                 scope.question.showMoreLess = celConfig.Settings.Refinements.ShowMoreLess;
                 scope.question.enabled = true;
                 scope.question.showApply = false;
@@ -2252,13 +2512,11 @@ angular
 
                 elem.bind("change", function (event) {
                     var value = event.target.value;
-                    //console.log(value);
                     if (scope.currentSort.alias === value) {
                         return;
                     }
                     var sortKey = "";
 		            for (key in celConfig.Settings.Toolbar.SortOptions) {
-						//var key = Object.keys(celConfig.Settings.Toolbar.SortOptions)[i];
 						if(celConfig.Settings.Toolbar.SortOptions[key].Alias === value) {
 					        sortKey = key;
 					    }

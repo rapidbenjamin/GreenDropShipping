@@ -1,14 +1,18 @@
 @if(Auth::user())
-        <div class="currenuser">
-                    <div class="avatar">
-                        <img src="{{ asset('img/user_avatar.png') }}">
-                    </div>               
-                    <div>
-                        <h3>{{Auth::user()->name}}</h3>
-                        
-                    </div>
+    <div class="mt-5 pt-5">
+        <div class="currenuser mt-3">
+            <div class="avatar">
+                <img src="{{ asset('img/user_avatar.png') }}">
+            </div>
+            <div>
+                <h3>{{Auth::user()->name}}</h3>
+            <p><a class="dropdown-item text-light" href="{{ route('logout') }}"
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                {{ __('Logout') }}
+            </a></p>
+            </div>
         </div>
-    
+
         <ul class="mainmenu">
             <li>
                 <a href="{{ url('/admin/dashboard') }}" class="colorBL bold" data-name="DASHBOARD">
@@ -34,12 +38,15 @@
                 </a>
             </li>
             <li>
-                <a href="{{ url('/admin/logs') }}" class="colorBL bold" data-name="LOGS">
-                    <img src="">
-                    Logs
+                <a class="colorBL bold account" data-name="ACCOUNT">
+                    <img src="{{ asset('img/Admin_12.png') }}">
+                    Account
                 </a>
+                <ul style="display: none;" class="items">
+                    <li><a href="{{ url('/admin/profile') }}">Profile</a></li>
+                    <li><a href="{{ url('/admin/password') }}">Change password</a></li>
+                </ul>
             </li>
-
-        </ul>        
-
+        </ul>
+    </div>
 @endif

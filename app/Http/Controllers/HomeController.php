@@ -29,15 +29,15 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $this->authorize('view-merchant-dashboard'); 
+        $this->authorize('view-merchant-dashboard');
 
-        $steps = DashboardSteps::find(\Auth::user()->id);
+        $steps = DashboardSteps::find(Auth::user()->id);
 
-        if($steps == null){
+        if ($steps == null) {
 
             $steps = new DashboardSteps();
 
-            $steps->id = \Auth::user()->id;
+            $steps->id = Auth::user()->id;
             $steps->step1 = 0;
             $steps->step2 = 0;
             $steps->step3 = 0;
@@ -46,46 +46,43 @@ class HomeController extends Controller
             $steps->step6 = 0;
 
             $steps->save();
-
         }
 
-        return view('home',Array(
-            'user' => \Auth::user(),
+        return view('home', array(
+            'user' => Auth::user(),
             'steps' => $steps,
         ));
-
     }
 
-    protected function checkWebhook(){
+    protected function checkWebhook()
+    {
         $result = ShopifyAdminApi::getWebhooksList(Auth::user());
 
         $existInShopify = 0;
 
-        foreach($result['body']['webhooks'] as $wh){
+        foreach ($result['body']['webhooks'] as $wh) {
 
             //exist in shopify?
-            if($wh['address'] == 'https://app.greendropship.com/create-order-webkook'){
+            if ($wh['address'] == 'https://app.greendropship.com/create-order-webkook') {
                 $existInShopify = 1;
                 $id_webhook = $wh['id'];
                 //exist in App?
-                $id_shWebhook = ShopifyWebhook::where('id_hook',$id_webhook)->where('id_customer',$user->id)->first();
+                $id_shWebhook = ShopifyWebhook::where('id_hook', $id_webhook)->where('id_customer', Auth::user()->id)->first();
 
-                if($id_shWebhook){
+                if ($id_shWebhook) {
                     //Monitoring    
-                }else{
+                } else {
                     //Create row
                     $hook = new ShopifyWebhook();
-                    $hook->id_customer = $user->id;
+                    $hook->id_customer = Auth::user()->id;
                     $hook->id_hook = $wh['id'];
                     $hook->topic = 'orders/create';
                     $hook->data = json_encode($wh);
                     $hook->save();
                 }
             }
-        }  
+        }
 
-        return true;     
-    }    
-
+        return true;
+    }
 }
-

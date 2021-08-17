@@ -9,11 +9,15 @@ body.bodyAdmin .titlebox h1 {
 body.bodyAdmin .leftmenu {
   background-color: #1a6e34;
 }
+body.bodyAdmin #admin-menu {
+  height: 100vh;
+}
 body.bodyAdmin .leftmenu .mainmenu li a p {
   color: #fff;
 }
 body.bodyAdmin .leftmenu .mainmenu li a {
   color: #fff;
+  font-size: 1.2rem;
 }
 body.bodyAdmin .leftmenu .mainmenu li ul li {
   color: #fff;
@@ -26,11 +30,15 @@ body.bodyAdmin .leftmenu .currenuser p {
 }
 body.bodyAdmin .leftmenu .mainmenu li ul li a {
   color: #fff;
+  font-weight: lighter;
 }
 body.bodyAdmin .leftmenu .mainmenu li.active a {
   background-color: #203e1d;
 }
 body.bodyAdmin .leftmenu .mainmenu li a:hover {
+  background-color: #203e1d;
+}
+body.bodyAdmin .leftmenu .currenuser a:hover {
   background-color: #203e1d;
 }
 body.bodyAdmin .panel-left {
@@ -39,6 +47,36 @@ body.bodyAdmin .panel-left {
 }
 body.bodyAdmin .panel-left .cwrap {
   padding: 17px;
+}
+body.bodyAdmin .panel-left.merchant-info .cwrap {
+  padding: 17px;
+  display: grid;
+  column-gap: 40px;
+}
+@media (max-width: 900px) {
+  body.bodyAdmin .panel-left.merchant-info .cwrap {
+    grid-template-columns: 1fr;
+  }
+}
+@media (min-width: 900px) {
+  body.bodyAdmin .panel-left.merchant-info .cwrap {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 1000px) {
+  body.bodyAdmin .panel-left.merchant-info .cwrap {
+    grid-template-columns: 1fr;
+  }
+}
+@media (min-width: 1200px) {
+  body.bodyAdmin .panel-left.merchant-info .cwrap {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+body.bodyAdmin .panel-left.merchant-info .cwrap p {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  overflow-wrap: anywhere;
 }
 body.bodyAdmin .panel-left .cwrap .tab-body-right {
   list-style: none;
@@ -261,6 +299,14 @@ body.bodyAdmin .basicbtn {
   text-align: center;
   padding: 2px;
   letter-spacing: 1px;
+  border-radius: 10px;
+}
+body.bodyAdmin .basicbtn:hover {
+  background-color: #1a6331;
+}
+body.bodyAdmin .basicbtn:hover {
+  border: none;
+  outline: none;
 }
 body.bodyAdmin .headerorders.adminorders-settings {
   grid-template-columns: 48px 150px 150px 112px 1fr 1fr 1fr 1fr auto;
@@ -327,7 +373,9 @@ body.bodyAdmin .notes textarea {
 }
 body.bodyAdmin .notes .btns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* grid-template-columns: 1fr 1fr; */
+  grid-template-columns: 200px;
+  justify-content: flex-end;
   column-gap: 15px;
 }
 @media (max-width: 500px) {
@@ -350,7 +398,7 @@ body.bodyAdmin .notes #btnNotes {
 body.bodyAdmin .notes .bgRED {
   font-size: 16px;
   color: #fff;
-  background-color: red;
+  background-color: #b2b2b2;
   border: none;
   box-sizing: border-box;
   padding-left: 15px;
@@ -358,10 +406,17 @@ body.bodyAdmin .notes .bgRED {
   border-radius: 10px;
   cursor: pointer;
 }
-body.bodyAdmin .new-user {
-  margin-bottom: 80px;
+body.bodyAdmin .notes .bgRED:hover {
+  background-color: #929292;
 }
-body.bodyAdmin .new-user h4 {
+body.bodyAdmin .notes .bgRED:focus {
+  border: none;
+  outline: none;
+}
+.merchants {
+  margin-top: 10px;
+}
+body.bodyAdmin .new-user h4, body.bodyAdmin .profile h4 {
   font-size: 20px;
   font-weight: 700;
   color: #1a6e34;
@@ -369,52 +424,137 @@ body.bodyAdmin .new-user h4 {
   padding-bottom: 8px;
   margin-bottom: 32px;
 }
+body.bodyAdmin .nuform .user-info .fa {
+  position: relative;
+  margin-left: -25px;
+}
 body.bodyAdmin .new-user .nuform {
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: 15px;
   grid-row-gap: 15px;
 }
+@media (min-width: 1200px) {
+  body.bodyAdmin .new-user .nuform {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+}
+@media (max-width: 800px) {
+  body.bodyAdmin .new-user .nuform {
+    grid-template-columns: 1fr 1fr;
+  }
+}
 @media (max-width: 400px) {
   body.bodyAdmin .new-user .nuform {
     grid-template-columns: 1fr;
   }
 }
-body.bodyAdmin .new-user .nuform label {
+body.bodyAdmin .new-user .nuform label, body.bodyAdmin .profile .nuform label {
   font-size: 14px;
   font-weight: 700;
   width: 100%;
   margin-bottom: 0;
 }
-@media (max-width: 400px) {
-  body.bodyAdmin .new-user .nuform label {
-    font-size: 12px;
-  }
+body.bodyAdmin .new-user .nuform label span {
+  color: #f00
 }
-body.bodyAdmin .new-user .nuform input {
-  font-size: 14px;
+body.bodyAdmin .new-user .nuform input, body.bodyAdmin .profile .nuform input {
+  font-size: 1rem;
   width: 100%;
+  height: 40px;
   padding-left: 5px;
   padding-right: 5px;
   color: #6a6c6f;
   border: 1px solid #d7e0f1;
 }
-body.bodyAdmin .new-user .nuform button {
+@media (max-width: 400px) {
+  body.bodyAdmin .new-user .nuform label, body.bodyAdmin .profile .nuform label {
+    font-size: 12px;
+  }
+  body.bodyAdmin .new-user .nuform input, body.bodyAdmin .profile .nuform input {
+    font-size: .8em;
+    height: 40px;
+  }
+}
+body.bodyAdmin .new-user p, body.bodyAdmin .profile p {
+  color: #ff0000;
+  text-align: center;
+  font-size: .8em;
+  margin-bottom: 0;
+}
+body.bodyAdmin .profile p {
+  grid-column: span 2;
+}
+body.bodyAdmin .profile .progressbar {
+  grid-column: span 1;
+}
+@media (max-width: 1200px) {
+  body.bodyAdmin .profile p {
+    grid-column: span 1;
+  }
+}
+body.bodyAdmin .new-user #success-user, body.bodyAdmin .profile #success-profile, body.bodyAdmin .profile #success-password {
+  color: #44b955;
+  text-align: center;
+}
+body.bodyAdmin .new-user #fail-user, body.bodyAdmin .profile #fail-user, body.bodyAdmin .profile #fail-password {
+  color: #f00;
+  text-align: center;
+}
+.headerorders.adminorders-settings .dates {
+  padding-top: 25px;
+}
+body.bodyAdmin .new-user .nuform button, body.bodyAdmin .profile .nuform button {
   font-size: 18px;
   color: #fff;
   background-color: #1a6e34;
   border: none;
   box-sizing: border-box;
-  padding-left: 15px;
-  padding-right: 15px;
+  flex: 0 0 120px;
   border-radius: 10px;
+  margin: 10px;
   cursor: pointer;
+  height: 40px;
+}
+body.bodyAdmin .new-user .nuform button:hover, body.bodyAdmin .profile .nuform button:hover {
+  background-color: #1a6331;
+}
+body.bodyAdmin .new-user .nuform button:focus, body.bodyAdmin .profile .nuform button:focus {
+  border: none;
+  outline: none;
 }
 @media (max-width: 400px) {
-  body.bodyAdmin .new-user .nuform button {
+  body.bodyAdmin .new-user .nuform button, body.bodyAdmin .profile .nuform button {
     width: 100%;
-    font-size: 16px;
+    font-size: 12px;
   }
+}
+body.bodyAdmin .profile {
+  height: 100vh;
+}
+body.bodyAdmin .profile .nuform {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: auto;
+  padding: 5%;
+  width: 60%;
+  height: 80%;
+  justify-content: space-evenly;
+  background: #fff;
+}
+@media (max-width: 1200px) {
+  body.bodyAdmin .profile .nuform {
+    width: 80%;
+  }
+}
+body.bodyAdmin .profile .nuform .user-info {
+  width: 100%;
+}
+body.bodyAdmin .profile .nuform .update-user, body.bodyAdmin .new-user .nuform .update-user {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 body.bodyAdmin .orderDetailContent {
   margin-top: 104px;

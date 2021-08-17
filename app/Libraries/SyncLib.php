@@ -39,67 +39,54 @@ class SyncLib
 
     public static function syncStock()
     {
-        echo 'Start: ' . gmdate('h:i:s', time());
-
-        $items = collect(DB::connection('mysql_magento')
-            ->select('SELECT * FROM `mg_inventory_stock_1`'))
-            ->where('is_salable', 1);
-
+        $t = time();
+        echo ('Start: ' . date("h:i:s", $t));
+        $stocksData = collect(DB::connection('mysql_magento')->select('SELECT * FROM `mg_inventory_stock_1`'))->where('is_salable', 1);
         $rows = [];
-
-        foreach ($items as $item) {
-            $row = [
-                'sku' => $item->sku,
-                'quantity' => $item->quantity
-            ];
-
+        foreach ($stocksData as $task) {
+            $row['product_id']  = $task->product_id;
+            $row['quantity']  = $task->quantity;
+            $row['sku']  = $task->sku;
             $rows[] = implode(',', $row);
         }
-
         Storage::disk('local')->put('magento_stock.csv', implode("\n", $rows));
         DB::statement("TRUNCATE TABLE temp_mg_product");
         $path = str_replace("\\", "/", base_path());
-
         DB::connection()->getpdo()->exec(
             "LOAD DATA LOCAL INFILE '" . $path . "/storage/app/magento_stock.csv' INTO TABLE temp_mg_product
             FIELDS TERMINATED BY ','"
         );
 
-        DB::statement('UPDATE products P
-            INNER JOIN temp_mg_product T
-                ON T.sku = P.sku
-            SET P.stock = T.quantity
-            WHERE P.stock != T.quantity
-        ');
-
-        DB::statement('UPDATE products P
-            INNER JOIN my_products MP
-                ON MP.id_product = P.id
-            INNER JOIN temp_mg_product T
-                ON T.sku = P.sku
-            SET
-                MP.cron = 1,
-                MP.stock = T.quantity
-            WHERE MP.stock != T.quantity'
+        DB::statement(
+            "UPDATE products
+            INNER JOIN temp_mg_product ON products.sku = temp_mg_product.sku
+            SET products.stock = temp_mg_product.quantity
+            WHERE products.stock != temp_mg_product.quantity"
+        );
+        DB::statement(
+            "UPDATE my_products
+            INNER JOIN temp_mg_product ON my_products.id_product = temp_mg_product.product_id
+            SET my_products.cron = 1, my_products.stock = temp_mg_product.quantity
+            WHERE my_products.stock != temp_mg_product.quantity"
         );
 
-        echo 'End: ' . gmdate('h:i:s', time());
-
+        $t = time();
+        echo ('End: ' . date("h:i:s", $t));
         return 'success';
     }
 
     public static function syncShopifyStock($request)
     {
         $myProducts = MyProducts::whereNotNull('inventory_item_id_shopify');
-        if (isset($request) && $request->filled('user_id') && $request->user_id > 0)
-            $myProducts = $myProducts->where('id_customer', $request->user_id)->take(50);
+        if (\Auth::User())
+            $myProducts = $myProducts->where('id_customer', \Auth::User()->id)->take(20);
+        else
+            $myProducts = $myProducts->take(100);
         $myProducts = $myProducts->where('cron', '1')->get();
         $updatedCount = 0;
         foreach ($myProducts as $mp) {
             try {
-                $product = json_decode(Products::find($mp->id_product));
-                $attribute_upc_index = array_search('upc', array_column(json_decode($product->attributes), 'attribute_code'));
-                $attribute = json_decode($product->attributes);
+                $product = Products::find($mp->id_product);
                 $price = $product->price * (100 + $mp->profit) / 100;
                 $merchant = User::find($mp->id_customer);
                 // GET LOCATION FROM SHOPIFY IF LOCATION IS NOT SET
@@ -110,12 +97,11 @@ class SyncLib
                 }
                 $mp->cron = 0;
                 $mp->save();
-                $mp->sku = $product->sku;
-                $mp->barcode = $attribute[$attribute_upc_index]->value;
 
                 //UPDATE STOCK & COST & PRICE IN SHOPIFY STORES
-                ShopifyAdminApi::updateCostPriceStock($merchant, $mp, $price, $product->price);
+                ShopifyAdminApi::updateStock($merchant, $mp);
                 sleep(1);
+                ShopifyAdminApi::updateCostPrice($merchant, $mp, $price, $product->price);
                 $updatedCount++;
             } catch (Exception $ex) {
                 echo $ex->getMessage();
@@ -184,22 +170,27 @@ class SyncLib
             ');
 
         //2. Clean Middeware token table
-        Token::where('id', '>', 0)->delete();
-
-        //3. Update table
+        $rows = [];
         foreach ($tokens as $key => $tk) {
             if ($tk->enddate != '0000-00-00 00:00:00') {
-                $token = new Token;
-                $token->token = $tk->token;
-                $token->status = $tk->status;
-                $token->id_order = $tk->id_order;
-                $token->user_id = $tk->user_id;
-                $token->enddate = $tk->enddate;
-                $token->display_name = $tk->display_name;
-                $token->user_email = $tk->user_email;
-                $token->save();
+                $row['id'] = $key;
+                $row['token'] = $tk->token;
+                $row['status'] = $tk->status;
+                $row['id_order'] = $tk->id_order;
+                $row['user_id'] = $tk->user_id;
+                $row['enddate'] = $tk->enddate;
+                $row['display_name'] = $tk->display_name;
+                $row['user_email'] = $tk->user_email;
+                $rows[] = implode(',', $row);
             }
         }
+        Storage::disk('local')->put('magento_tokens.csv', implode("\n", $rows));
+        DB::statement("TRUNCATE TABLE token");
+        $path = str_replace("\\", "/", base_path());
+        DB::connection()->getpdo()->exec(
+            "LOAD DATA LOCAL INFILE '" . $path . "/storage/app/magento_tokens.csv' INTO TABLE token
+            FIELDS TERMINATED BY ','"
+        );
         return 'Success';
     }
 
@@ -364,11 +355,9 @@ class SyncLib
                 }
                 $category->parent_id = $Mcategory->parent_id;
                 $category->name = $Mcategory->name;
-                //$category->is_active = $Mcategory->is_active;
                 $category->level = $Mcategory->level;
                 $category->position = $Mcategory->position;
                 $category->save();
-                //echo 'Id: '. $category->id . '<br>';
                 if (count($Mcategory->children_data)) {
                     $this->getRecursiveCategories($Mcategory->children_data, $categoriesIds);
                 }
