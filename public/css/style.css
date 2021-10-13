@@ -281,6 +281,8 @@ textarea {
 [type="number"]::-webkit-inner-spin-button,
 [type="number"]::-webkit-outer-spin-button {
   height: auto;
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /**
@@ -3973,20 +3975,35 @@ button.back {
 .sod-title strong {
   color: #44b955;
 }
+.screen-settings {
+  width: fit-content;
+  background-color: #ffffff;
+  padding: 40px;
+}
+@media (max-width: 500px) {
+  .screen-settings {
+    padding: 20px;
+  }
+}
 .screen-settings h3 {
   color: #44b955;
   font-size: 21px;
   font-weight: 700;
-  margin-bottom: 22px;
+  margin-bottom: 16px;
+}
+.screen-settings h2 {
+  color: #44b955;
+  font-weight: 700;
 }
 .screen-settings p {
   font-size: 17px;
+  width: fit-content;
 }
 .screen-settings .inputs {
   display: grid;
   grid-template-columns: 13px 1fr;
   column-gap: 10px;
-  align-items: center;
+  align-items: baseline;
   font-size: 17px;
 }
 
@@ -3996,20 +4013,23 @@ button.back {
 .screen-settings .inputs label {
   margin: 0;
 }
-.screen-settings .inputs2 {
+.screen-settings .profit, .screen-settings .inventory_threshold {
   display: grid;
-  grid-template-columns: minmax(auto, 100px) 13px;
-  column-gap: 10px;
+  grid-template-columns: minmax(auto, 45px) 13px;
   align-items: center;
   font-size: 17px;
+  background: transparent;
+  gap: 5px;
 }
-.screen-settings .inputs2 label {
+.screen-settings .profit label, .screen-settings .inventory_threshold label {
   display: none;
 }
-.screen-settings .inputs2 input {
-  text-align: center;
+.screen-settings .profit input, .screen-settings .inventory_threshold input {
+  text-align: right;
+  border: solid 1px #929292;
+  padding: 0px 3px;
 }
-.screen-settings .bgVC {
+.screen-settings .greenbutton {
   color: #fff;
   background-color: #44b955;
   border: none;
@@ -4020,6 +4040,9 @@ button.back {
   box-sizing: border-box;
   cursor: pointer;
   min-width: 120px;
+}
+.screen-settings .greenbutton:hover {
+  background-color: #42b253;
 }
 .screen-settings .set-inputs {
   margin-bottom: 47px;
