@@ -559,10 +559,10 @@
 
 	$("#apply").click(function() {
 		if (moment($('#start').val()).isAfter( moment($('#to').val()).format('YYYY-MM-DD')) ) {
-			$('#modal-body').html(`<h5>Invalid date range</h5>`);
-			$('#modal-footer').hide();
+			$('#confirm-modal-body').html(`<h5>Invalid date range</h5>`);
+			$('#confirm-modal-footer').hide();
 			$('#apply').attr('data-toggle', 'modal');
-			$('#apply').attr('data-target', '#delete-product-modal');
+			$('#apply').attr('data-target', '#confirm-modal');
 			return;
 		} else {
 			$('#apply').attr('data-toggle', '');

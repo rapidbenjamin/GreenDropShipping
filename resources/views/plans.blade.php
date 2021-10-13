@@ -177,7 +177,7 @@
 
                         @if(Auth::user()->plan != 'free' && Auth::user()->membership_token != '')
 
-                        <button data-plan="free" data-toggle="modal" data-target="#delete-product-modal" class="bgVO colorBL greenbutton update downgrade">Downgrade</button>
+                        <button data-plan="free" data-toggle="modal" data-target="#confirm-modal" class="bgVO colorBL greenbutton update downgrade">Downgrade</button>
 
                         @elseif(Auth::user()->plan == 'free' && Auth::user()->membership_token != '')
 
@@ -334,7 +334,7 @@
         });
 
         $('.downgrade').click(function() {
-            $('#modal-body').html('<h5>Do you really want to downgrade this app?</h5>');
+            $('#confirm-modal-body').html('<h5>Do you really want to downgrade this app?</h5>');
         });
 
         $('#confirm').click(function() {
