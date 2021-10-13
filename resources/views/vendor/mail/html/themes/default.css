@@ -8,7 +8,7 @@ body *:not(html):not(style):not(br):not(tr):not(code) {
 }
 
 body {
-    background-color: #f8fafc;
+    background-color: #ffffff;
     color: #74787e;
     height: 100%;
     hyphens: auto;
@@ -32,7 +32,7 @@ blockquote {
 }
 
 a {
-    color: #3869d4;
+    color: #44b955;
 }
 
 a img {
@@ -84,7 +84,7 @@ img {
 /* Layout */
 
 .wrapper {
-    background-color: #f8fafc;
+    background-color: #ffffff;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -105,7 +105,7 @@ img {
 /* Header */
 
 .header {
-    padding: 25px 0;
+    padding: 10px 0px;
     text-align: center;
 }
 
@@ -115,14 +115,22 @@ img {
     font-weight: bold;
     text-decoration: none;
     text-shadow: 0 1px 0 white;
+    position: relative;
+}
+
+.header a span {
+    position: relative;
+    margin-left: 20px;
+    bottom: 28px;
+    color: #44b955;
 }
 
 /* Body */
 
 .body {
     background-color: #ffffff;
-    border-bottom: 1px solid #edeff2;
-    border-top: 1px solid #edeff2;
+    border-bottom: 1px solid #ffffff;
+    border-top: 1px solid #ffffff;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -144,7 +152,7 @@ img {
 /* Subcopy */
 
 .subcopy {
-    border-top: 1px solid #edeff2;
+    border-top: 1px solid #ffffff;
     margin-top: 25px;
     padding-top: 25px;
 }
@@ -182,7 +190,7 @@ img {
 }
 
 .table th {
-    border-bottom: 1px solid #edeff2;
+    border-bottom: 1px solid #ffffff;
     padding-bottom: 8px;
     margin: 0;
 }
@@ -231,11 +239,11 @@ img {
 
 .button-green,
 .button-success {
-    background-color: #38c172;
-    border-top: 10px solid #38c172;
-    border-right: 18px solid #38c172;
-    border-bottom: 10px solid #38c172;
-    border-left: 18px solid #38c172;
+    background-color: #44b955;
+    border-top: 10px solid #44b955;
+    border-right: 18px solid #44b955;
+    border-bottom: 10px solid #44b955;
+    border-left: 18px solid #44b955;
 }
 
 .button-red,
