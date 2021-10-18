@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\User;
 use App\ShopifyWebhook;
 use App\Libraries\Shopify\ShopifyAdminApi;
 use App\DashboardSteps;
+use App\MyProducts;
 
 class HomeController extends Controller
 {
@@ -47,31 +46,26 @@ class HomeController extends Controller
 
             $steps->save();
         }
+        $my_products_count = MyProducts::where('id_customer', Auth::user()->id)->count();
 
         return view('home', array(
             'user' => Auth::user(),
             'steps' => $steps,
+            'my_products_count' => $my_products_count,
         ));
     }
 
     protected function checkWebhook()
     {
         $result = ShopifyAdminApi::getWebhooksList(Auth::user());
-
-        $existInShopify = 0;
-
         foreach ($result['body']['webhooks'] as $wh) {
-
             //exist in shopify?
             if ($wh['address'] == 'https://app.greendropship.com/create-order-webkook') {
-                $existInShopify = 1;
                 $id_webhook = $wh['id'];
                 //exist in App?
                 $id_shWebhook = ShopifyWebhook::where('id_hook', $id_webhook)->where('id_customer', Auth::user()->id)->first();
 
-                if ($id_shWebhook) {
-                    //Monitoring    
-                } else {
+                if (!$id_shWebhook) {
                     //Create row
                     $hook = new ShopifyWebhook();
                     $hook->id_customer = Auth::user()->id;
