@@ -33,7 +33,7 @@
                         <input type="checkbox" id="check-all-mp" value="" data-mark="false">
                     </div>
                     <div class="btn-import-actions">
-                        <button class="btn-mp-delete-all alldeletebutton redbutton" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                        <button class="btn-mp-delete-all alldeletebutton redbutton" data-toggle="modal" data-target="#confirm-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     </div>
                 </div>
                 <div class="pagesize">
@@ -110,7 +110,7 @@
                             <button class="btn-mp-view viewbutton greenbutton vplist" data-id="{{ $pr->id }}" id="view-{{$pr->id_shopify}}" data-view="#product{{ $pr->id }}">View</button>
                         </td>
                         <td>
-                            <button class="btn-mp-delete deletebutton redbutton" data-toggle="modal" data-target="#delete-product-modal" id="delete-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" data-name="{{ $pr->name }}" data-sku="{{ $pr->sku }}" data-img="{{$pr->image_url_75}}">Delete</button>
+                            <button class="btn-mp-delete deletebutton redbutton" data-toggle="modal" data-target="#confirm-modal" id="delete-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" data-name="{{ $pr->name }}" data-sku="{{ $pr->sku }}" data-img="{{$pr->image_url_75}}">Delete</button>
                             <button class="deletebutton redbutton" id="deleting-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" style="display: none;">Deleting...</button>
                             <button class="deletebutton redbutton" id="deleted-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id }}" style="display: none;">Deleted</button>
                         </td>
@@ -175,13 +175,13 @@
                 }
             });
             if (products.length) {
-                $('#modal-body').html(`<h5>Are you sure to delete checked products from your Shopify Store?</h5>`);
+                $('#confirm-modal-body').html(`<h5>Are you sure to delete checked products from your Shopify Store?</h5>`);
                 $('#product_id').val('delete-products');
-                $('#modal-footer').show();
+                $('#confirm-modal-footer').show();
             } else {
-                $('#modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
+                $('#confirm-modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
                 $('#product_id').val('cancel');
-                $('#modal-footer').hide();
+                $('#confirm-modal-footer').hide();
             }
 
         });
@@ -274,7 +274,7 @@
         setInterval(deleteProductsAjax, 15000);
     });
     $('#product_data').on('click', '.btn-mp-delete', function() {
-        $('#modal-body').html(`<div style="display:flex;">
+        $('#confirm-modal-body').html(`<div style="display:flex;">
                 <img style="width:75px; height:75px;" src="${$(this).data('img')}"/>
                 <div>
                     <h5>${$(this).data('name')}</h5>
@@ -283,7 +283,7 @@
             </div>
             <h5 class="mt-3">This product will be removed from your Shopify store. Do you really want to delete it?</h5>`);
         $('#product_id').val($(this).data('myproductid'));
-        $('#modal-footer').show();
+        $('#confirm-modal-footer').show();
     })
     $('#product_data').on('click', '.edit-product', function() {
         window.open('https://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');

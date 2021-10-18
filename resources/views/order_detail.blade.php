@@ -194,10 +194,10 @@
                                 </div>
                                 <div class="productbtn">
                                     @if($order->fulfillment_status== 4)
-                                    <button class="cancel my-1" id="cancel-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Order</button>
+                                    <button class="cancel my-1" id="cancel-button" data-toggle="modal" data-target="#confirm-modal" data-id="{{$order->id}}">Cancel Order</button>
                                     @endif
                                     @if($order->financial_status== 2 && $order->fulfillment_status== 5)
-                                    <button class="cancel my-1" id="cancel-req-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Request</button>
+                                    <button class="cancel my-1" id="cancel-req-button" data-toggle="modal" data-target="#confirm-modal" data-id="{{$order->id}}">Cancel Request</button>
                                     @endif
                                     @if($order->financial_status== App\Libraries\OrderStatus::Outstanding && ($order->fulfillment_status != 9 && $order->fulfillment_status != 12))
                                     <button class="payments my-1" id="checkout-button" data-id="{{$order->id}}">Pay Order</button>
@@ -227,14 +227,14 @@
     $(document).ready(function() {
         
         $("#cancel-button").click(function() {
-            $('#modal-body').html('<h5>Do you really want to cancel the order?</h5>');
+            $('#confirm-modal-body').html('<h5>Do you really want to cancel the order?</h5>');
             $('#confirm').text('Cancel Order');
             $('#cancel').text('Do Not Cancel');
             $('#request_type').val('cancel');
         });
 
         $("#cancel-req-button").click(function() {
-            $('#modal-body').html('<h5>Do you really want to cancel the order?</h5>');
+            $('#confirm-modal-body').html('<h5>Do you really want to cancel the order?</h5>');
             $('#confirm').text('Cancel Order');
             $('#cancel').text('Do Not Cancel');
             $('#request_type').val('cancel_req');

@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Products;
 use App\Category;
 use App\ImportList;
 use App\MyProducts;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class SearchController extends Controller
@@ -22,59 +20,104 @@ class SearchController extends Controller
         $this->middleware('auth');
     }
 
-    public function index(Request $request)
+    public function index()
     {
         $this->authorize('view-merchant-search');
         $imported_ids = Products::select('products.*', 'import_list.id as id_import_list')
             ->join('import_list', 'import_list.id_product', '=', 'products.id')
             ->whereNotIn('import_list.id', MyProducts::where('id_customer', Auth::User()->id)->pluck('id_imp_product'))
-            ->where('import_list.id_customer', Auth::user()->id)->pluck('products.id');
-        $myproduct_ids = MyProducts::where('id_customer', Auth::User()->id)->orderBy('id_product')->pluck('id_product');
-        $shopify_ids = MyProducts::where('id_customer', Auth::User()->id)->orderBy('id_product')->pluck('id_shopify');
+            ->where('import_list.id_customer', Auth::user()->id)
+            ->pluck('products.sku')->toArray();
+        $myproduct_ids = MyProducts::where('id_customer', Auth::User()->id)
+            ->join('products', 'id_product', '=', 'products.id')
+            ->orderBy('id_product')
+            ->pluck('products.sku')->toArray();
+        $shopify_ids = MyProducts::where('id_customer', Auth::User()->id)
+            ->orderBy('id_product')
+            ->pluck('id_shopify');
         return view('search', [
-            'imported_ids' => $imported_ids,
-            'myproduct_ids' => $myproduct_ids,
+            'imported_ids' => json_encode($imported_ids),
+            'myproduct_ids' => json_encode($myproduct_ids),
             'shopify_ids' => $shopify_ids,
         ]);
     }
 
-    public function show(Products $products)
+    public function show($sku)
     {
-        $action = 'search-products';
-        $import_product = ImportList::where('id_customer', Auth::User()->id)->where('id_product', $products->id)->first();
-        $my_product = MyProducts::where('id_customer', Auth::User()->id)->where('id_product', $products->id)->first();
+        $action = 'search-product';
+        $product = Products::where('sku', $sku)->first();
+        if ($product == null) {
+            return view('search_detail', ['product' => $product, 'action' => $action]);
+        }
+        $import_product = ImportList::where('id_customer', Auth::User()->id)->where('id_product', $product->id)->first();
+        $my_product = MyProducts::where('id_customer', Auth::User()->id)->where('id_product', $product->id)->first();
         if ($import_product != null) {
             if ($my_product == null) {
                 $action = 'added';
             } else {
                 $action = 'my-product';
-                $products->id_shopify = MyProducts::where('id_customer', Auth::User()->id)
-                    ->where('id_product', $products->id)
+                $product->id_shopify = MyProducts::where('id_customer', Auth::User()->id)
+                    ->where('id_product', $product->id)
                     ->pluck('id_shopify')[0];
             }
         }
-        $products->mini_images = [];
-
-        if ($products->images != null && count(json_decode($products->images)) > 0) {
-            $products->image_url = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($products->images)[0]->file;
-            $images = [];
-            foreach (json_decode($products->images) as $image) {
-                $images[] = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . $image->file;
+        $product->mini_images = [];
+        $image_75 = 'dc09e1c71e492175f875827bcbf6a37c';
+        $image_700 = '207e23213cf636ccdef205098cf3c8a3';
+        $image_285 = 'e793809b0880f758cc547e70c93ae203';
+        if ($product->images != null && count(json_decode($product->images)) > 0) {
+            if (json_decode($product->images)[0]->file == '') {
+                $product->image_url = [
+                    'main' => '/img/default_image_285.png',
+                    'gallery' => '/img/default_image_700.png'
+                ];
+                $images = [];
+                foreach (json_decode($product->images) as $image) {
+                    if ($image->file) {
+                        $images[] = [
+                            'main' => '/img/default_image_75.png',
+                            'gallery' => '/img/default_image_700.png'
+                        ];
+                    }
+                }
+                $product->mini_images = $images;    
+            } else {
+                $product->image_url = [
+                    'main' => env('URL_MAGENTO_IMAGES') . '/' . $image_285 . json_decode($product->images)[0]->file,
+                    'gallery' => env('URL_MAGENTO_IMAGES') . '/' . $image_700 . json_decode($product->images)[0]->file,
+                ];
+                $images = [];
+                foreach (json_decode($product->images) as $image) {
+                    if ($image->file) {
+                        $images[] = [
+                            'main' => env('URL_MAGENTO_IMAGES') . '/' . $image_75 . $image->file,
+                            'gallery' => env('URL_MAGENTO_IMAGES') . '/' . $image_700 . $image->file
+                        ];
+                    }
+                }
+                $product->mini_images = $images;
             }
-            $products->mini_images = $images;
         } else {
-            $products->image_url = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
+            $product->image_url = [
+                'main' => '/img/default_image_285.png',
+                'gallery' => '/img/default_image_700.png'
+            ];
             $images = [];
-            foreach (json_decode($products->images) as $image) {
-                $images[] = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37cno_selection';
+            foreach (json_decode($product->images) as $image) {
+                if ($image->file) {
+                    $images[] = [
+                        'main' => '/img/default_image_75.png',
+                        'gallery' => '/img/default_image_700.png'
+                    ];
+                }
             }
-            $products->mini_images = $images;
+            $product->mini_images = $images;
         }
 
-        $products->brand = $this->getAttributeByCode($products, 'brand');
-        $products->description = $this->getAttributeByCode($products, 'description');
+        $product->brand = $this->getAttributeByCode($product, 'brand');
+        $product->description = $this->getAttributeByCode($product, 'description');
 
-        return view('search_detail', ['product' => $products, 'action' => $action]);
+        return view('search_detail', ['product' => $product, 'action' => $action]);
     }
 
     public function getCategories($parent_id = 2)

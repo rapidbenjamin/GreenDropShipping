@@ -58,7 +58,7 @@
                     <input title="Select all products" type="checkbox" id="check-all">
                 </div>
                 <div class="btn-import-actions">
-                    <button class="btn-import-list-delete-all redbutton mx-1 my-1" data-toggle="modal" data-target="#delete-product-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                    <button class="btn-import-list-delete-all redbutton mx-1 my-1" data-toggle="modal" data-target="#confirm-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
                     <button class="btn-import-list-send-all greenbutton mx-1 my-1" id="btn-import-list-send-all">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
                     <button class="btn-import-list-send-all greenbutton mx-1 my-1" id="btn-import-list-sending" style="display: none;">Sending...<img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
                 </div>
@@ -94,7 +94,7 @@
                         </div>
                         <div class="buttons import-actions">
                             {{--@can('plan_delete-product-import-list')--}}
-                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#delete-product-modal" @endcan class='delete redbutton @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}" data-img="{{$ap->images != null ? env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37c'.$ap->images[0]->file :  env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37cnoselection'}}">
+                            <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot @can("plan_view-my-products") data-toggle="modal" data-target="#confirm-modal" @endcan class='delete redbutton @can("plan_view-my-products") btn-import-list-delete @endcan' id="delete-{{$ap->id_import_list}}" data-id="{{$ap->id_import_list}}" data-name="{{ $ap->name }}" data-sku="{{ $ap->sku }}" data-img="{{$ap->images != null ? env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37c'.$ap->images[0]->file :  env('URL_MAGENTO_IMAGES').'/dc09e1c71e492175f875827bcbf6a37cnoselection'}}">
                                 Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon">
                             </button>
                             <button class='delete redbutton' id="deleting-{{$ap->id_import_list}}" style="display: none;" data-id="{{$ap->id_import_list}}">Deleting... <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
@@ -102,7 +102,7 @@
                             {{--@can('plan_publish-product-import-list')--}}
                             <button @cannot("plan_view-my-products") data-toggle="modal" data-target="#upgrade-plans-modal" @endcannot class='sendto greenbutton @can("plan_view-my-products") btn-import-list-send @endcan btn-import-list-send-{{$ap->id_import_list}}' data-id="{{$ap->id_import_list}}">Send to Shopify <img class="button-icon" src="img/edit.png" alt="Pencil in Square - Edit Icon"></button>
                             <button class="sendto greenbutton sending btn-import-list-send3 btn-import-list-send3-{{$ap->id_import_list}}" data-shopifyid="0" style="display:none">Sending...</button>
-                            <button class="sendto greenbutton edit-in-shopify btn-import-list-send2 btn-import-list-send2-{{$ap->id_import_list}}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>
+                            <button class="sendto edit-in-shopify btn-import-list-send2 btn-import-list-send2-{{$ap->id_import_list}}" data-shopifyid="0" style="display:none">Edit in Shopify Store</button>
                             {{--@endcan--}}
                         </div>
                     </div>
@@ -318,9 +318,9 @@
 
             if (products.length == 0) {
                 $(this).attr('data-toggle', 'modal');
-                $(this).attr('data-target', '#delete-product-modal');
-                $('#modal-body').html('<h5>At least one checkbox must be selected</h5>');
-                $('#modal-footer').hide();
+                $(this).attr('data-target', '#confirm-modal');
+                $('#confirm-modal-body').html('<h5>At least one checkbox must be selected</h5>');
+                $('#confirm-modal-footer').hide();
             } else {
                 $(this).attr('data-toggle', '');
                 $(this).hide();
@@ -345,12 +345,12 @@
                 product_ids.push($(ele).attr('id').split('-')[1]);
             });
             if (product_ids.length) {
-                $('#modal-body').html(`<h5>Are you sure to delete checked products from Import List?</h5>`);
+                $('#confirm-modal-body').html(`<h5>Are you sure to delete checked products from Import List?</h5>`);
                 $('#product_id').val('delete-products');
-                $('#modal-footer').show();
+                $('#confirm-modal-footer').show();
             } else {
-                $('#modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
-                $('#modal-footer').hide();
+                $('#confirm-modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
+                $('#confirm-modal-footer').hide();
                 $('#product_id').val('cancel');
             }
         })
@@ -363,8 +363,8 @@
                     deleteProduct($('#product_id').val());
                 }
             }
-            $('#delete-product-modal').removeClass('show');
-            $('#delete-product-modal').css('display', 'none');
+            $('#confirm-modal').removeClass('show');
+            $('#confirm-modal').css('display', 'none');
             $('.modal-backdrop.fade.show').remove();
         });
 
@@ -373,20 +373,20 @@
                 $(`${$('#modal_type').val().split('-').join('')}`).val('');
                 $('#modal_type').val('');
             }
-            $('#delete-product-modal').removeClass('show');
-            $('#delete-product-modal').css('display', 'none');
+            $('#confirm-modal').removeClass('show');
+            $('#confirm-modal').css('display', 'none');
             $('.modal-backdrop.fade.show').remove();
         });
 
         $('#close').click(function() {
-            $('#delete-product-modal').removeClass('show');
-            $('#delete-product-modal').css('display', 'none');
+            $('#confirm-modal').removeClass('show');
+            $('#confirm-modal').css('display', 'none');
             $('.modal-backdrop.fade.show').remove();
         });
 
-        $('#delete-product-modal .modal-content').blur(function() {
-            $('#delete-product-modal').removeClass('show');
-            $('#delete-product-modal').css('display', 'none');
+        $('#confirm-modal .modal-content').blur(function() {
+            $('#confirm-modal').removeClass('show');
+            $('#confirm-modal').css('display', 'none');
             $('.modal-backdrop.fade.show').remove();
         });
 
@@ -558,7 +558,7 @@
     });
 
     $('#import-products').on('click', '.btn-import-list-delete', function() {
-        $('#modal-body').html(`<div style="display:flex;">
+        $('#confirm-modal-body').html(`<div style="display:flex;">
                 <img style="width:75px; height:75px;" src="${$(this).data('img')}"/>
                 <div>
                     <h5>${$(this).data('name')}</h5>
@@ -567,7 +567,7 @@
             </div>
             <h5 class="mt-3">This product will be removed from Import List. Do you really want to delete it?</h5>`);
         $('#product_id').val($(this).data('id'));
-        $('#modal-footer').show();
+        $('#confirm-modal-footer').show();
     });
 
     $('#import-products').on('change', '.box-profit', function() {
@@ -648,10 +648,10 @@
     $('#import-products').on('blur', '.collection', function(e) {
         if (e.target.value.trim() != '' && $('#collection_data').children().length == 0) {
             $('#modal_type').val(`#collections-${e.target.dataset.id}`);
-            $('#modal-body').html("<h5>This collection doesn't exist in your Shopify store.<br>Are you sure to create new custom collection?</h5>");
-            $('#delete-product-modal').css('display', 'block');
-            $('#delete-product-modal').addClass('show');
-            // $('#delete-product-modal .modal-content').attr('tabindex', -1).focus();
+            $('#confirm-modal-body').html("<h5>This collection doesn't exist in your Shopify store.<br>Are you sure to create new custom collection?</h5>");
+            $('#confirm-modal').css('display', 'block');
+            $('#confirm-modal').addClass('show');
+            // $('#confirm-modal .modal-content').attr('tabindex', -1).focus();
             $('body').append('<div class="modal-backdrop fade show"></div>');
         }
     });
