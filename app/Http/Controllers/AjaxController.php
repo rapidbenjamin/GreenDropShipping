@@ -660,13 +660,10 @@ class AjaxController extends Controller
             $settings->id_merchant = Auth::user()->id;
         }
         $settings->set1 = $request->set1 == 'true' ? 1 : 0;
-        $settings->set2 = $request->set2 == 'true' ? 1 : 0;
-        $settings->set3 = $request->set3 == 'true' ? 1 : 0;
-        $settings->set4 = $request->set4 == 'true' ? 1 : 0;
-        $settings->set5 = $request->set5 == 'true' ? 1 : 0;
-        $settings->set6 = $request->set6 == 'true' ? 1 : 0;
-        $settings->set7 = $request->set7 == 'true' ? 1 : 0;
         $settings->set8 = $request->set8;
+        $settings->inventory_threshold = $request->inventory_threshold;
+        $settings->sync_inventory = $request->sync_inventory == 'true' ? 1 : 0;
+        $settings->sync_price = $request->sync_price == 'true' ? 1 : 0;
         $settings->save();
         return response()->json(['res' => 'ok']);
     }

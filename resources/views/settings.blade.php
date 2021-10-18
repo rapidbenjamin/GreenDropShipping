@@ -8,21 +8,35 @@
             <div class="screen-settings">
                 <div class="set-inputs">
                     <h3>The Product Updates below are automated in Shopify:</h3>
-                    <p class="inputs"><input type="checkbox" id="check-set1" value="" {{$settings->set1==0?'':'checked'}} /><label>Publish products when added to Shopify.</label></p><br><br><br>
-                    <!-- <p>Notify the merchant when:</p>
-                    <p class="inputs not"><input type="checkbox" id="check-set2" value="" {{$settings->set2==0?'':'checked'}} /><label>Sending an order.</label></p>
-                    <p class="inputs not"><input type="checkbox" id="check-set3" value="" {{$settings->set3==0?'':'checked'}} /><label>The product is not available.</label></p>
-                    <p class="inputs not"><input type="checkbox" id="check-set4" value="" {{$settings->set4==0?'':'checked'}} /><label>The cost changes.</label></p>
-                    <p class="inputs not"><input type="checkbox" id="check-set5" value="" {{$settings->set5==0?'':'checked'}} /><label>The stock changes.</label></p>
-                    <p> -->
-                        <strong> DEFAULT PROFIT CONFIGURATION (Percentage)</strong>
+                    <div class="setting-checkboxes">
+                        <p class="inputs">
+                            <input type="checkbox" id="check-set1" value="" {{$settings->set1==0?'':'checked'}} />
+                            <label>Set the product as active when published to your Shopify store</label>
+                        </p>
+                        <p class="inputs">
+                            <input type="checkbox" id="sync-inventory" value="" {{$settings->sync_inventory==0?'':'checked'}} />
+                            <label>Automated Inventory Syncing.</label>
+                        </p>
+                        <p class="inputs">
+                            <input type="checkbox" id="sync-price" value="" {{$settings->sync_price==0?'':'checked'}} />
+                            <label>Automated Price Syncing.</label>
+                        </p>
+                    </div>
+                    <p><strong>Default Profit Configuration (Percentage)</strong></p>
+                    <p class="profit">
+                        <input type="number" id="profit" value="{{$settings->set8}}" min="0"/> <span>%</span>
+                        <label id="profit-error" class="text-danger"></label>
                     </p>
-                    <p class="inputs2">
-                        <input type="text" id="txt-value" value="{{$settings->set8}}" /> <span>%</span>
-                        <label id="txt-value-error" class="text-danger"></label>
+                    <p><strong>Default Inventory Threshold (Min-threshold is 20)</strong></p>
+                    <p class="inventory_threshold">
+                        <input type="number" min="20" id="inventory-threshold" value="{{$settings->inventory_threshold}}" />
+                        <label id="inventory-threshold-error" class="text-danger"></label>
                     </p>
                 </div>
-                <button class="bgVC colorBL greenbutton" id="save-settings">Save</button>
+                <div class="d-flex align-items-center">
+                    <button class="greenbutton" id="save-settings">Update</button>
+                    <span class="h6 ml-3 my-0 d-none" id="update-success"><a href="#">Your settings have been updated.</a></span>
+                </div>
             </div>
         </div>
     </div>
@@ -30,28 +44,41 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#save-settings').click(function() {
+        $('#save-settings').click(function () {
             $.post('save-settings', {
                 "_token": "{{ csrf_token() }}",
                 "set1": $('#check-set1').is(':checked'),
-                "set2": $('#check-set2').is(':checked'),
-                "set3": $('#check-set3').is(':checked'),
-                "set4": $('#check-set4').is(':checked'),
-                "set5": $('#check-set5').is(':checked'),
-                "set6": $('#radio-amount').is(':checked'),
-                "set7": $('#radio-percentage').is(':checked'),
-                "set8": $('#txt-value').val()
+                "set8": $('#profit').val(),
+                "inventory_threshold": parseInt($('#inventory-threshold').val()),
+                "sync_inventory": $('#sync-inventory').is(':checked'),
+                "sync_price": $('#sync-price').is(':checked'),
             }, function(data, status) {
-                window.location.href = '{{url("/settings")}}';
+                $('#update-success').removeClass('d-none');
+                $('#update-success').addClass('d-flex align-items-center');
+                setTimeout(() => {
+                    $('#update-success').removeClass('d-flex align-items-center');
+                    $('#update-success').addClass('d-none');
+                }, 1500);
             }).fail(function(xhr, status, error) {
                 $.each(JSON.parse(xhr.responseText).errors, function(key, val) {
                     $('#txt-value-error').text('');
                     if (key == 'set8') {
-                        $('#txt-value-error').text(val[0].replace("set8", "value"));
+                        $('#profit-error').text(val[0].replace("set8", "value"));
+                    }
+                    if (key == 'inventory_threshold') {
+                        $('#inventory-threshold-error').text(val[0].replace("inventory_threshold", "value"));
                     }
                 });
             });
         });
+
+        $('#inventory-threshold').blur(function (e) {
+            if (e.target.value < 20) {
+                $('#inventory-threshold').val(20);
+            } else {
+                $('#inventory-threshold').val(parseInt(e.target.value));
+            }
+        })
     });
 </script>
 
