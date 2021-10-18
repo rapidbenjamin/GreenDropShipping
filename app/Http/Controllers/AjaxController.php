@@ -211,19 +211,27 @@ class AjaxController extends Controller
             $prods = Products::select('products.*', 'my_products.id_imp_product as id_my_product', 'my_products.id_shopify', 'my_products.id as id_my_products', 'my_products.profit')
                 ->join('import_list', 'import_list.id_product', '=', 'products.id')
                 ->join('my_products', 'my_products.id_imp_product', '=', 'import_list.id')
-                ->where('my_products.id_customer', Auth::user()->id)->whereNull('my_products.deleted_at')->orderBy('my_products.id', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
-            $total_count = MyProducts::where('my_products.id_customer', Auth::user()->id)
-                ->whereNull('my_products.deleted_at')
-                ->count();
+                ->where('my_products.id_customer', Auth::user()->id)
+                ->whereNull('my_products.deleted_at');
+            $total_count = $prods->count();
+            if (ceil($total_count / $page_size) < $page_number) {
+                $page_number = ceil($total_count / $page_size);
+            }
+            $prods = $prods->orderBy('my_products.id', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
             $search = new SearchController;
             foreach ($prods as $product) {
                 $product['brand'] = $search->getAttributeByCode($product, 'brand');
                 if ($product->images != null && count(json_decode($product->images)) > 0) {
-                    $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product->images)[0]->file;
-                    $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
+                    if (json_decode($product['images'])[0]->file == '') {
+                        $product['image_url_75'] = '/img/default_image_75.png';
+                        $product['image_url_285'] = '/img/default_image_285.png';
+                    } else {
+                        $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product->images)[0]->file;
+                        $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
+                    }
                 } else {
-                    $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37cno_selection';
-                    $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
+                    $product->image_url_75 = '/img/default_image_75.png';
+                    $product->image_url_285 = '/img/default_image_285.png';
                 }
             }
             return json_encode([

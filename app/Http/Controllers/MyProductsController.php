@@ -27,34 +27,33 @@ class MyProductsController extends Controller
     {
         $this->authorize('view-merchant-my-products');
         $this->authorize('plan_view-my-products');
-        $prods = Products::select('products.*', 'my_products.id_imp_product as id_my_product', 'my_products.id_shopify', 'my_products.id as id_my_products', 'my_products.profit')
+        $total_count = Products::select('products.*', 'my_products.id_imp_product as id_my_product', 'my_products.id_shopify', 'my_products.id as id_my_products', 'my_products.profit')
             ->join('import_list', 'import_list.id_product', '=', 'products.id')
             ->join('my_products', 'my_products.id_imp_product', '=', 'import_list.id')
-            ->where('my_products.id_customer', Auth::user()->id)->whereNull('my_products.deleted_at')->orderBy('my_products.id', 'desc');
-        $total_count = $prods->count();
-        $prods = $prods->paginate(10);
-        $search = new SearchController;
-        foreach ($prods as $product) {
-            $product['brand'] = $search->getAttributeByCode($product, 'brand');
-            if ($product->images != null && count(json_decode($product->images)) > 0) {
-                $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37c' . json_decode($product->images)[0]->file;
-                $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203' . json_decode($product->images)[0]->file;
-            } else {
-                $product->image_url_75 = env('URL_MAGENTO_IMAGES') . '/dc09e1c71e492175f875827bcbf6a37cno_selection';
-                $product->image_url_285 = env('URL_MAGENTO_IMAGES') . '/e793809b0880f758cc547e70c93ae203no_selection';
-            }
-        }
-        return view('my-products_v2', ['prods' => $prods, 'total_count' => $total_count]);
+            ->where('my_products.id_customer', Auth::user()->id)
+            ->whereNull('my_products.deleted_at')->count();
+        
+        return view('my-products_v2', [
+            'total_count' => $total_count
+        ]);
     }
 
     public function deleteProduct(Request $request)
     {
         $this->authorize('view-merchant-my-products');
         $this->authorize('plan_view-my-products');
-        ShopifyBulkDelete::dispatchNow(Auth::User(), [$request->product_id], 'MyProducts');
+        $before = MyProducts::select('id_shopify')
+            ->where('id_customer', Auth::User()->id)
+            ->where('id_shopify', $request->id_shopify)
+            ->first();
+        ShopifyBulkDelete::dispatchNow(Auth::User(), [$request->id_shopify], 'MyProducts');
+        $after = MyProducts::select('id_shopify')
+            ->where('id_customer', Auth::User()->id)
+            ->where('id_shopify', $request->id_shopify)
+            ->first();
+        
         return response()->json([
-            'result' => true,
-            'product_id' => $request->product_id
+            'result' => $before != null && $after == null
         ]);
     }
 
@@ -76,11 +75,7 @@ class MyProductsController extends Controller
             ->where('user_id', Auth::user()->id)
             ->where('action', 'delete')
             ->pluck('payload');
-        if (ShopifyBulkDelete::dispatch(Auth::User(), $temp_product_ids, 'MyProducts')) {
-            $result = 'ok';
-        }
-
-        return response()->json(['result' => $result]);
+        ShopifyBulkDelete::dispatch(Auth::User(), $temp_product_ids, 'MyProducts');
     }
 
     public function checkDeleteProducts(Request $request)
@@ -88,14 +83,15 @@ class MyProductsController extends Controller
         $this->authorize('view-merchant-my-products');
         $this->authorize('plan_view-my-products');
 
-        $product_shopify_ids = $request->product_shopify_ids;
-        $result = DB::table('temp_publish_products')->where('user_id', Auth::User()->id)
-            ->whereIn('payload', $product_shopify_ids)->where('action', 'delete')->pluck('payload');
+        $my_shopify_ids = DB::table('my_products')
+            ->where('id_customer', Auth::User()->id)
+            ->whereIn('id_shopify', $request->product_shopify_ids)
+            ->pluck('id_shopify');
         $data = [];
-        foreach ($product_shopify_ids as $product_shopify_id) {
+        foreach ($request->product_shopify_ids as $product_shopify_id) {
             $flag = true;
-            foreach ($result as $res) {
-                if ($product_shopify_id == $res) {
+            foreach ($my_shopify_ids as $my_shopify_id) {
+                if ($product_shopify_id == $my_shopify_id) {
                     $flag = false;
                 }
             }

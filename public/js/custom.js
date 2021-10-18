@@ -1162,62 +1162,71 @@ function showMyProducts (products) {
                     <img src="${product.image_url_75}">
                 </div>
             </td>
-            <td data-label="PRODUCT NAME">
-                <a href="search-products/${product.id}" target="_blank" id="name-${product.id_shopify}">${product.name }</a>
+            <td data-label="PRODUCT NAME" class="product-name text-left">
+                <a href="search-products/${product.sku}" target="_blank" id="name-${product.id_shopify}">${product.name }</a>
             </td>
             <td data-label="COST GDS" class="nowrap">
-                US$ ${parseFloat(product.price).toFixed(2)}
+                US $${parseFloat(product.price).toFixed(2)}
             </td>
             <td data-label="PROFIT">
-                ${product.profit}%
+                ${product.profit ? product.profit : 0}%
             </td>
             <td data-label="RETAIL PRICE" class="nowrap">
-                US$ ${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}
+                US $${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}
             </td>
             <td data-label="SKU">
                 ${product.sku}
             </td>
-            <td>
-                <button class="btn-mp-view viewbutton vplist" data-id="${product.id}" id="view-${product.id_shopify}" data-view="#product${product.id}">View</button>
-            </td>
-            <td>
-                <button class="btn-mp-delete deletebutton redbutton" data-toggle="modal" data-target="#confirm-modal" id="delete-${product.id_shopify}" data-myproductid="${product.id_shopify}"  data-name="${product.name}" data-sku="${product.sku}" data-img="${product.image_url_75}">Delete</button>                    <button class="deletebutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                <button class="deletebutton redbutton" id="deleting-${product.id_shopify}" data-myproductid="${product.id_shopify}" style="display: none;">Deleting...</button>
-                <button class="deletebutton redbutton" id="deleted-${product.id_shopify}" data-myproductid="${product.id}" style="display: none;">Deleted</button>
+            <td class="action-buttons">
+                <button class="btn-mp-view my-1 mx-1 viewbutton vplist" data-id="${product.id}" id="view-${product.id_shopify}" data-view="#product${product.id}">View</button>
+                <button class="btn-mp-delete my-1 mx-1 deletebutton redbutton" data-toggle="modal" data-target="#confirm-modal" id="delete-${product.id_shopify}" data-myproductid="${product.id_shopify}"  data-name="${product.name}" data-sku="${product.sku}" data-img="${product.image_url_75}">Delete</button>
+                <span id="deleted-msg-${product.id_shopify}" class="text-secondary h5 mb-0" style="display:none; cursor: text">Deleted Product</span>
+                <img src="/img/loading_1.gif" id="deleting-${product.id_shopify}" style="display:none;">
             </td>
         </tr>
         <tr class="shoproductrow" id="product${product.id}">
             <td></td>
-            <td colspan="8">
+            <td colspan="7">
                 <div class="productlisthow">
                     <div class="productimage">
                         <img src="${product.image_url_285}">
                     </div>
                     <div class="productdata">
                         <h3>${product.name}</h3>
-                        <p class="price">Price US$ ${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}</p>
+                        <p class="price"><strong>Price:</strong> US $${parseFloat(product.price * (100 + product.profit) / 100).toFixed(2)}</p>
                         <p>
-                            Stock: ${product.stock}
+                            <strong>Stock:</strong> ${product.stock ? product.stock : '<span class="text-danger">OUT OF STOCK</span>'}
                         </p>
                         <p>
-                            Cost: US$ ${parseFloat(product.price).toFixed(2)}
+                            <strong>Cost:</strong> US $${parseFloat(product.price).toFixed(2)}
                         </p>
                         <p>
-                            Profit: ${product.profit}%
+                            <strong>Profit:</strong> ${product.profit ? product.profit : 0}%
                         </p>
                         <p>
-                            Brand: ${product.brand}
+                            <strong>Brand:</strong> ${product.brand}
                         </p>
 
                         <div class="pbuttons">
-                            <button class="edit edit-product" id="edit-${product.id_shopify}" data-shopifyid="${product.id_shopify}">Edit in Shopify</button>
+                            <button class="edit edit-product" id="edit-${product.id_shopify}" data-shopifyid="${product.id_shopify}">Edit in Store</button>
                         </div>
                     </div>
                 </div>
             </td>
         </tr>`
-    })
-    $('#product_data').html(str)
+    });
+    
+    if (products.length) {
+        $('#product_data').html(str)
+        setTimeout(() => {
+            window.scrollTo(0,0);
+        }, 500);
+    } else {
+        $('#product-top-menu').hide();
+        $('.greentable.my-products').hide();
+        $('#pagination').hide();
+        $('.empty-product').show();
+    }
 }
 
 function showImportProducts (data) {
@@ -1415,6 +1424,39 @@ function uncheckAllProducts () {
     $('#select-all').show();
     $('#selected-products').text(0);
     $('#selected-products').hide();
+}
+
+function showBulkActionButtons () {
+    let count = 0;
+    $("input.checkbox:checked").each(function(index, ele) {
+        count++;
+    });
+    $('#selected-products').text(count);
+    if ($('#selected-products').text() <= 0) {
+        $('#check-all-products').prop('checked', false);
+        $('#select-all').css('display', 'block');
+        $('#selected-products').css('display', 'none');
+    } else {
+        if (!$('#check-all-products').is(':disabled')) {
+            $('#check-all-products').prop('checked', true);
+            if ($('#selected-products').text() < 10) {
+                $('#selected-products').css('padding', '0px 10px');
+            } else {
+                $('#selected-products').css('padding', '0px 5px');
+            }
+            $('#select-all').css('display', 'none');
+            $('#selected-products').css('display', 'block');
+        }
+    }
+}
+
+function popupFailMsg(msg) {
+    $('body').append('<div id="fade-background"></div>');
+    $('#product-fail-text').html(msg);
+    $('#product-fail').css('display', 'block');
+    setTimeout(() => {
+        $('#product-fail').addClass('show');
+    }, 150);
 }
 
 function setLoading() {
