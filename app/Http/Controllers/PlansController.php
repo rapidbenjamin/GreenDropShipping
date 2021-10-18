@@ -6,8 +6,6 @@ use App\Libraries\Shopify\ShopifyAdminApi;
 use App\MonthlyRecurringPlan;
 use App\User;
 use App\Token;
-use Carbon\Carbon;
-use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -154,7 +152,14 @@ class PlansController extends Controller
         $user = User::find(Auth::user()->id);
         $token = Token::where('token.token', $user->membership_token)->first();
 
-        if ($token['status'] == 'active' || $user->membership_token == env('APP_UNIVERSAL_TOKEN')) return true;
+        if ($token) {
+            if ($token['status'] == 'active') {
+                return true;
+            }
+        }
+        if ($user->membership_token == env('APP_UNIVERSAL_TOKEN')) {
+            return true;
+        }
         return false;
     }
 
