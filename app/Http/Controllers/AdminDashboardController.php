@@ -143,6 +143,8 @@ class AdminDashboardController extends Controller
             'bestsellers' => Products::select(array('products.name', 'products.sku', DB::Raw('count(*) as Counts'), DB::Raw('ROUND(sum(order_details.price),2) as total')))
                 ->join('order_details', 'products.sku', 'order_details.sku')
                 ->join('orders', 'orders.id', 'order_details.id_order')
+                ->whereDate('orders.created_at', '>=', $request->from)
+                ->whereDate('orders.created_at', '<=', $request->to)
                 ->groupBy('products.sku', 'products.name')
                 ->orderBy('Counts', 'desc')
                 ->limit(10)->get(),

@@ -450,7 +450,7 @@ body.bodyAdmin .new-user .nuform {
   }
 }
 body.bodyAdmin .new-user .nuform label, body.bodyAdmin .profile .nuform label {
-  font-size: 14px;
+  font-size: 1rem;
   font-weight: 700;
   width: 100%;
   margin-bottom: 0;
@@ -466,6 +466,8 @@ body.bodyAdmin .new-user .nuform input, body.bodyAdmin .profile .nuform input {
   padding-right: 5px;
   color: #6a6c6f;
   border: 1px solid #d7e0f1;
+  background-color: transparent;
+  border-radius: 0;
 }
 @media (max-width: 400px) {
   body.bodyAdmin .new-user .nuform label, body.bodyAdmin .profile .nuform label {
@@ -493,13 +495,23 @@ body.bodyAdmin .profile .progressbar {
     grid-column: span 1;
   }
 }
-body.bodyAdmin .new-user #success-user, body.bodyAdmin .profile #success-profile, body.bodyAdmin .profile #success-password {
+body.bodyAdmin .profile #success-user, body.bodyAdmin .profile #success-password {
   color: #44b955;
   text-align: center;
 }
-body.bodyAdmin .new-user #fail-user, body.bodyAdmin .profile #fail-user, body.bodyAdmin .profile #fail-password {
+body.bodyAdmin .profile #success-user {
+  position: absolute;
+  right: 50%;
+  transform: translate(50%, 1rem);
+}
+body.bodyAdmin .profile #fail-user, body.bodyAdmin .profile #fail-password {
   color: #f00;
   text-align: center;
+}
+body.bodyAdmin .profile #fail-user {
+  position: absolute;
+  right: 50%;
+  transform: translate(50%, 1rem);
 }
 .headerorders.adminorders-settings .dates {
   padding-top: 25px;
@@ -531,6 +543,8 @@ body.bodyAdmin .new-user .nuform button:focus, body.bodyAdmin .profile .nuform b
 }
 body.bodyAdmin .profile {
   height: 100vh;
+  min-height: 720px;
+  position: relative;
 }
 body.bodyAdmin .profile .nuform {
   display: flex;
@@ -563,9 +577,6 @@ body.bodyAdmin .orderDetailContent {
   body.bodyAdmin .orderDetailContent {
     margin-top: 0;
   }
-}
-.wrapinsidecontent.login {
-  margin-top: 104px;
 }
 @media (max-width: 800px) {
   .wrapinsidecontent.login {
