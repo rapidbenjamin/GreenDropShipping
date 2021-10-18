@@ -2,16 +2,13 @@
 
 namespace App\Libraries;
 
-use Illuminate\Http\Request;
 use App\MyProducts;
 use App\User;
 use App\Order;
-use App\Token;
 use App\Category;
 use App\Products;
 use App\Libraries\Shopify\ShopifyAdminApi;
 use App\Libraries\Magento\MCategory;
-use App\Libraries\Magento\MProduct;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -261,10 +258,30 @@ class SyncLib
             INTO TABLE temp_products
             COLUMNS TERMINATED BY ","
             OPTIONALLY ENCLOSED BY "\""
-            ESCAPED BY "<"
-            ESCAPED BY ">"
-            ESCAPED BY "\'"
             IGNORE 1 LINES'
+        );
+
+        DB::statement(
+            "UPDATE temp_products
+            SET monthly_special = 0
+            WHERE monthly_special = ''"
+        );
+
+        DB::statement(
+            "UPDATE temp_products
+            SET suggested_retail = 0
+            WHERE suggested_retail = ''"
+        );
+
+        DB::statement(
+            "UPDATE temp_products
+            SET `weight` = 0
+            WHERE `weight` = ''"
+        );
+
+        DB::statement(
+            "DELETE FROM temp_products 
+            WHERE sku LIKE '% %'"
         );
 
         DB::statement(
@@ -281,61 +298,100 @@ class SyncLib
             SET P.name = T.name,
                 P.price = T.price,
                 P.stock = T.qty,
+                P.brand = T.brand,
+                P.image_url = SUBSTR(T.images_1, 18),
                 P.weight = T.weight,
                 P.type_id = 'simple',
                 P.status = 1,
-                P.image_url = T.images_1,
-                P.images = JSON_ARRAY(
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 40)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 40)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 40)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 40))
-                ),
+                P.categories = T.categories,
+                P.images = CASE 
+                    WHEN T.images_2 = '' AND T.images_3 = '' AND T.images_4 = '' THEN JSON_ARRAY(
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 18))
+                    ) 
+                    WHEN T.images_2 != '' AND T.images_3 = '' AND T.images_4 = '' THEN JSON_ARRAY(
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 18)),
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 18))
+                    ) 
+                    WHEN T.images_2 != '' AND T.images_3 != '' AND T.images_4 = '' THEN JSON_ARRAY(
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 18)),
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 18)),
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 18))
+                    ) 
+                    WHEN T.images_2 != '' AND T.images_3 != '' AND T.images_4 != '' THEN JSON_ARRAY(
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 18)),
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 18)),
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 18)),
+                        JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 18))
+                    ) 
+                END,
                 P.attributes = JSON_ARRAY(
-                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 40)),
+                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 18)),
                     JSON_OBJECT('attribute_code', 'description', 'value', T.description),
                     JSON_OBJECT('attribute_code', 'ship_width', 'value', T.width),
                     JSON_OBJECT('attribute_code', 'ship_length', 'value', T.length),
                     JSON_OBJECT('attribute_code', 'ship_height', 'value', T.height),
                     JSON_OBJECT('attribute_code', 'brand', 'value', T.brand),
-                    JSON_OBJECT('attribute_code', 'upc', 'value', T.upc),
-                    JSON_OBJECT('attribute_code', 'cube', 'value', T.cubic),
+                    JSON_OBJECT('attribute_code', 'upc', 'value', SUBSTR(T.upc, 2)),
+                    JSON_OBJECT('attribute_code', 'cube', 'value', T.cubic_volume),
                     JSON_OBJECT('attribute_code', 'size', 'value', T.size),
                     JSON_OBJECT('attribute_code', 'size_uom', 'value', T.size_uom),
                     JSON_OBJECT('attribute_code', 'storage', 'value', '')
                 ),
                 P.stock_info = T.storage,
-                P.upc = T.upc"
+                P.upc = SUBSTR(T.upc, 2),
+                P.updated_at = UTC_TIMESTAMP(),
+                P.suggested_retail = T.suggested_retail,
+                P.lead_time = T.`lead-time`,
+                P.monthly_special = T.monthly_special"
         );
 
         DB::statement(
-            "INSERT INTO `products`(`sku`,`name`,`price`,`stock`,`brand`,`image_url`,`weight`,`type_id`,`status`,`images`,`attributes`,`stock_info`,`upc`)
-            SELECT T.sku,T.name,T.price, T.qty, T.brand, SUBSTR(T.images_1, 40),T.weight,'simple',1,JSON_ARRAY(
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 40)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 40)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 40)),
-                    JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 40))
-                ),JSON_ARRAY(
-                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 40)),
+            "INSERT INTO `products`(`sku`,`name`,`price`,`stock`,`brand`,`image_url`,`weight`,`type_id`,`status`,`categories`, `images`,`attributes`,`stock_info`,`upc`, `created_at`, `updated_at`, `suggested_retail`, `lead_time`, `monthly_special`)
+            SELECT T.sku,T.name,T.price, T.qty, T.brand, SUBSTR(T.images_1, 18),T.weight,'simple',1,T.categories,
+                (
+                    CASE 
+                        WHEN T.images_2 = '' AND T.images_3 = '' AND T.images_4 = '' THEN JSON_ARRAY(
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 18))
+                        ) 
+                        WHEN T.images_2 != '' AND T.images_3 = '' AND T.images_4 = '' THEN JSON_ARRAY(
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 18)),
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 18))
+                        ) 
+                        WHEN T.images_2 != '' AND T.images_3 != '' AND T.images_4 = '' THEN JSON_ARRAY(
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 18)),
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 18)),
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 18))
+                        ) 
+                        WHEN T.images_2 != '' AND T.images_3 != '' AND T.images_4 != '' THEN JSON_ARRAY(
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_1, 18)),
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_2, 18)),
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_3, 18)),
+                            JSON_OBJECT('media_type', 'image', 'label', null, 'position', 1, 'disabled', false, 'types', JSON_ARRAY('image', 'small_image', 'thumbnail'), 'file', SUBSTR(T.images_4, 18))
+                        ) 
+                    END
+                ),
+                JSON_ARRAY(
+                    JSON_OBJECT('attribute_code', 'image', 'value', SUBSTR(T.images_1, 18)),
                     JSON_OBJECT('attribute_code', 'description', 'value', T.description),
                     JSON_OBJECT('attribute_code', 'ship_width', 'value', T.width),
                     JSON_OBJECT('attribute_code', 'ship_length', 'value', T.length),
                     JSON_OBJECT('attribute_code', 'ship_height', 'value', T.height),
                     JSON_OBJECT('attribute_code', 'brand', 'value', T.brand),
-                    JSON_OBJECT('attribute_code', 'upc', 'value', T.upc),
-                    JSON_OBJECT('attribute_code', 'cube', 'value', T.cubic),
+                    JSON_OBJECT('attribute_code', 'upc', 'value', SUBSTR(T.upc, 2)),
+                    JSON_OBJECT('attribute_code', 'cube', 'value', T.cubic_volume),
                     JSON_OBJECT('attribute_code', 'size', 'value', T.size),
                     JSON_OBJECT('attribute_code', 'size_uom', 'value', T.size_uom),
                     JSON_OBJECT('attribute_code', 'storage', 'value', '')
-                ),T.storage, T.upc
+                ),T.storage, SUBSTR(T.upc, 2), UTC_TIMESTAMP(), UTC_TIMESTAMP(), T.suggested_retail, T.`lead-time`, T.monthly_special
             FROM temp_products T LEFT JOIN products P ON T.sku = P.sku
             WHERE P.sku IS NULL"
         );
+
         DB::statement(
             "UPDATE products P
             LEFT JOIN temp_products T ON T.sku = P.sku
-            SET stock = 0
-            WHERE T.sku IS NULL"
+            SET P.stock = 0, P.updated_at = UTC_TIMESTAMP()
+            WHERE T.sku IS NULL AND P.stock != 0"
         );
         echo 'End: ' . gmdate('h:i:s', time());
         return 'Success';
