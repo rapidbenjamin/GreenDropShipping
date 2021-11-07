@@ -286,7 +286,7 @@ class MOrder
                     'firstname' => $shipping_address->first_name,
                     'lastname' => $shipping_address->last_name,
                     'email' => $shipping_address->email,
-                    'telephone' => "512-555-1112", //mandatory field;
+                    'telephone' => $res['phone'], //mandatory field;
                 ],
                 'billing_address' => [
                     'region' => $res['province'],
@@ -299,8 +299,7 @@ class MOrder
                     'firstname' => $res['shop_owner'],
                     'lastname' => $res['name'],
                     'email' => $res['email'],
-                    'telephone' => "512-555-1115", //mandatory field;
-                    //'telephone' => $res['phone'], //mandatory field;
+                    'telephone' => $res['phone'], //mandatory field;
                 ],
                 'shipping_carrier_code' => 'shqusps2',
                 'shipping_method_code' => 'PriorityMail',
