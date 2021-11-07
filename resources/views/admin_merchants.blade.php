@@ -114,7 +114,7 @@
                                 {{$ml->plan}}
                             </td>
                             <td data-label="ACTIVE">
-                                <input type="checkbox" name="switch-button" id="switch-label{{$ml->id}}" data-merchantid="{{$ml->id}}" data-toggle="modal" data-target="#delete-product-modal" class="switch-button__checkbox change-status" @if($ml->active == 1)checked @endif>
+                                <input type="checkbox" name="switch-button" id="switch-label{{$ml->id}}" data-merchantid="{{$ml->id}}" data-toggle="modal" data-target="#confirm-modal" class="switch-button__checkbox change-status" @if($ml->active == 1)checked @endif>
                             </td>
                             <td class="btngroup">
 
@@ -164,7 +164,7 @@
             $(this).prop('checked', true);
         }
         $('#user_id').val($(this).data('merchantid'));
-        $('#modal-body').html(`<h5>Are your sure to ${$(this).is(':checked') ? 'disable' : 'enable'} this merchant?</h5>`);
+        $('#confirm-modal-body').html(`<h5>Are your sure to ${$(this).is(':checked') ? 'disable' : 'enable'} this merchant?</h5>`);
     });
 
     $('#merchant_data').on('click', 'button.orders-customers', function() {

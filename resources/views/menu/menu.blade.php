@@ -1,9 +1,6 @@
 @if(Auth::user())
 
 <div class="leftmenu fixedpos">
-
-
-
     <div class="topel row-menu">
         <div class="currenuser">
             <div class="avatar">
@@ -17,8 +14,8 @@
                     </a>
                 </p>
                 <p>
-                    <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        {{ __('Logout') }}
+                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        {{ __('Log Out') }}
                     </a>
                 </p>
             </div>
@@ -57,26 +54,42 @@
                         </a>
                     </li>
                     @else
-                    <li data-toggle="modal" data-target="#upgrade-plans-modal" data-name="MY PRODUCTS">
+                    @if(Auth::user()->plan == 'free')
+                    <li data-toggle="modal" data-target="#upgrade-plans-modal">
                         <a>
                             My Products
                         </a>
                     </li>
+                    @else
+                    <li data-toggle="modal" data-target="#membership-modal">
+                        <a>
+                            My Products
+                        </a>
+                    </li>
+                    @endif
                     @endcan
                     @can('plan_view-my-products')
                     @if(Auth::User()->migration == 0)
-                    <li data-name="MIGRATION">
-                        <a href="{{ url('/migrate-products') }}">
-                            Migration
+                    <li data-name="MERGE INVENTORY">
+                        <a href="{{ url('/merge-inventory') }}">
+                            Merge Inventory
                         </a>
                     </li>
                     @endif
                     @else
-                    <li data-toggle="modal" data-target="#upgrade-plans-modal" data-name="MY PRODUCTS">
+                    @if(Auth::user()->plan == 'free')
+                    <li data-toggle="modal" data-target="#upgrade-plans-modal">
                         <a>
-                            Migration
+                            Merge Inventory
                         </a>
                     </li>
+                    @else
+                    <li data-toggle="modal" data-target="#membership-modal">
+                        <a>
+                            Merge Inventory
+                        </a>
+                    </li>
+                    @endif
                     @endcan
                 </ul>
             </li>
@@ -89,12 +102,21 @@
                 </a>
             </li>
             @else
+            @if(Auth::user()->plan == 'free')
             <li data-toggle="modal" data-target="#upgrade-plans-modal" data-name="ORDERS">
                 <a>
                     <img src="{{ asset('/img/manageorder.png') }}" srcset="/img/manageorder@2x.png 2x,/img/manageorder@3x.png 3x">
                     <p>Manage Order</p>
                 </a>
             </li>
+            @else
+            <li data-toggle="modal" data-target="#membership-modal" data-name="ORDERS">
+                <a>
+                    <img src="{{ asset('/img/manageorder.png') }}" srcset="/img/manageorder@2x.png 2x,/img/manageorder@3x.png 3x">
+                    <p>Manage Order</p>
+                </a>
+            </li>
+            @endif
             @endcan
             @endif
         </ul>

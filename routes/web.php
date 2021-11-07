@@ -11,15 +11,7 @@
 |
 */
 
-use App\Libraries\Magento\MagentoApi;
-use App\Libraries\Magento\MOrder;
-use App\Libraries\Magento\MProduct;
-use App\Libraries\Shopify\ShopifyAdminApi;
-use App\Order;
-use App\Products;
-use App\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 Auth::routes();
 Route::get('/', 'HomeController@index')->name('home');
@@ -32,7 +24,6 @@ Route::group(['prefix' => 'products'], function () {
 });
 
 Route::get('/ajax', 'AjaxController@index');
-Route::post('/ajax', 'AjaxController@import');
 
 /*Products*/
 Route::get('/search-products', 'SearchController@index');
@@ -42,14 +33,13 @@ Route::get('/my-products', 'MyProductsController@index');
 Route::post('/delete-shopify-product', 'MyProductsController@deleteProduct');
 Route::post('/delete-all-shopify-product', 'MyProductsController@deleteAllProduct');
 Route::post('/check-delete-shopify-products', 'MyProductsController@checkDeleteProducts');
-Route::get('/migrate-products', 'MigrateProductsController@index');
+Route::get('/merge-inventory', 'MigrateProductsController@index');
 Route::post('/delete-migrate-product', 'MigrateProductsController@deleteMigrateProduct');
 Route::post('/delete-migrate-products', 'MigrateProductsController@deleteMigrateProducts');
 Route::post('/check-delete-migrate', 'MigrateProductsController@checkDeleteMigrateProducts');
 Route::post('/confirm-migrate-products', 'MigrateProductsController@confirmMigrateProducts');
 
 /*Orders*/
-Route::get('orders/exports', 'OrdersController@exportCSV');
 Route::get('/orders', 'OrdersController@index');
 Route::get('/orders/{orders}', 'OrdersController@show');
 Route::get('/settings', 'SettingsController@index');
@@ -111,10 +101,8 @@ Route::post('/save-settings', 'AjaxController@saveSettings');
 
 
 Route::prefix('admin')->group(function () {
-    Route::get('orders/exports', 'AdminOrdersController@exportCSV');
     Route::get('dashboard', 'AdminDashboardController@index');
     Route::get('merchants', 'AdminMerchantsController@index');
-    Route::get('merchants/exportCSV', 'AdminMerchantsController@exportCSV');
     Route::get('merchants/changeStatus/{merchant}/{status}', 'AdminMerchantsController@changeStatus');
     Route::get('merchants/show/{merchant}', 'AdminMerchantsController@show');
     Route::get('users', 'AdminUsersController@index');

@@ -32,7 +32,7 @@
                         <div id="migrate-actions">
                             <button class="btn-delete-products alldeletebutton redbutton mx-1">Delete</button>
                             <button class="btn-confirm-products allconfirmbutton greenbutton mx-1">Confirm</button>
-                            <button class="btn-set-profit profit greenbutton mx-1" data-toggle="modal" data-target="#delete-product-modal">Set Profit</button>
+                            <button class="btn-set-profit profit greenbutton mx-1" data-toggle="modal" data-target="#confirm-modal">Set Profit</button>
                             <button class="btn-setting-profit profit greenbutton mx-1" style="display: none;">Setting...</button>
                         </div>
                     </div>
@@ -273,15 +273,15 @@
             }, function(data, status) {});
         } else {
             $(this).attr('data-toggle', 'modal');
-            $(this).attr('data-target', '#delete-product-modal');
-            $('#modal-body').html('<h5>At least one checkbox must be selected</h5>');
-            $('#modal-footer').hide();
+            $(this).attr('data-target', '#confirm-modal');
+            $('#confirm-modal-body').html('<h5>At least one checkbox must be selected</h5>');
+            $('#confirm-modal-footer').hide();
         }
     });
     
     $('.migrate-products').on('click', '.btn-set-profit', function() {
-        $('#modal-body').html(`<h5>Are you sure to set all profits to {{$default_profit}}%?</h5>`);
-        $('#modal-footer').show();
+        $('#confirm-modal-body').html(`<h5>Are you sure to set all profits to {{$default_profit}}%?</h5>`);
+        $('#confirm-modal-footer').show();
     });
 
     $('.migrate-products').on('click', '.btn-confirm-product', function() {
@@ -366,9 +366,9 @@
             });
         } else {
             $(this).attr('data-toggle', 'modal');
-            $(this).attr('data-target', '#delete-product-modal');
-            $('#modal-body').html('<h5>At least one checkbox must be selected</h5>');
-            $('#modal-footer').hide();
+            $(this).attr('data-target', '#confirm-modal');
+            $('#confirm-modal-body').html('<h5>At least one checkbox must be selected</h5>');
+            $('#confirm-modal-footer').hide();
         }
     });
     

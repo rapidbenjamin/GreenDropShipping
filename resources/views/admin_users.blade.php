@@ -107,7 +107,7 @@
 								{{$user->email}}
 							</td>
 							<td data-label="ACTIVE">
-								<input type="checkbox" name="switch-button" id="switch-label{{$user->id}}" data-userid="{{$user->id}}" data-toggle="modal" data-target="#delete-product-modal" class="switch-button__checkbox change-status" @if($user->active == 1)checked @endif>
+								<input type="checkbox" name="switch-button" id="switch-label{{$user->id}}" data-userid="{{$user->id}}" data-toggle="modal" data-target="#confirm-modal" class="switch-button__checkbox change-status" @if($user->active == 1)checked @endif>
 							</td>
 							<td>
 								<a href="/admin/merchants/show/{{$user->id}}"><button class="view greenbutton">View</button></a>
@@ -149,7 +149,7 @@
 			$(this).prop('checked', true);
 		}
         $('#user_id').val($(this).data('userid'));
-        $('#modal-body').html(`<h5>Are your sure to ${$(this).is(':checked') ? 'disable' : 'enable'} this user?</h5>`);
+        $('#confirm-modal-body').html(`<h5>Are your sure to ${$(this).is(':checked') ? 'disable' : 'enable'} this user?</h5>`);
     });
 </script>
 

@@ -178,7 +178,7 @@
                                         <div class="btns">
                                             <button id='btnNotes' data-id="{{$order->id}}" class="btn bgVO colorBL my-1">Update Notes</button>
                                             @if($order->fulfillment_status== 4)
-                                            <button class="btn bgVC bgRED colorBL my-1" id="cancel-button" data-toggle="modal" data-target="#delete-product-modal" data-id="{{$order->id}}">Cancel Order</button>
+                                            <button class="btn bgVC bgRED colorBL my-1" id="cancel-button" data-toggle="modal" data-target="#confirm-modal" data-id="{{$order->id}}">Cancel Order</button>
                                             @endif
                                         </div>
                                     </div>
@@ -194,7 +194,7 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $("#cancel-button").click(function() {
-            $('#modal-body').html('<h5>Do you really want to cancel the order?</h5>');
+            $('#confirm-modal-body').html('<h5>Do you really want to cancel the order?</h5>');
         });
         
         $('#confirm').click(function() {

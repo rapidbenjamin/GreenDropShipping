@@ -625,27 +625,35 @@ class AjaxController extends Controller
                 'page_number' => $page_number,
             ]);
         }
-    }
 
-    public function import(Request $request)
-    {
-        $rows = [];
-        $skus = [];
-        foreach ($request->skus as $sku) {
-            $product = Products::where('sku', $sku)->first();
-            if ($product != null) {
-                $import_product = ImportList::where('id_customer', Auth::User()->id)->where('id_product', $product->id)->first();
-                if ($import_product == null) {
-                    $rows[] = [
-                        'id_customer' => Auth::User()->id,
-                        'id_product' => $product->id
-                    ];
+        if ($parameters['action'] == 'import-products') {
+            $rows = [];
+            $skus = [];
+            $nonskus = [];
+            foreach (json_decode($parameters['skus']) as $sku) {
+                $product = Products::where('sku', $sku)->first();
+                if ($product != null) {
+                    $import_product = ImportList::where('id_customer', Auth::User()->id)
+                        ->where('id_product', $product->id)->first();
+                    if ($import_product == null) {
+                        $rows[] = [
+                            'id_customer' => Auth::User()->id,
+                            'id_product' => $product->id,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ];
+                    }
                     $skus[] = $sku;
-                }
+                } else {
+                    $nonskus[] = $sku;
+                } 
             }
+            DB::table('import_list')->insert($rows);
+            return json_encode([
+                'skus' => $skus,
+                'nonskus' => $nonskus,
+            ]);
         }
-        DB::table('import_list')->insert($rows);
-        return json_encode($skus);
     }
 
     public function saveSettings(Request $request)
