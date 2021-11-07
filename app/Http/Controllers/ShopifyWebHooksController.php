@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Libraries\Magento\MOrder;
-use App\Libraries\Shipping;
 use App\MonthlyRecurringPlan;
 use App\MonthlyRecurringPlanOrders;
 use App\MyProducts;
@@ -92,7 +91,7 @@ class ShopifyWebHooksController extends Controller
         //Validation order do not exist
         $res = Order::select('orders.id')->where("id_shopify", $request->id)->first();
 
-        if (!$res['id'] > 0) {
+        if (!$res) {
             $order_details_list = [];
             $total_shopify = 0;
             $total_green = 0;
@@ -311,11 +310,5 @@ class ShopifyWebHooksController extends Controller
         } catch (Exception $ex) {
             Log::error($ex->getMessage());
         }
-    }
-
-    public static function GDSLOG($action, $message)
-    {
-        $log = date('Y-m-d H:i:s') . '| Merchant ' . Auth::user()->id . '| Shop ' . Auth::user()->name . ' | ' .  $action . ' | ' . $message;
-        Storage::disk('local')->append("gds/" . date('Y-m') . '.txt', $log);
     }
 }
