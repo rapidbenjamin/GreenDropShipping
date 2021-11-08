@@ -19,7 +19,7 @@
 					<label for="to">To:</label>
 					<input type="date" id="to" name="trip-to" class="date-input">
 
-				<button id="apply" class="basicbtn">Apply</button>
+				<button id="apply" class="btn basicbtn">Apply</button>
 			</div>
 
 			<div class="adtwocol">
@@ -53,7 +53,7 @@
 						<ul style="list-style-type:none" class="tab-body-right">
 							<li class="lastorders">
 								<table class="greentable">
-									<thead>
+									<thead style="display: none;">
 										<tr>
 											<th>
 												Shop
@@ -78,7 +78,7 @@
 							</li>
 							<li class="bestsellers">
 								<table class="greentable">
-									<thead>
+									<thead style="display: none;">
 										<tr>
 											<th>
 												Product
@@ -100,7 +100,7 @@
 							</li>
 							<li class="topmerchants">
 								<table class="greentable">
-									<thead>
+									<thead style="display: none;">
 										<tr>
 											<th>
 												Shop
@@ -559,8 +559,9 @@
 
 	$("#apply").click(function() {
 		if (moment($('#start').val()).isAfter( moment($('#to').val()).format('YYYY-MM-DD')) ) {
-			$('#confirm-modal-body').html(`<h5>Invalid date range</h5>`);
-			$('#confirm-modal-footer').hide();
+			$('#confirm-modal-body').html(`<h5 class="my-0">Invalid date range</h5>`);
+			$('#cancel').hide();
+			$('#confirm').text('Confirm');
 			$('#apply').attr('data-toggle', 'modal');
 			$('#apply').attr('data-target', '#confirm-modal');
 			return;
@@ -591,7 +592,7 @@
 			let to = $('#to').val();
 
 			let dates = [];
-			start_moment = moment(start);
+			let start_moment = moment(start);
 			dates.push(start_moment.toDate());
 			do {
 				let dateaux = start_moment.add(days, 'days')
@@ -700,40 +701,74 @@
 				if (k == 1) {
 					col = "#fff";
 				}
-				lis += `<tr class="productdatarow" style="background:${col}"><td style="word-break: break-all;" data-label="Shop">${lastOrders[i].name}</td><td data-label="Products">${lastOrders[i].Products}</td><td data-label="Total (GDS)">$${lastOrders[i].total}</td><td data-label="Date">${lastOrders[i].created_at}</td><td data-label="Status"><div style="display: flex; justify-content: flex-end;"><span style="background:${lastOrders[i].statuscolor}; color:#000;padding: 4px; min-width:70px; text-align:center;"> ${lastOrders[i].status} </span></div></td></tr>`;
+				lis += `<tr class="productdatarow" style="background:${col}">
+					<td style="word-break: break-all;" data-label="Shop">${lastOrders[i].name}</td>
+					<td data-label="Products">${lastOrders[i].Products}</td>
+					<td data-label="Total (GDS)">US $${lastOrders[i].total}</td>
+					<td data-label="Date">${lastOrders[i].created_at}</td>
+					<td data-label="Status">
+						<div class="d-flex justify-content-center">
+							<span style="background:${lastOrders[i].statuscolor}; color:#000;padding: 4px; min-width:70px; text-align:center;"> ${lastOrders[i].status} </span>
+						</div>
+					</td>
+				</tr>`;
 				if (k == 1) {
 					k = 0;
 				}
+			}
+			if (lastOrders.length == 0) {
+				$('.lastorders table thead').hide();
+			} else {
+				$('.lastorders table thead').show();
 			}
 			$('#orders').append(lis);
 
 			$('#merchants').empty();
 			let lism = '';
-			let k = 1;
-			let color = "transparent"
+			k = 1;
+			col = "transparent"
 			for (let i = 0; i < topMerchants.length; i++) {
 				if (k == 1) {
 					col = "#fff";
 				}
-				lism += `<tr class="productdatarow" style="background:${col}"><td style="word-break: break-all;" data-label="Shop">${topMerchants[i].name}</td><td data-label="Orders">${topMerchants[i].num_orders}</td><td data-label="Total">$${topMerchants[i].total}</td></tr>`;
+				lism += `<tr class="productdatarow" style="background:${col}">
+					<td style="word-break: break-all;" data-label="Shop">${topMerchants[i].name}</td>
+					<td data-label="Orders">${topMerchants[i].num_orders}</td>
+					<td data-label="Total">US $${topMerchants[i].total}</td>
+				</tr>`;
 				if (k == 1) {
 					k = 0;
 				}
+			}
+			if (topMerchants.length == 0) {
+				$('.topmerchants table thead').hide();
+			} else {
+				$('.topmerchants table thead').show();
 			}
 			$('#merchants').append(lism);
 
 			$('#sellers').empty();
 			let liss = '';
-			let k = 1;
-			let col = "transparent"
+			k = 1;
+			col = "transparent"
 			for (let i = 0; i < bestsellers.length; i++) {
 				if (k == 1) {
 					col = "#fff";
 				}
-				liss += `<tr class="productdatarow" style="background:${col}"><td style="word-break: break-all;" data-label="Product">${bestsellers[i].name}</td><td data-label="SKU">${bestsellers[i].sku}</td><td data-label="Units Sold">${bestsellers[i].Counts}</td><td data-label="Total (GDS)">$${bestsellers[i].total}</td></tr>`;
+				liss += `<tr class="productdatarow" style="background:${col}">
+					<td style="word-break: break-all;" data-label="Product">${bestsellers[i].name}</td>
+					<td data-label="SKU">${bestsellers[i].sku}</td>
+					<td data-label="Units Sold">${bestsellers[i].Counts}</td>
+					<td data-label="Total (GDS)">US $${bestsellers[i].total}</td>
+				</tr>`;
 				if (k == 1) {
 					k = 0;
 				}
+			}
+			if (bestsellers.length == 0) {
+				$('.bestsellers table thead').hide();
+			} else {
+				$('.bestsellers table thead').show();
 			}
 			$('#sellers').append(liss);
 

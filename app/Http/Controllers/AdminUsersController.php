@@ -37,17 +37,14 @@ class AdminUsersController extends Controller
     {
         $this->authorize('view-admin-merchants');
         $user = User::where('id', Auth::user()->id)->first();
-        return view('admin_profile', array(
+        return view('admin_profile', [
             'user' => $user
-        ));
+        ]);
     }
     
-    public function password()
+    public function create_user()
     {
         $this->authorize('view-admin-merchants');
-        $user = User::where('id', Auth::user()->id)->first();
-        return view('admin_password', array(
-            'user' => $user
-        ));
+        return view('admin_add_user');
     }
 }

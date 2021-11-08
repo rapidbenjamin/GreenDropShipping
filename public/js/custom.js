@@ -127,6 +127,18 @@ $(document).ready(function () {
             input.attr("type", "password");
         }
     })
+
+    $('#fail-close, #fail-confirm').click(function() {
+        $('#product-fail').removeClass('show');
+        setTimeout(() => {
+            $('#product-fail').css('display', 'none');
+            $('#fade-background').remove();
+        }, 150);
+    });
+
+    $('#view-plan').click(function() {
+        window.location.href = '/plans#planBottom';
+    });
     
     function passProgress(value) {
         let flag = false;
@@ -170,7 +182,7 @@ $(document).ready(function () {
     $('#btn-save-user').click(function (event) {
         //validation
         var flag = true;
-        var reg = /([A-Za-z0-9][._]?)+[A-Za-z0-9]@[A-Za-z0-9]+(\.?[A-Za-z0-9]){1}\.(com?|net|org|ca|es|be|ru|by|kz|it|de|fr|cn|fm|me|ch)+(\.[A-Za-z0-9]{2,4})?/;
+        var reg = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
         var name = $('#txt-user-name').val().trim();
         var email = $('#txt-email').val().trim();
         var password = $('#txt-password').val();
@@ -251,9 +263,9 @@ $(document).ready(function () {
                         $('#success-user').hide();
                     }, 3000);
                 } else if (data.result) {
-                    $('#success-profile').show();
+                    $('#success-user').show();
                     setTimeout(() => {
-                        $('#success-profile').hide();
+                        $('#success-user').hide();
                     }, 3000);
                 } else {
                     $('#fail-user').show();
