@@ -8,6 +8,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Libraries\Shopify\ShopifyAdminApi;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -58,14 +60,17 @@ class ShopifyBulkDelete implements ShouldQueue
             do {
                 $response_product = ShopifyAdminApi::deleteProduct($this->user, $product_id);
                 if ($this->action == 'MyProducts') {
-                    \DB::table('my_products')->where('id_customer', \Auth::User()->id)->where('id_shopify', $product_id)->delete();
-                    \DB::table('temp_publish_products')->where('user_id', \Auth::User()->id)->where('payload', $product_id)->delete();
+                    DB::table('temp_publish_products')->where('user_id', Auth::User()->id)->where('payload', $product_id)->where('action', 'delete')->delete();
                 } else if ($this->action == 'MigrateProducts') {
-                    \DB::table('temp_migrate_products')->where('user_id', \Auth::User()->id)->where('id_shopify', $product_id)->delete();
+                    DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)->where('id_shopify', $product_id)->delete();
                 }
                 if ($response_product['HTTP_CODE'] == 200) {
+                    if ($this->action == 'MyProducts') {
+                        DB::table('my_products')->where('id_customer', Auth::User()->id)->where('id_shopify', $product_id)->delete();
+                        DB::table('temp_migrate_products')->where('user_id', Auth::User()->id)->where('id_shopify', $product_id)->delete();
+                    }
                     break;
-                } else {
+                } else if ($response_product['HTTP_CODE'] == 429 || $response_product['HTTP_CODE'] == 500) {
                     Log::info($product_id . ' - retry-after: ' . (int)$response_product['retry-after']);
                     sleep((int)$response_product['retry-after']);
                 }

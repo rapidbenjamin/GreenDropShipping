@@ -2,42 +2,23 @@
 
 @section('content')
 <div class="indexContent" data-page_name="MY PRODUCTS">
-
     <div class="maincontent">
-
         <div class="wrapinsidecontent">
-
-            @if(Auth::user()->plan == 'free')
-            <div class="alertan">
-                <div class="agrid">
-                    <img src="img/infogray.png" srcset="img/infogray@2x.png 2x,img/infogray@3x.png 3x">
-                    <p>You have a free plan. <a href="/plans">Click here to upgrade your plan.</a></p>
-                </div>
-            </div>
-            @endif
-
-            <div class="alertan level2">
-                <div class="agrid">
-                    @if(count($prods) > 0)
-                    <p>You can view here all the products you have added to your Shopify store.</p>
-                    @else
-                    <p>When products are published to Shopify you'll see them here.</p>
-                    @endif
-                </div>
-                <i class="fa fa-close text-secondary" aria-hidden="true"></i>
-            </div>
+            @if($total_count > 0)
             @can("plan_view-my-products")
-            <div class="product-menu" id="product-top-menu">
+            <div class="product-menu my-product-menu" id="product-top-menu">
                 <div class="sendtoshopify">
-                    <div class="checksend" style="margin-top: 8px;">
-                        <input type="checkbox" id="check-all-mp" value="" data-mark="false">
+                    <div class="checksend">
+                        <input type="checkbox" id="check-all-products" value="" data-mark="false">
+                        <span id="select-all" class="h4 mx-2 my-0 font-weight-bold">Select All</span>
+                        <span id="selected-products">0</span>
                     </div>
                     <div class="btn-import-actions">
-                        <button class="btn-mp-delete-all alldeletebutton redbutton" data-toggle="modal" data-target="#confirm-modal">Delete <img class="button-icon" src="img/delete.png" alt="Trash Can - Delete Icon"></button>
+                        <button class="btn-mp-delete-all alldeletebutton redbutton">Delete selected</button>
                     </div>
                 </div>
                 <div class="pagesize">
-                    <span>Show</span>
+                    <span class="h5 my-0">Show</span>
                     <select name="PageSize" id="page_size">
                         <option value="10">10</option>
                         <option value="20">20</option>
@@ -47,124 +28,60 @@
                 </div>
             </div>
             @endcan
-            <table class="greentable" cellspacing="0">
+            <table class="greentable my-products" cellspacing="0">
                 <thead>
                     <tr>
-                        <th>
-                        </th>
-                        <th>
-                            Image
-                        </th>
-                        <th>
-                            Product Name
-                        </th>
-                        <th>
-                            Cost
-                        </th>
-                        <th>
-                            Profit
-                        </th>
-                        <th>
-                            Price
-                        </th>
-                        <th>
-                            SKU
-                        </th>
-                        <th>
-
-                        </th>
-                        <th>
-
-                        </th>
+                        <th></th>
+                        <th>Image</th>
+                        <th>Product Name</th>
+                        <th>Cost</th>
+                        <th>Profit</th>
+                        <th>Price</th>
+                        <th>SKU</th>
+                        <th>ACTIONS</th>
                     </tr>
                 </thead>
-                <tbody id="product_data">
-
-
-                    @foreach ($prods as $pr)
-                    <tr class="productdatarow">
-                        <td class="check">
-                            <input type="checkbox" id="check-{{ $pr->id_shopify }}" data-id="{{ $pr->id_my_products }}" value="" class="checkbox">
-                        </td>
-                        <td class="pimage">
-                            <div class="productphoto">
-                                <img src="{{$pr->image_url_75}}">
-                            </div>
-                        </td>
-                        <td data-label="PRODUCT NAME">
-                            <a href="search-products/{{$pr->id}}" target="_blank" id="name-{{$pr->id_shopify}}">{{ $pr->name }}</a>
-                        </td>
-                        <td data-label="COST GDS" class="nowrap">
-                            US$ {{$pr->price}}
-                        </td>
-                        <td data-label="PROFIT">
-                            {{ $pr->profit }}%
-                        </td>
-                        <td data-label="RETAIL PRICE" class="nowrap">
-                            US$ {{number_format($pr->price * (100 + $pr->profit) / 100, 2,'.','')}}
-                        </td>
-                        <td data-label="SKU">
-                            {{$pr->sku}}
-                        </td>
-                        <td>
-                            <button class="btn-mp-view viewbutton greenbutton vplist" data-id="{{ $pr->id }}" id="view-{{$pr->id_shopify}}" data-view="#product{{ $pr->id }}">View</button>
-                        </td>
-                        <td>
-                            <button class="btn-mp-delete deletebutton redbutton" data-toggle="modal" data-target="#confirm-modal" id="delete-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" data-name="{{ $pr->name }}" data-sku="{{ $pr->sku }}" data-img="{{$pr->image_url_75}}">Delete</button>
-                            <button class="deletebutton redbutton" id="deleting-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id_shopify }}" style="display: none;">Deleting...</button>
-                            <button class="deletebutton redbutton" id="deleted-{{ $pr->id_shopify }}" data-myproductid="{{ $pr->id }}" style="display: none;">Deleted</button>
-                        </td>
-                    </tr>
-                    <tr class="shoproductrow" id="product{{ $pr->id }}">
-                        <td></td>
-                        <td colspan="8">
-                            <div class="productlisthow">
-                                <div class="productimage">
-                                    <img src="{{$pr->image_url_285}}">
-                                </div>
-                                <div class="productdata">
-                                    <h3>{{ $pr->name }}</h3>
-                                    <p class="price">Price US$ {{number_format($pr->price * (100 + $pr->profit) / 100, 2,'.','')}}</p>
-                                    <p>
-                                        Stock: {{ $pr->stock }}
-                                    </p>
-                                    <p>
-                                        Cost: US$ {{ $pr->price }}
-                                    </p>
-                                    <p>
-                                        Profit: {{ $pr->profit }}%
-                                    </p>
-                                    <p>
-                                        Brand: {{ $pr->brand }}
-                                    </p>
-
-                                    <div class="pbuttons">
-                                        <button class="edit greenbutton edit-product" id="edit-{{$pr->id_shopify}}" data-shopifyid="{{ $pr->id_shopify }}">Edit in Shopify</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
+                <tbody id="product_data"></tbody>
             </table>
+            <div id="pagination"></div>
+            @endif
+            <div class="empty-product my-empty" style="display: none;">
+                <div class="empty-text">
+                    <h2 class="my-3"><strong>Your product list is empty!</strong></h2>
+                    <h4 style="line-height: 1.5;" class="my-0">You don't have any product in your store.<br>Go to your import list to add products to your store. If you have not created an import list yet, go to Search Products and add  products to your import list.</h4>
+                    <a href="/import-list"><button class="btn btn-success btn-lg my-3 greenbutton border-0">Go To Import List</button></a>
+                </div>
+                <div>
+                    <img src="{{ asset('/img/noproduct.png') }}" alt="No Products">
+                </div>
+            </div>
         </div>
     </div>
 </div>
+<div class="back-to-top" style="display:none">
+    <img src=" {{ asset('/img/back_to_top.png') }}" alt="">
+    <span style="text-align: center;" class="h5">Back<br>to Top</span>
+</div>
 
-<div id="pagination"></div>
 <input type="text" id="product_id" value="" hidden>
 <input type="text" id="total_count" value="{{$total_count}}" hidden>
 
 <script type="text/javascript">
     $(document).ready(function() {
         $('#total_count').text("{{$total_count}}");
-        $('#check-all-mp').click(function() {
-            if ($('#check-all-mp').is(':checked')) {
+        $('#check-all-products').click(function() {
+            if ($('#check-all-products').is(':checked')) {
                 $('.checkbox').prop('checked', true);
+                let count = 0;
+                $("input.checkbox:checked").each(function(index, ele) {
+                    count++;
+                });
+                $('#selected-products').text(count);
             } else {
                 $('.checkbox').prop('checked', false);
+                $('#selected-products').text(0);
             }
+            showBulkActionButtons();
         });
 
         $('.btn-mp-delete-all').click(function() {
@@ -175,15 +92,21 @@
                 }
             });
             if (products.length) {
-                $('#confirm-modal-body').html(`<h5>Are you sure to delete checked products from your Shopify Store?</h5>`);
+                $(this).attr('data-toggle', 'modal');
+                $(this).attr('data-target', '#confirm-modal');
+                $('#confirm-modal-title').text('Product');
+                $('#confirm-modal-body').html(`<h5>Are you sure you want to remove ${products.length} products from your Shopify store?</h5>`);
                 $('#product_id').val('delete-products');
+                $('#confirm').text('Delete');
+                $('#confirm').removeClass('btn-success');
+                $('#confirm').removeClass('greenbutton');
+                $('#confirm').addClass('btn-danger');
+                $('#confirm').css('background-color', '#F72525');
                 $('#confirm-modal-footer').show();
             } else {
-                $('#confirm-modal-body').html(`<h5>At least one checkbox must be selected</h5>`);
-                $('#product_id').val('cancel');
-                $('#confirm-modal-footer').hide();
+                $(this).removeAttr('data-toggle');
+                $(this).removeAttr('data-target');
             }
-
         });
 
         $('#confirm').click(function() {
@@ -196,24 +119,57 @@
             }
         });
 
-        function deleteProduct(id) {
-            $(`#check-${id}`).prop('disabled', true);
-            $(`#check-${id}`).removeClass();
-            $(`#check-${id}`).prop('checked', false);
-            $(`#delete-${id}`).hide();
-            $(`#deleting-${id}`).show();
-            $(`#deleted-${id}`).hide();
-            $(`#edit-${id}`).hide();
-            $(`#name-${id}`).css('pointer-events', 'none');
+        function disableProduct(shopify_id) {
+            $(`#check-${shopify_id}`).prop('disabled', true);
+            $(`#check-${shopify_id}`).removeClass();
+            $(`#check-${shopify_id}`).prop('checked', false);
+            $(`#edit-${shopify_id}`).hide();
+            $(`#name-${shopify_id}`).css('pointer-events', 'none');
+            $(`#view-${shopify_id}`).hide();
+            $(`#delete-${shopify_id}`).hide();
+            $(`#deleting-${shopify_id}`).show();
+        }
+
+        function enableProduct(shopify_id) {
+            $(`#check-${shopify_id}`).prop('disabled', false);
+            $(`#check-${shopify_id}`).addClass('checkbox');
+            $(`#edit-${shopify_id}`).show();
+            $(`#name-${shopify_id}`).css('pointer-events', 'auto');
+            $(`#view-${shopify_id}`).show();
+            $(`#deleting-${shopify_id}`).hide();
+            $(`#delete-${shopify_id}`).show();
+        }
+
+        function deleteProduct(shopify_id) {
+            disableProduct(shopify_id);
+            $('#check-all-products').prop('checked', false);
+            $('#check-all-products').prop('disabled', true);
+            $('.btn-mp-delete-all').prop('disabled', true);
             $.post('{{url("/delete-shopify-product")}}', {
                 "_token": "{{ csrf_token() }}",
-                product_id: id
+                id_shopify: shopify_id
             }, function(data, status) {
                 if (data.result) {
-                    $(`#delete-${id}`).hide();
-                    $(`#deleting-${id}`).hide();
-                    $(`#deleted-${id}`).show();
+                    $(`#deleting-${shopify_id}`).hide();
+                    $(`#deleted-msg-${shopify_id}`).show();
+                    $('.btn-mp-delete-all').prop('disabled', false);
+                    $('#check-all-products').prop('disabled', false);
+                    showBulkActionButtons();
+                } else {
+                    enableProduct(shopify_id);
+                    popupFailMsg('A problem has occured while deleting your product from Shopify store.');
+                    $('#contact').show();
+                    $('#check-all-products').prop('disabled', false);
+                    $('.btn-mp-delete-all').prop('disabled', false);
+                    showBulkActionButtons();
                 }
+            }).fail(function() {
+                enableProduct(shopify_id);
+                popupFailMsg('A problem has occured while deleting your product from Shopify store.');
+                $('#contact').show();
+                $('#check-all-products').prop('disabled', false);
+                $('.btn-mp-delete-all').prop('disabled', false);
+                showBulkActionButtons();
             });
         }
 
@@ -231,23 +187,19 @@
                 }
             });
             products.forEach(product => {
-                $(`#check-${product.product_shopify_id}`).prop('disabled', true);
-                $(`#check-${product.product_shopify_id}`).prop('checked', false);
-                $(`#check-${product.product_shopify_id}`).removeClass();
-                $(`#delete-${product.product_shopify_id}`).hide();
-                $(`#deleting-${product.product_shopify_id}`).show();
-                $(`#deleted-${product.product_shopify_id}`).hide();
-                $(`#edit-${product.product_shopify_id}`).hide();
-                $(`#name-${product.product_shopify_id}`).css('pointer-events', 'none');
+                disableProduct(product.product_shopify_id);
             });
-            $('#check-all-mp').prop('checked', false);
-            $('#check-all-mp').prop('disabled', true);
+            $('#check-all-products').prop('checked', false);
+            $('#check-all-products').prop('disabled', true);
+            $(`.btn-mp-delete-all`).prop('disabled', true);
             window.localStorage.removeItem('my_product_ids');
             window.localStorage.setItem('my_product_ids', JSON.stringify(product_ids));
             $.post('{{url("/delete-all-shopify-product")}}', {
                 "_token": "{{ csrf_token() }}",
                 products: products,
-            }, function(data, status) {});
+            }, function(data, status) {
+            }).fail(function(data, status) {
+            });
         }
 
         function deleteProductsAjax() {
@@ -258,14 +210,34 @@
                         product_shopify_ids: product_ids,
                         "_token": "{{ csrf_token() }}",
                     }).then(res => {
+                        if (res.product_shopify_ids.length > 0) {
+                            product_ids.forEach(product_id => {
+                                let flag = true;
+                                res.product_shopify_ids.forEach(shopify_id => {
+                                    if (product_id == shopify_id) {
+                                        $(`#deleting-${shopify_id}`).hide();
+                                        $(`#deleted-msg-${shopify_id}`).show();
+                                        flag = false;
+                                    }
+                                });
+                                if (flag) {
+                                    enableProduct(product_id);
+                                }
+                            });
+                            $(`.btn-mp-delete-all`).prop('disabled', false);
+                            $('#check-all-products').prop('disabled', false);
+                            showBulkActionButtons();
+                        } else {
+                            product_ids.forEach(product_id => {
+                                enableProduct(product_id);
+                            });
+                            $('#check-all-products').prop('disabled', false);
+                            $(`.btn-mp-delete-all`).prop('disabled', false);
+                            popupFailMsg('A problem has occured while deleting your products from Shopify store.');
+                            $('#contact').show();
+                        }
+                        showBulkActionButtons();
                         window.localStorage.removeItem('my_product_ids');
-                        res.product_shopify_ids.forEach(id => {
-                            $(`#delete-${id}`).hide();
-                            $(`#deleting-${id}`).hide();
-                            $(`#deleted-${id}`).show();
-                            $(`#check-${id}`).prop('checked', false);
-                            $('#check-all-mp').prop('disabled', false);
-                        });
                     });
                 }
             }
@@ -273,21 +245,30 @@
         deleteProductsAjax();
         setInterval(deleteProductsAjax, 15000);
     });
-    $('#product_data').on('click', '.btn-mp-delete', function() {
-        $('#confirm-modal-body').html(`<div style="display:flex;">
-                <img style="width:75px; height:75px;" src="${$(this).data('img')}"/>
+    
+    $('#product_data').on('click', '.btn-mp-delete', function(e) {
+        $('#confirm-modal-title').text('Product');
+        $('#confirm-modal-body').html(`<div style="gap: 1rem;" class="d-flex align-items-center pb-3">
+                <img style="width:75px; height:75px;" src="${e.target.dataset.img}"/>
                 <div>
-                    <h5>${$(this).data('name')}</h5>
-                    <h5 style="text-align:center" class="mt-3">${$(this).data('sku')}</h5>
+                    <h5 class="font-weight-bold">${e.target.dataset.name}</h5>
+                    <h5 class="mt-2 mb-0">${e.target.dataset.sku}</h5>
                 </div>
             </div>
-            <h5 class="mt-3">This product will be removed from your Shopify store. Do you really want to delete it?</h5>`);
-        $('#product_id').val($(this).data('myproductid'));
+            <h5 class="my-3">This product will be removed from your store. Are you sure you want to remove this product?</h5>`);
+        $('#product_id').val(e.target.dataset.myproductid);
+        $('#confirm').text('Delete Product');
+        $('#confirm').removeClass('btn-success');
+        $('#confirm').removeClass('greenbutton');
+        $('#confirm').addClass('btn-danger');
+        $('#confirm').css('background-color', '#F72525');
         $('#confirm-modal-footer').show();
     })
+    
     $('#product_data').on('click', '.edit-product', function() {
         window.open('https://{{Auth::user()->shopify_url}}/admin/products/' + $(this).data('shopifyid'), '_blank');
     });
+
     $('#product_data').on('click', '.vplist', function(e) {
         e.preventDefault();
         var idp = $(this).attr('data-view');
@@ -298,6 +279,18 @@
 
         $(idp).toggleClass("active");
         $(this).parents(".productdatarow").toggleClass("showp");
+    });
+
+    $('#product_data').on('click', '.checkbox', function(e) {
+        let count = parseInt($('#selected-products').text());
+        if (e.target.checked) {
+            $('#selected-products').text(count + 1);
+        } else {
+            if ($('#selected-products').text() > 0) {
+                $('#selected-products').text(count - 1);
+            }
+        }
+        showBulkActionButtons();
     });
 </script>
 @endsection
