@@ -258,10 +258,6 @@
     $(document).ready(function() {
         $('#total_count').text("{{$total_count}}");
 
-        $(".editor").each(function(index, ele) {
-            CKEDITOR.replace($(ele).attr('id'), {});
-        });
-
         $('#check-all').click(function() {
             if ($('#check-all').is(':checked')) {
                 $('.checkbox').prop('checked', true);

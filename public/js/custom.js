@@ -339,21 +339,31 @@ $(document).ready(function () {
         e.target.parentElement.remove();
     });
 
-    if (pathname == '/my-products' || pathname == '/import-list' || pathname == '/migrate-products' || pathname == '/admin/orders' || pathname == '/admin/merchants' || pathname == '/admin/users'|| pathname == '/orders') {
+    function getParams() {
+        let parameters = {
+            action: getAction(),
+            page_size: 10,
+            page_number: 1
+        }
+        return parameters;
+    }
+
+    if (pathname == '/my-products' || pathname == '/import-list' || pathname == '/merge-inventory' || pathname == '/admin/orders' || pathname == '/admin/merchants' || pathname == '/admin/users'|| pathname == '/orders') {
         $('#pagination').html(`<div class="pagination">
             <ul class="pagination" role="navigation">
-                <li class="page-item" id="prev">
-                    <a class="page-link" rel="prev" aria-label="« Previous">‹</a>
-                </li>
-                <li class="page-item active" aria-current="page"><span id="page_number" class="page-link">${Math.ceil($('#total_count').val()/10) == 0 ? 0 : 1}</span> of <span id="total_page" class="page-link">${Math.ceil($('#total_count').val()/10)}</span></li>
-                <li class="page-item" id="next" aria-disabled="true" aria-label="Next »">
-                    <span class="page-link" aria-hidden="true">›</span>
-                </li>
+                <button class="page-item cel-icon-angle-double-left" id="first_page" disabled></button>
+                <button class="page-item cel-icon-angle-left" id="prev" disabled></button>
+                <li class="page-item active" id="pages" aria-current="page">0</li>
+                <button class="page-item cel-icon-angle-right" id="next" disabled></button>
+                <button class="page-item cel-icon-angle-double-right" id="last_page" disabled></button>
             </ul>
         </div>`);
+        let params = getParams();
+        getData(params);
     }
 
     $('#page_size').change(function (event) {
+        uncheckAllProducts();
         var parameters = {
             action: getAction(),
             page_size: event.target.value,
@@ -362,10 +372,38 @@ $(document).ready(function () {
         getData(parameters);
     })
 
-    $('#next').click(function () {
+    $('#first_page').click(function () {
+        uncheckAllProducts();
         var total_count = $('#total_count').text();
         var page_size = $('#page_size').val();
-        var page_number = $('#page_number').text().split('/')[0];
+        var page_number = 1;
+        var parameters = {
+            action: getAction(),
+            page_size: page_size,
+            page_number: page_number
+        }
+        if (total_count > page_size * page_number) {
+            getData(parameters);
+        }
+    })
+
+    $('#prev').click(function () {
+        uncheckAllProducts();
+        var parameters = {
+            action: getAction(),
+            page_size: $('#page_size').val(),
+            page_number: $('.page_number.selected').text() - 1
+        }
+        if ($('.page_number.selected').text() > 1) {
+            getData(parameters);
+        }
+    })
+
+    $('#next').click(function () {
+        uncheckAllProducts();
+        var total_count = $('#total_count').text();
+        var page_size = $('#page_size').val();
+        var page_number = $('.page_number.selected').text();
         var parameters = {
             action: getAction(),
             page_size: page_size,
@@ -376,13 +414,14 @@ $(document).ready(function () {
         }
     })
 
-    $('#prev').click(function () {
+    $('#last_page').click(function () {
+        uncheckAllProducts();
         var parameters = {
             action: getAction(),
             page_size: $('#page_size').val(),
-            page_number: $('#page_number').text().split('/')[0] - 1
+            page_number: Math.ceil($('#total_count').text() / $('#page_size').val())
         }
-        if ($('#page_number').text().split('/')[0] > 1) {
+        if (Math.ceil($('#total_count').text() / $('#page_size').val()) > 1) {
             getData(parameters);
         }
     })
@@ -1063,22 +1102,50 @@ function getData(parameters) {
 function pagination (data) {
     if (data.page_number == '1') {
         $('#prev').prop('disabled', true);
+        $('#first_page').prop('disabled', true);
     } else {
         $('#prev').prop('disabled', false);
+        $('#first_page').prop('disabled', false);
     }
     if (data.page_number * data.page_size >= data.total_count) {
         $('#next').prop('disabled', true);
+        $('#last_page').prop('disabled', true);
     } else {
         $('#next').prop('disabled', false);
+        $('#last_page').prop('disabled', false);
     }
-    $('#total_count').text(data.total_count);
-    if (Math.ceil(data.total_count / data.page_size) == 0) {
-        $('#total_page').text(0);
-        $('#page_number').text(0);
+    let str = '';
+    if (Math.ceil(data.total_count / data.page_size) != 0) {
+        if (Math.ceil(data.total_count / data.page_size) == 1) {
+            $('#pagination').hide();
+        } else {
+            let start_page = parseInt(data.page_number) - 2;
+            let end_page = parseInt(data.page_number) + 2;
+            if (start_page <= 0) {
+                start_page = 1;
+                end_page = 5;
+            }
+            if (Math.ceil(data.total_count / data.page_size) <= end_page) {
+                end_page = Math.ceil(data.total_count / data.page_size);
+                start_page = end_page - 4
+                if (start_page <= 0) {
+                    start_page = 1;
+                }
+            }
+            for(let i = start_page; i <= end_page; i++) {
+                if (i == data.page_number) {
+                    str += `<span class="page_number selected">${i}</span>`;
+                } else {
+                    str += `<span class="page_number" onclick="pageNumberClick(${i})">${i}</span>`;
+                }
+            }
+            $('#pagination').show();
+        }
     } else {
-        $('#total_page').text(Math.ceil(data.total_count / data.page_size));
-        $('#page_number').text(data.page_number);
+        $('#pagination').hide();
     }
+    $('#pages').html(str);
+    $('#total_count').text(data.total_count);
 }
 
 function showMyProducts (products) {
@@ -1327,14 +1394,27 @@ function showImportProducts (data) {
             </div>
         </div>`
     })
-
-    str += `<script src="js/ckeditor/ckeditor.js"></script>
-    <script type="text/javascript">
-        $(".editor").each(function(index, ele) {
-            CKEDITOR.replace($(ele).attr('id'), {});
-        });
-    </script>`
     $('#import-products').html(str);
+    $(".editor").each(function(index, ele) {
+        CKEDITOR.replace($(ele).attr('id'), {});
+    });
+}
+
+function pageNumberClick (page_number) {
+    var parameters = {
+        action: getAction(),
+        page_size: $('#page_size').val(),
+        page_number: page_number
+    }
+    getData(parameters);
+}
+
+function uncheckAllProducts () {
+    $('#check-all-products').prop('checked', false);
+    $('#check-all-products').prop('disabled', false);
+    $('#select-all').show();
+    $('#selected-products').text(0);
+    $('#selected-products').hide();
 }
 
 function setLoading() {

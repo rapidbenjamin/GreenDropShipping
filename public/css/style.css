@@ -1339,24 +1339,48 @@ svg {
 .pagination {
   list-style: none;
   padding: 0;
-  margin-top: 10px;
-  margin-bottom: 10px;
   display: flex;
   align-items: center;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0px auto;
+}
+.pagination ul {
+  background-color: #EDF0F5;
+  border: dotted 1px;
+  border-radius: 0px;
+}
+.pagination button {
+  background-color: transparent;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+.pagination button:disabled {
+  cursor: default;
+}
+.pagination button::before {
+  font-size: 1rem;
+}
+.pagination button:focus {
+  border: none;
+  outline: none;
 }
 .pagination li {
   display: inline-flex;
   align-items: center;
 }
-.pagination li:last-child a,
-.pagination li:first-child a {
+.pagination li span {
+  margin: 5px 12px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.pagination li span.selected {
   background-color: #44b955;
   color: #fff;
+  padding: 0px 8px;
   font-size: 17px;
   box-sizing: border-box;
   border: none;
+  cursor: default;
 }
 @media (max-width: 800px) {
   .pagination li:last-child a,
@@ -1373,7 +1397,6 @@ svg {
 @media (max-width: 800px) {
   .pagination li:last-child,
   .pagination li:first-child {
-    /* width: 100%; */
     text-align: center;
   }
 }

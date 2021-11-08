@@ -212,7 +212,9 @@ class AjaxController extends Controller
                 ->join('import_list', 'import_list.id_product', '=', 'products.id')
                 ->join('my_products', 'my_products.id_imp_product', '=', 'import_list.id')
                 ->where('my_products.id_customer', Auth::user()->id)->whereNull('my_products.deleted_at')->orderBy('my_products.id', 'desc')->skip(($page_number - 1) * $page_size)->take($page_size)->get();
-            $total_count = MyProducts::count();
+            $total_count = MyProducts::where('my_products.id_customer', Auth::user()->id)
+                ->whereNull('my_products.deleted_at')
+                ->count();
             $search = new SearchController;
             foreach ($prods as $product) {
                 $product['brand'] = $search->getAttributeByCode($product, 'brand');
